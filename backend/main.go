@@ -39,7 +39,11 @@ func main() {
 		protectedRoutes.DELETE("/admin/:id", controllers.DeleteAdmin)
 
 		// User routes
-
+		protectedRoutes.POST("/equipment", controllers.CreateEquipment)
+		protectedRoutes.GET("/equipment/:id", controllers.GetEquipmentByID)
+		protectedRoutes.GET("/equipment", controllers.GetAllEquipments)
+		protectedRoutes.PUT("/equipment/:id", controllers.UpdateEquipment)
+		protectedRoutes.DELETE("/equipment/:id", controllers.DeleteEquipment)
 
 		// Submission routes
 		protectedRoutes.POST("/submission", controllers.CreateSubmission)
