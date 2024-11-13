@@ -1,44 +1,78 @@
-import React from "react";
-import DashboardItem from "../Layout/DashboardItem";
-import Layout from "../Layout/Layout";
+// src/pages/Dashboard.tsx
+import React from 'react';
+import DashboardItem from '../Layout/DashboardItem';
 
 const Dashboard: React.FC = () => {
   return (
-    <Layout>
-      <div
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#F8F9FA',
+      }}
+    >
+      {/* Purple Header */}
+      <header
         style={{
-          display: "flex",
-          flexDirection: "row", // Align items in a row
-          justifyContent: "center", // Center the items horizontally
-          alignItems: "center", // Center the items vertically
-          gap: "30px",
-          flexWrap: "nowrap", // Ensure items stay in one row
-          minHeight: "100vh", // Full viewport height
-          width: "100%", // Full viewport width
-          overflowX: "auto", // Allow horizontal scroll if necessary
+          width: '100%',
+          backgroundColor: '#4B004B', // Purple background
+          color: '#ffffff', // White text color
+          padding: '20px 0',
+          textAlign: 'center',
+          fontSize: '24px',
+          fontWeight: 'bold',
         }}
       >
-        <DashboardItem
-          path="/equipment-borrow"
-          icon="/path-to-icon/computer-icon.png"
-          title="ข้อมูลการยืมอุปกรณ์"
-          bgColor="#00bcd4"
-        />
-        <DashboardItem
-          path="/spare-equipment"
-          icon="https://img2.pic.in.th/pic/iconstock.png"
-          title="ข้อมูลอุปกรณ์สำรอง"
-          bgColor="#ff4081"
-          iconSize="250px" // Set the icon size to 80px or whatever size you prefer
-        />
-        <DashboardItem
-          path="/equipment-repair"
-          icon="/path-to-icon/tools-icon.png"
-          title="ข้อมูลอุปกรณ์ส่งซ่อม"
-          bgColor="#ffab91"
-        />
+        <h1 style={{ margin: 0 }}>PEA System</h1>
+      </header>
+
+      {/* Dashboard Content */}
+      <div
+        style={{
+          padding: '200px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '30px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <DashboardItem
+            path="/equipment-borrow"
+            icon="https://img2.pic.in.th/pic/borrowicon.md.png"
+            title="ข้อมูลการยืมอุปกรณ์"
+            bgColor="#00bcd4"
+            iconSize="250px"
+          />
+          <DashboardItem
+            path="/borrowitem"
+            icon="https://img2.pic.in.th/pic/iconstock.png"
+            title="ข้อมูลอุปกรณ์สำรอง"
+            bgColor="#ff4081"
+            iconSize="250px"
+          />
+          <DashboardItem
+            path="/equipment-repair"
+            icon="https://img2.pic.in.th/pic/pngtree-comicstyle-wrench-and-screwdriver-icon-on-white-background-vector-png-image_41876974-Photoroom.png"
+            title="ข้อมูลอุปกรณ์ส่งซ่อม"
+            bgColor="#ffab91"
+            iconSize="250px"
+          />
+        </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 
