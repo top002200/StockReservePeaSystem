@@ -2,6 +2,7 @@
 import React from 'react';
 import DashboardItem from '../Layout/DashboardItem';
 
+
 const Dashboard: React.FC = () => {
   return (
     <div
@@ -10,28 +11,27 @@ const Dashboard: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         minHeight: '100vh',
-        backgroundColor: '#F8F9FA',
+        backgroundColor: '#fefcff',
       }}
     >
       {/* Purple Header */}
       <header
         style={{
           width: '100%',
-          backgroundColor: '#4B004B', // Purple background
-          color: '#ffffff', // White text color
+          backgroundColor: '#74045f', // Purple background
           padding: '20px 0',
           textAlign: 'center',
           fontSize: '24px',
           fontWeight: 'bold',
         }}
       >
-        <h1 style={{ margin: 0 }}>PEA System</h1>
+        <img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" className="logo-img" />
       </header>
 
       {/* Dashboard Content */}
       <div
         style={{
-          padding: '200px',
+          padding: '100px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -46,29 +46,29 @@ const Dashboard: React.FC = () => {
             justifyContent: 'center',
             alignItems: 'center',
             gap: '30px',
-            flexWrap: 'wrap',
+            flexWrap: 'nowrap',
           }}
         >
           <DashboardItem
-            path="/equipment-borrow"
+            path="/borrowitem"
             icon="https://img2.pic.in.th/pic/borrowicon.md.png"
             title="ข้อมูลการยืมอุปกรณ์"
-            bgColor="#00bcd4"
-            iconSize="250px"
+            bgColor="#a0d8e4"
+            iconSize="200px"
           />
           <DashboardItem
-            path="/borrowitem"
+            path="/equipment-info"
             icon="https://img2.pic.in.th/pic/iconstock.png"
             title="ข้อมูลอุปกรณ์สำรอง"
-            bgColor="#ff4081"
-            iconSize="250px"
+            bgColor="#bb96f7"
+            iconSize="200px"
           />
           <DashboardItem
             path="/equipment-repair"
             icon="https://img2.pic.in.th/pic/pngtree-comicstyle-wrench-and-screwdriver-icon-on-white-background-vector-png-image_41876974-Photoroom.png"
             title="ข้อมูลอุปกรณ์ส่งซ่อม"
-            bgColor="#ffab91"
-            iconSize="250px"
+            bgColor="#ffc684"
+            iconSize="200px"
           />
         </div>
       </div>

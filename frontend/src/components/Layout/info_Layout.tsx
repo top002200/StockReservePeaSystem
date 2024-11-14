@@ -11,7 +11,7 @@ interface LayoutProps {
 }
 
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Info_Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="layout">
@@ -23,24 +23,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
         <ul className="nav nav-pills flex-column">
           <li className='nav-item'>
-            <Link to="/borrowitem" className={`nav-link ${location.pathname === '/borrowitem' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลอุปกรณ์</Link>
-          </li>
-          <li className='nav-item'>
-            <Link to="/approval" className={`nav-link ${location.pathname === '/approval' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faDesktop} style={{ color: '#fefcff', paddingRight: 10 }} />คำขอยืมอุปกรณ์</Link>
-          </li>
-          <li className='nav-item'>
-            <Link to="/user-management" className={`nav-link ${location.pathname === '/user-management' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faUser} style={{ color: '#fefcff', paddingRight: 10 }} />จัดการข้อมูลผู้ใช้งาน</Link>
+            <Link to="/equipment-info" className={`nav-link ${location.pathname === '/equipment-info' ? 'active' : ''}`}>
+              <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลอุปกรณ์สำรอง</Link>
           </li>
         </ul>
-        <div className='footer'>
+        <div className='footer equip'>
           <ul className='nav nav-pills flex-column'>
-            <li className='nav-item'>
+            {/*<li className='nav-item'>
               <Link to="/personal-info" className={`nav-link ${location.pathname === '/personal-info' ? 'active' : ''}`}>
                 <FontAwesomeIcon icon={faUserGear} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลส่วนตัว</Link>
-            </li>
+            </li> */}
             <li className='nav-item'>
               <Link to="/logout" className={`nav-link ${location.pathname === '/logout' ? 'active' : ''}`}>
                 <FontAwesomeIcon icon={faRightFromBracket} style={{ color: '#fefcff', paddingRight: 10 }} />ออกจากระบบ</Link>
@@ -62,4 +54,4 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
-export default Layout;
+export default Info_Layout;

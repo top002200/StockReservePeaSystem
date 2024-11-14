@@ -4,16 +4,17 @@
     display: flex;
     min-height: 100vh;
   }
-  
+  /*
   .sidebar {
     width: 250px;
     background-color: #4B004B; /* Purple background color for sidebar */
-    color: #ffffff;
+    /*color: #ffffff;
     padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-  }
+    align-items: center; 
+  /*}
+  
   
   .logo {
     text-align: center;
@@ -29,7 +30,7 @@
   .nav-link {
     color: #ffffff;
     background-color: #b084c7; /* Button-like background */
-    padding: 10px 15px;
+   /* padding: 10px 15px;
     border-radius: 8px;
     margin-bottom: 10px;
     text-align: center;
@@ -42,16 +43,62 @@
   .nav-link:hover {
     background-color: #e2b7ff;
     color: #4B004B;
-  }
+  }*/
+  
+  .sidebar {
+    min-height: 100vh;
+    width: 240px;
+    background-color: #74045f;
+    color: #fefcff;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+
+.sidebar .nav-link {
+    color: #fefcff;
+    border-radius: 20px;
+}
+
+.sidebar .nav-link.active {
+    color: #fefcff;
+    background-color: #c7911b;
+    border-radius: 20px;
+    text-decoration: underline;
+}
+
+.sidebar .footer {
+    display: grid;
+    height: 440px;
+    align-items: end;
+    /* จัดเนื้อหาให้อยู่ด้านล่าง */
+}
+
+.sidebar .footer.equip {
+  display: grid;
+  height: 520px;
+  align-items: end;
+  /* จัดเนื้อหาให้อยู่ด้านล่าง */
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.logo-img {
+  width: 160px;
+  height: auto;
+  margin-bottom: 5px;
+}
   
   .content {
     flex: 1;
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background-color: #F8F9FA; /* Light background for main content */
+    background-color: #fefcff; /* Light background for main content */
   }
-  
+  /*
   .content-header {
     background-color: purple;
     color: white;
@@ -59,7 +106,7 @@
     text-align: center;
     border-radius: 8px;
     margin-bottom: 20px;
-  }
+  }*/
   
   .content-main {
     flex: 1;
@@ -67,5 +114,6 @@
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 3px solid #c7911b;
   }
   
