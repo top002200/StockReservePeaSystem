@@ -66,6 +66,13 @@ func main() {
 		protectedRoutes.PUT("/model/:id", controllers.UpdateModel)
 		protectedRoutes.DELETE("/model/:id", controllers.DeleteModel)
 
+
+		// Type routes
+		protectedRoutes.POST("/type", controllers.CreateType)
+		protectedRoutes.GET("/type/:id", controllers.GetTypeByID)
+		protectedRoutes.GET("/types", controllers.GetAllTypes)
+
+
 	}
 
 	// Determine the port to run on

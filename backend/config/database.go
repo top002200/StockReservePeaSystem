@@ -1,3 +1,4 @@
+// config/database.go
 package config
 
 import (
@@ -31,11 +32,12 @@ func InitDatabase() {
 
 	// Run AutoMigrate for all models
 	err = DB.AutoMigrate(
-		&models.Admin{},
-		&models.Equipment{},
-		&models.Submission{},
-		&models.Brand{},
-		&models.Model{},
+		&models.Admin{}, 
+		&models.Equipment{}, 
+		&models.Submission{}, 
+		&models.Brand{}, 
+		&models.Model{}, 
+		&models.Type{}, 
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database schema:", err)
