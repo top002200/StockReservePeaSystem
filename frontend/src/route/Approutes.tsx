@@ -14,6 +14,7 @@ import Equipment_info from "../components/pages/Equipment_info";
 import Equipment_Repair from "../components/pages/Equipment_Repair";
 import Personal_info from "../components/pages/Personal_info";
 
+
 export default function AppRoutes() {
   return (
     <Router>
@@ -26,6 +27,7 @@ export default function AppRoutes() {
         <Route path="/equipment-info" element={<Equipment_info />} />
         <Route path="/equipment-repair" element={<Equipment_Repair />} />
         <Route path="/personal-info" element={<Personal_info />} />
+
         
       </Routes>
     </Router>

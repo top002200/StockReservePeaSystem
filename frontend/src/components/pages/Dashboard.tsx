@@ -46,7 +46,7 @@ const Dashboard: React.FC = () => {
             justifyContent: 'center',
             alignItems: 'center',
             gap: '30px',
-            flexWrap: 'nowrap',
+            flexWrap: 'wrap',
           }}
         >
           <DashboardItem
