@@ -34,7 +34,8 @@ func InitDatabase() {
 		&models.Admin{},
 		&models.Equipment{},
 		&models.Submission{},
-
+		&models.Brand{},
+		&models.Model{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database schema:", err)

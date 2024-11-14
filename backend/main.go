@@ -51,6 +51,21 @@ func main() {
 		protectedRoutes.GET("/submissions", controllers.GetAllSubmissions)
 		protectedRoutes.PUT("/submission/:id", controllers.UpdateSubmission)
 		protectedRoutes.DELETE("/submission/:id", controllers.DeleteSubmission)
+
+		// Brand routes
+		protectedRoutes.POST("/brand", controllers.CreateBrand)
+		protectedRoutes.GET("/brand/:id", controllers.GetBrandByID)
+		protectedRoutes.GET("/brands", controllers.GetAllBrands)
+		protectedRoutes.PUT("/brand/:id", controllers.UpdateBrand)
+		protectedRoutes.DELETE("/brand/:id", controllers.DeleteBrand)
+
+		// Model routes
+		protectedRoutes.POST("/model", controllers.CreateModel)
+		protectedRoutes.GET("/model/:id", controllers.GetModelByID)
+		protectedRoutes.GET("/models", controllers.GetAllModels)
+		protectedRoutes.PUT("/model/:id", controllers.UpdateModel)
+		protectedRoutes.DELETE("/model/:id", controllers.DeleteModel)
+
 	}
 
 	// Determine the port to run on
