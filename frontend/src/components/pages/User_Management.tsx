@@ -10,7 +10,7 @@ const User_Managment: React.FC = () => {
   return (
     <Layout>
       <div className="user-management-content">
-        <h2 className="text-center mb-4" style={{ color: '#74045f', textDecoration: 'underline' }}><b>จัดการข้อมูลผู้ใช้งาน</b></h2>
+        <h3 className="text-center mb-4" style={{ color: '#74045f', textDecoration: 'underline' }}><b>จัดการข้อมูลผู้ใช้งาน</b></h3>
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10, paddingRight: 20 }}>
           <button type="button" className="btn btn-success"><FontAwesomeIcon icon={faPlus} /></button>
         </div>
@@ -33,8 +33,8 @@ const User_Managment: React.FC = () => {
               <td>xxx-xxx-xxxx</td>
               <td>******</td>
               <td>
-                <Button variant="primary" className="me-2"><FontAwesomeIcon icon={faEdit} /></Button>
-                <Button variant="danger"><FontAwesomeIcon icon={faTrashCan} /></Button>
+                <Button variant="outline-primary" className="me-2"><FontAwesomeIcon icon={faEdit} /></Button>
+                <Button variant="outline-danger"><FontAwesomeIcon icon={faTrashCan} /></Button>
               </td>
             </tr>
             <tr className='align-middle text-center'>
@@ -44,8 +44,8 @@ const User_Managment: React.FC = () => {
               <td>xxx-xxx-xxxx</td>
               <td>******</td>
               <td>
-                <Button variant="primary" className="me-2"><FontAwesomeIcon icon={faEdit} /></Button>
-                <Button variant="danger"><FontAwesomeIcon icon={faTrashCan} /></Button>
+                <Button variant="outline-primary" className="me-2"><FontAwesomeIcon icon={faEdit} /></Button>
+                <Button variant="outline-danger"><FontAwesomeIcon icon={faTrashCan} /></Button>
               </td>
             </tr>
           </tbody>

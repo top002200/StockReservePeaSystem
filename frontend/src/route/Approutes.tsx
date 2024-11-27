@@ -13,6 +13,9 @@ import User_Managment from "../components/pages/User_Management";
 import Equipment_info from "../components/pages/Equipment_info";
 import Equipment_Repair from "../components/pages/Equipment_Repair";
 import Personal_info from "../components/pages/Personal_info";
+import User_DB from "../components/pages/User_DB";
+import Approval_Status from "../components/pages/Approval_Status";
+import Login from "../components/pages/Login";
 
 
 export default function AppRoutes() {
@@ -20,6 +23,8 @@ export default function AppRoutes() {
     <Router>
       <Routes>
         {/* Public Route */}
+        <Route path="/Login" element={<Login />} />
+        {/* Admin */}
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/Borrowitem" element={<Borrowitem />} />
         <Route path="/Approval" element={<Approval />} />
@@ -28,6 +33,9 @@ export default function AppRoutes() {
         <Route path="/equipment-repair" element={<Equipment_Repair />} />
         <Route path="/personal-info" element={<Personal_info />} />
 
+        {/* User */}
+        <Route path="/user-dashboard" element={<User_DB />} />
+        <Route path="/approval-status" element={<Approval_Status/>} />
         
       </Routes>
     </Router>

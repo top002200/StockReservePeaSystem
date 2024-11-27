@@ -4,42 +4,34 @@ import React from 'react';
 import './Layout.css';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleUser, faRightFromBracket, faTable, faUser, faUserGear } from '@fortawesome/free-solid-svg-icons';
-import { faCircleCheck } from '@fortawesome/free-solid-svg-icons/faCircleCheck';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Bootstrap JS
+import { faCircleCheck, faCircleUser, faRightFromBracket, faTable } from '@fortawesome/free-solid-svg-icons';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const User_Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="layout">
       {/* Sidebar */}
       <aside className="sidebar d-flex flex-column p-4">
         <div className="logo">
-          <a href='/Dashboard'><img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" className="logo-img" /></a>
+          <img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" className="logo-img" />
           <hr />
         </div>
         <ul className="nav nav-pills flex-column">
           <li className='nav-item'>
-            <Link to="/borrowitem" className={`nav-link ${location.pathname === '/borrowitem' ? 'active' : ''}`}>
+            <Link to="/user-dashboard" className={`nav-link ${location.pathname === '/user-dashboard' ? 'active' : ''}`}>
               <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลอุปกรณ์</Link>
           </li>
           <li className='nav-item'>
-            <Link to="/approval" className={`nav-link ${location.pathname === '/approval' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#fefcff', paddingRight: 10 }} />คำขอยืมอุปกรณ์</Link>
-          </li>
-          <li className='nav-item'>
-            <Link to="/user-management" className={`nav-link ${location.pathname === '/user-management' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faUser} style={{ color: '#fefcff', paddingRight: 10 }} />จัดการข้อมูลผู้ใช้งาน</Link>
+            <Link to="/approval-status" className={`nav-link ${location.pathname === '/approval-status' ? 'active' : ''}`}>
+              <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#fefcff', paddingRight: 10 }} />สถานะคำขอยืม</Link>
           </li>
         </ul>
-        
-        <div className='footer'>
+        <div className='footer user'>
           <hr />
           <div className='dropdown open'>
             <button
@@ -53,10 +45,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
              <FontAwesomeIcon icon={faCircleUser} style={{ color: '#fefcff', paddingRight: 5, fontSize: 25 }} /><span className='ms-1'>User</span>
             </button>
             <div className='dropdown-menu' aria-labelledby='triggerID'>
-              <Link to="/personal-info" className='dropdown-item'>
-                <FontAwesomeIcon icon={faUserGear} style={{ color: '#fefcff', paddingRight: 10 }} />
-                ข้อมูลส่วนตัว
-              </Link>
               <Link to="/login" className='dropdown-item'>
                 <FontAwesomeIcon icon={faRightFromBracket} style={{ color: '#fefcff', paddingRight: 10 }} />
                 ออกจากระบบ
@@ -64,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
         </div>
-
+        
       </aside>
 
       {/* Main Content */}
@@ -75,8 +63,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
     </div>
 
-
+    
   );
 };
 
-export default Layout;
+export default User_Layout;

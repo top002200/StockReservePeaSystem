@@ -4,7 +4,7 @@ import React from 'react';
 import './Layout.css';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDesktop, faRightFromBracket, faTable, faUser, faUserGear } from '@fortawesome/free-solid-svg-icons';
+import { faCircleUser, faDesktop, faRightFromBracket, faTable, faUser, faUserGear } from '@fortawesome/free-solid-svg-icons';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -28,16 +28,30 @@ const Info_Layout: React.FC<LayoutProps> = ({ children }) => {
           </li>
         </ul>
         <div className='footer equip'>
-          <ul className='nav nav-pills flex-column'>
-            {/*<li className='nav-item'>
-              <Link to="/personal-info" className={`nav-link ${location.pathname === '/personal-info' ? 'active' : ''}`}>
-                <FontAwesomeIcon icon={faUserGear} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลส่วนตัว</Link>
-            </li> */}
-            <li className='nav-item'>
-              <Link to="/logout" className={`nav-link ${location.pathname === '/logout' ? 'active' : ''}`}>
-                <FontAwesomeIcon icon={faRightFromBracket} style={{ color: '#fefcff', paddingRight: 10 }} />ออกจากระบบ</Link>
-            </li>
-          </ul>
+          <hr />
+          <div className='dropdown open'>
+            <button
+              className='btn border-none dropdown-toggle text-white'
+              type="button"
+              id="triggerID"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              style={{padding: '10px 50px'}}
+            >
+             <FontAwesomeIcon icon={faCircleUser} style={{ color: '#fefcff', paddingRight: 5, fontSize: 25 }} /><span className='ms-1'>User</span>
+            </button>
+            <div className='dropdown-menu' aria-labelledby='triggerID'>
+              <Link to="/personal-info" className='dropdown-item'>
+                <FontAwesomeIcon icon={faUserGear} style={{ color: '#fefcff', paddingRight: 10 }} />
+                ข้อมูลส่วนตัว
+              </Link>
+              <Link to="/login" className='dropdown-item'>
+                <FontAwesomeIcon icon={faRightFromBracket} style={{ color: '#fefcff', paddingRight: 10 }} />
+                ออกจากระบบ
+              </Link>
+            </div>
+          </div>
+          
         </div>
         
       </aside>

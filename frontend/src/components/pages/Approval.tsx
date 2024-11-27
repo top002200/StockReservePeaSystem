@@ -7,10 +7,29 @@ import { faEdit, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 
 
 const Approval: React.FC = () => {
+  const data = [
+    {
+        id: 1,
+        user_id: '123456',
+        user_name: 'นางสาวxxx xxxx',
+        b_item: 'Notebook',
+        quantity: '1',
+        note: 'xxxxxxxxxxxxxxxxxxxx'
+    },
+    {
+      id: 2,
+      user_id: '543210',
+      user_name: 'นางสาวxxx xxxx',
+      b_item: 'Wireless Mouse',
+      quantity: '1',
+      note: 'xxxxxxxxxxxxxxxxxxxx'
+  }
+    
+];
   return (
     <Layout>
       <div className="approval-content">
-        <h2 className="text-center mb-4" style={{color: '#74045f', textDecoration: 'underline'}}><b>คำขอยืมอุปกรณ์</b></h2>
+        <h3 className="text-center mb-4" style={{color: '#74045f', textDecoration: 'underline'}}><b>คำขอยืมอุปกรณ์</b></h3>
         <Table bordered hover responsive>
           <thead>
             <tr className='align-middle text-center'>
@@ -23,28 +42,19 @@ const Approval: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className='align-middle text-center'>1</td>
-              <td className='align-middle text-center'>นางสาวxxx xxxx</td>
-              <td className='align-middle text-center'>123456</td>
-              <td className='align-middle text-left'>Notebook : 1 <br/>Wireless Mouse : 1</td>
-              <td className='align-middle text-left'>xxxxxxxxxxxxxxxxxxxx</td>
+          {data.map((item, index) => (
+            <tr key={item.id}>
+              <td className='align-middle text-center'>{index + 1}</td>
+              <td className='align-middle text-center'>{item.user_name}</td>
+              <td className='align-middle text-center'>{item.user_id}</td>
+              <td className='align-middle text-left'>{item.b_item} : {item.quantity}</td>
+              <td className='align-middle text-left'>{item.note}</td>
               <td className='align-middle text-center'>
-                <Button variant="primary" className="me-2"><FontAwesomeIcon icon={faEdit} /></Button>
-                <Button variant="success"><FontAwesomeIcon icon={faFileDownload} /></Button>
+                <Button variant="outline-primary" className="me-2" style={{width: '40px'}}><FontAwesomeIcon icon={faEdit} /></Button>
+                <Button variant="outline-success"><FontAwesomeIcon icon={faFileDownload} /></Button>
               </td>
             </tr>
-            <tr>
-              <td  className='align-middle text-center'>2</td>
-              <td  className='align-middle text-center'>นายxxx xxxx</td>
-              <td  className='align-middle text-center'>543210</td>
-              <td  className='align-middle text-left'>xxxxxxxxx : xx</td>
-              <td className='align-middle text-left'></td>
-              <td className='align-middle text-center'>
-                <Button variant="primary" className="me-2"><FontAwesomeIcon icon={faEdit} /></Button>
-                <Button variant="success"><FontAwesomeIcon icon={faFileDownload} /></Button>
-              </td>
-            </tr>
+          ))}
           </tbody>
         </Table>
       </div>

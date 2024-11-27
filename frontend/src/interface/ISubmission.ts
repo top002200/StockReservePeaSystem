@@ -1,6 +1,6 @@
 export interface SubmissionData {
     submission_id: number;          // รหัสประจำตัวของการส่ง
-    equipment_id: number;           // รหัสประจำตัวของอุปกรณ์ที่เกี่ยวข้อง
+    equipment_id?: number;           // รหัสประจำตัวของอุปกรณ์ที่เกี่ยวข้อง
     username: string;               // ชื่อผู้ใช้ที่ส่ง
     user_id: string;                // รหัสประจำตัวของผู้ใช้ที่ส่ง
     position: string;               // ตำแหน่งของผู้ส่ง

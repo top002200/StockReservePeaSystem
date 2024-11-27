@@ -18,14 +18,14 @@ const Dashboard: React.FC = () => {
       <header
         style={{
           width: '100%',
-          backgroundColor: '#74045f', // Purple background
+          backgroundImage: 'linear-gradient(to bottom, #74045f 40%, #c7911b 100%)',
           padding: '20px 0',
           textAlign: 'center',
           fontSize: '24px',
           fontWeight: 'bold',
         }}
       >
-        <img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" className="logo-img" />
+        <img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" style={{width: "180px"}} />
       </header>
 
       {/* Dashboard Content */}

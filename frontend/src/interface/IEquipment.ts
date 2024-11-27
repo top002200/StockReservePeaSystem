@@ -1,10 +1,11 @@
-import { SubmissionData } from './ISubmission';
+
 
 export interface EquipmentData {
-  equipment_id: number;           // รหัสประจำตัวของอุปกรณ์
-  equipment_name: string;         // ชื่อของอุปกรณ์
+  equipment_id?: number;           // รหัสประจำตัวของอุปกรณ์
+  equip_img: string;              // URL ของรูปโปรไฟล์ของอุปกรณ์
   type: string;                   // ประเภทของอุปกรณ์
+  brand: string;                  // ยี่ห้อ
   model: string;                  // รุ่นของอุปกรณ์
-  profile_pic: string;            // URL ของรูปโปรไฟล์ของอุปกรณ์
-  submissions: SubmissionData[];  // รายการการส่งที่เกี่ยวข้องกับอุปกรณ์นี้
+  contract: string;
+  assetcode: string;
 }
