@@ -38,6 +38,8 @@ func InitDatabase() {
 		&models.Brand{}, 
 		&models.Model{}, 
 		&models.Type{}, 
+		&models.Picture{},
+		&models.BorrowedEquipment{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database schema:", err)

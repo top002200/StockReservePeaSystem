@@ -9,5 +9,5 @@ type Equipment struct {
 	Contract      string       `json:"equip_contract"`
 	AssetCode     string       `json:"equip_assetcode"`
 	EquipmentImg  string       `json:"equip_img"`
-	Submissions   []Submission `gorm:"foreignKey:EquipmentID;references:EquipmentID" json:"submissions"`
-}
+
+}	

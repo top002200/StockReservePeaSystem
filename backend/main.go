@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/top002200/stockreversepea/controllers"
-	// "github.com/top002200/stockreversepea/middlewares"
 	"github.com/top002200/stockreversepea/config"
 
 	"github.com/gin-gonic/gin"
@@ -17,19 +16,17 @@ func main() {
 	config.InitDatabase()
 
 	// Apply CORS middleware globally
-	// x
+	r.Use(CORSMiddleware())
 
 	// Public routes
 	// publicRoutes := r.Group("/")
 	// {
 	// 	publicRoutes.POST("/login", controllers.Login)
-	// 	// publicRoutes.POST("/signup", controllers.Signup) // หากต้องการเพิ่ม signup
+	// 	// publicRoutes.POST("/signup", controllers.Signup) // Add signup if needed
 	// }
 
 	// Protected routes
 	protectedRoutes := r.Group("/")
-
-	// protectedRoutes.Use(middlewares.AuthMiddleware()) // ใช้ AuthMiddleware ใน protectedRoutes
 	{
 		// Admin routes
 		protectedRoutes.POST("/admin", controllers.CreateAdmin)
@@ -38,12 +35,19 @@ func main() {
 		protectedRoutes.PUT("/admin/:id", controllers.UpdateAdmin)
 		protectedRoutes.DELETE("/admin/:id", controllers.DeleteAdmin)
 
-		// User routes
+		// Equipment routes
 		protectedRoutes.POST("/equipment", controllers.CreateEquipment)
 		protectedRoutes.GET("/equipment/:id", controllers.GetEquipmentByID)
 		protectedRoutes.GET("/equipment", controllers.GetAllEquipments)
 		protectedRoutes.PUT("/equipment/:id", controllers.UpdateEquipment)
 		protectedRoutes.DELETE("/equipment/:id", controllers.DeleteEquipment)
+
+		// BorrowedEquipment routes
+		protectedRoutes.POST("/borrowed-equipment", controllers.CreateBorrowedEquipment)
+		protectedRoutes.GET("/borrowed-equipment/:id", controllers.GetBorrowedEquipmentByID)
+		protectedRoutes.GET("/borrowed-equipments", controllers.GetAllBorrowedEquipments)
+		protectedRoutes.PUT("/borrowed-equipment/:id", controllers.UpdateBorrowedEquipment)
+		protectedRoutes.DELETE("/borrowed-equipment/:id", controllers.DeleteBorrowedEquipment)
 
 		// Submission routes
 		protectedRoutes.POST("/submission", controllers.CreateSubmission)
@@ -66,13 +70,16 @@ func main() {
 		protectedRoutes.PUT("/model/:id", controllers.UpdateModel)
 		protectedRoutes.DELETE("/model/:id", controllers.DeleteModel)
 
-
 		// Type routes
 		protectedRoutes.POST("/type", controllers.CreateType)
 		protectedRoutes.GET("/type/:id", controllers.GetTypeByID)
 		protectedRoutes.GET("/types", controllers.GetAllTypes)
 
-
+		// Picture routes
+		protectedRoutes.POST("/picture", controllers.CreatePicture)
+		protectedRoutes.GET("/picture/:id", controllers.GetPictureByID)
+		protectedRoutes.GET("/pictures", controllers.GetAllPictures)
+		protectedRoutes.DELETE("/picture/:id", controllers.DeletePicture)
 	}
 
 	// Determine the port to run on
@@ -85,19 +92,19 @@ func main() {
 	r.Run(":" + port)
 }
 
-// CORSMiddleware is a middleware function that adds CORS headers to the response
-// func CORSMiddleware() gin.HandlerFunc {
-//     return func(c *gin.Context) {
-//         c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-//         c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-//         c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-//         c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
+// CORSMiddleware applies CORS headers to the response
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 
-//         if c.Request.Method == "OPTIONS" {
-//             c.AbortWithStatus(204)
-//             return
-//         }
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
 
-//         c.Next()
-//     }
-// }
+		c.Next()
+	}
+}

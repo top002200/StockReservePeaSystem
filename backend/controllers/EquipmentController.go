@@ -1,21 +1,27 @@
 package controllers
 
 import (
+
 	"net/http"
+
+
 	"github.com/gin-gonic/gin"
 	"github.com/top002200/stockreversepea/config"
 	"github.com/top002200/stockreversepea/models"
 	"gorm.io/gorm"
 )
 
-// CreateEquipment - Controller สำหรับสร้าง Equipment ใหม่
+// CreateEquipment รับข้อมูลอุปกรณ์พร้อมรูปแบบ Base64
 func CreateEquipment(c *gin.Context) {
 	var equipment models.Equipment
+
+	// Bind JSON to the Equipment struct
 	if err := c.ShouldBindJSON(&equipment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid input"})
 		return
 	}
 
+	// Save equipment to the database
 	if err := config.DB.Create(&equipment).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to create equipment"})
 		return
@@ -23,6 +29,7 @@ func CreateEquipment(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": equipment})
 }
+
 
 // GetEquipmentByID - ดึงข้อมูล Equipment ตาม ID
 func GetEquipmentByID(c *gin.Context) {

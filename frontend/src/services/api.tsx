@@ -4,6 +4,7 @@ import { SubmissionData } from "../interface/ISubmission";
 import { BrandData } from "../interface/IBrand";
 import { ModelData } from "../interface/IModel";
 import { TypeData } from "../interface/IType";
+import { BorrowedEquipmentData } from "../interface/IBorrowedEquipment";
 
 // const apiURL = "http://localhost:8080";
 const apiURL = "http://localhost:8080";
@@ -109,7 +110,10 @@ async function deleteAdmin(adminId: string) {
       return { status: true, message: "Admin deleted successfully" };
     } else {
       const error = await response.json();
-      return { status: false, message: error.message || "Failed to delete admin" };
+      return {
+        status: false,
+        message: error.message || "Failed to delete admin",
+      };
     }
   } catch (error) {
     console.error("Error deleting admin:", error);
@@ -132,7 +136,10 @@ async function createEquipment(data: EquipmentData) {
     if (response.ok) {
       return { status: true, message: res.message, data: res.data };
     } else {
-      return { status: false, message: res.error || "Failed to create equipment" };
+      return {
+        status: false,
+        message: res.error || "Failed to create equipment",
+      };
     }
   } catch (error: any) {
     console.error("Error creating equipment:", error);
@@ -148,8 +155,9 @@ async function getAllEquipments() {
     });
 
     if (response.ok) {
-      const data = await response.json();
-      return { status: true, data };
+      const result = await response.json(); // รับ JSON ทั้งหมด
+      console.log("API Response:", result); // ตรวจสอบโครงสร้าง
+      return { status: true, data: result.data }; // ดึงเฉพาะฟิลด์ `data`
     } else {
       const error = await response.json();
       return {
@@ -199,7 +207,10 @@ async function updateEquipment(equipmentId: string, data: EquipmentData) {
     if (response.ok) {
       return { status: true, message: res.message, data: res.data };
     } else {
-      return { status: false, message: res.error || "Failed to update equipment" };
+      return {
+        status: false,
+        message: res.error || "Failed to update equipment",
+      };
     }
   } catch (error: any) {
     console.error("Error updating equipment:", error);
@@ -218,7 +229,10 @@ async function deleteEquipment(equipmentId: string) {
       return { status: true, message: "Equipment deleted successfully" };
     } else {
       const error = await response.json();
-      return { status: false, message: error.message || "Failed to delete equipment" };
+      return {
+        status: false,
+        message: error.message || "Failed to delete equipment",
+      };
     }
   } catch (error) {
     console.error("Error deleting equipment:", error);
@@ -241,7 +255,10 @@ async function createSubmission(data: SubmissionData) {
     if (response.ok) {
       return { status: true, message: res.message, data: res.data };
     } else {
-      return { status: false, message: res.error || "Failed to create submission" };
+      return {
+        status: false,
+        message: res.error || "Failed to create submission",
+      };
     }
   } catch (error: any) {
     console.error("Error creating submission:", error);
@@ -409,24 +426,265 @@ async function getAllTypes() {
     return { status: false, message: "An unexpected error occurred" };
   }
 }
+// Picture API Functions
+
+// Create Picture
+async function createPicture(pictureData: {
+  picture_id: string;
+  picture_data: string;
+}) {
+  try {
+    const response = await fetch(`${apiURL}/picture`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(pictureData),
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to create picture",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error creating picture:", error);
+    return { status: false, message: error.message || "An error occurred" };
+  }
+}
+
+// Get All Pictures
+const getAllPictures = async () => {
+  try {
+    const response = await fetch(`${apiURL}/pictures`, {
+      method: "GET",
+    });
+    const result = await response.json();
+    return {
+      status: response.ok,
+      data: result.data || [],
+      message: result.message || null,
+    };
+  } catch (error) {
+    console.error("Error fetching pictures:", error);
+    return {
+      status: false,
+      data: [],
+      message: "Error fetching pictures",
+    };
+  }
+};
+
+// Get Picture by ID
+async function getPictureById(pictureId: string) {
+  try {
+    const response = await fetch(`${apiURL}/picture/${pictureId}`, {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch picture",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching picture by ID:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Delete Picture
+async function deletePicture(pictureId: string) {
+  try {
+    const response = await fetch(`${apiURL}/picture/${pictureId}`, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      return { status: true, message: "Picture deleted successfully" };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to delete picture",
+      };
+    }
+  } catch (error) {
+    console.error("Error deleting picture:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+async function createBorrowedEquipment(data: BorrowedEquipmentData) {
+  try {
+    const response = await fetch(`${apiURL}/borrowed-equipment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to create borrowed equipment",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error creating borrowed equipment:", error);
+    return { status: false, message: error.message || "An error occurred" };
+  }
+}
+
+// Get All BorrowedEquipments
+async function getAllBorrowedEquipments() {
+  try {
+    const response = await fetch(`${apiURL}/borrowed-equipments`, {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch borrowed equipments",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching borrowed equipments:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Get BorrowedEquipment by ID
+async function getBorrowedEquipmentById(borrowedEquipmentId: string) {
+  try {
+    const response = await fetch(
+      `${apiURL}/borrowed-equipment/${borrowedEquipmentId}`,
+      {
+        method: "GET",
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch borrowed equipment",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching borrowed equipment by ID:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Update BorrowedEquipment
+async function updateBorrowedEquipment(
+  borrowedEquipmentId: string,
+  data: BorrowedEquipmentData
+) {
+  try {
+    const response = await fetch(
+      `${apiURL}/borrowed-equipment/${borrowedEquipmentId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to update borrowed equipment",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error updating borrowed equipment:", error);
+    return { status: false, message: error.message || "An error occurred" };
+  }
+}
+
+// Delete BorrowedEquipment
+async function deleteBorrowedEquipment(borrowedEquipmentId: string) {
+  try {
+    const response = await fetch(
+      `${apiURL}/borrowed-equipment/${borrowedEquipmentId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (response.ok) {
+      return {
+        status: true,
+        message: "Borrowed equipment deleted successfully",
+      };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to delete borrowed equipment",
+      };
+    }
+  } catch (error) {
+    console.error("Error deleting borrowed equipment:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
 export {
-    createAdmin,
-    getAllAdmins,
-    getAdminById,
-    updateAdmin,
-    deleteAdmin,
-    createEquipment,
-    getAllEquipments,
-    getEquipmentById,
-    updateEquipment,
-    deleteEquipment,
-    createSubmission,
-    getAllSubmissions,
-    createBrand,
-    getAllBrands,
-    createModel,
-    getAllModels,
-    createType,
-    getAllTypes,
-  };
-  
+  createAdmin,
+  getAllAdmins,
+  getAdminById,
+  updateAdmin,
+  deleteAdmin,
+  createEquipment,
+  getAllEquipments,
+  getEquipmentById,
+  updateEquipment,
+  deleteEquipment,
+  createSubmission,
+  getAllSubmissions,
+  createBrand,
+  getAllBrands,
+  createModel,
+  getAllModels,
+  createType,
+  getAllTypes,
+  createPicture,
+  getAllPictures,
+  getPictureById,
+  deletePicture,
+  createBorrowedEquipment,
+  getAllBorrowedEquipments,
+  getBorrowedEquipmentById,
+  updateBorrowedEquipment,
+  deleteBorrowedEquipment,
+};
