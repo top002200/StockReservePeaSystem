@@ -6,7 +6,7 @@ import (
 
 type Submission struct {
 	SubmissionID   uint      `gorm:"primaryKey;autoIncrement" json:"submission_id"`
-	BorrowedEquipmentID      uint      `json:"heading_idborrowed_equipment_id"` // Foreign key เชื่อมโยงกับ Heading
+	BorrowedEquipmentID      uint      `json:"borrowed_equipment_id"` // Foreign key เชื่อมโยงกับ Heading
 	UsernName      string    `json:"submission_username"`
 	Usernid        string    `json:"submission_userid"`
 	Position       string    `json:"submission_position"`

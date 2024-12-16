@@ -147,7 +147,6 @@ async function createEquipment(data: EquipmentData) {
   }
 }
 
-// Get All Equipments
 async function getAllEquipments() {
   try {
     const response = await fetch(`${apiURL}/equipment`, {
@@ -155,9 +154,9 @@ async function getAllEquipments() {
     });
 
     if (response.ok) {
-      const result = await response.json(); // รับ JSON ทั้งหมด
-      console.log("API Response:", result); // ตรวจสอบโครงสร้าง
-      return { status: true, data: result.data }; // ดึงเฉพาะฟิลด์ `data`
+      const result = await response.json(); // Handle full JSON response
+      console.log("API Response:", result); // Debug API structure
+      return { status: true, data: result.data }; // Extract `data` field
     } else {
       const error = await response.json();
       return {

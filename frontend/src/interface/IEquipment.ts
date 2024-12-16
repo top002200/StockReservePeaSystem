@@ -7,5 +7,5 @@ export interface EquipmentData {
   equip_contract: string;
   equip_assetcode: string;
   equip_img: string;
-  submissions?: any[]; // Make optional
+
 }

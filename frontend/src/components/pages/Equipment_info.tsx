@@ -48,35 +48,24 @@ function Equipment_info() {
   // Fetch initial data
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [equipmentRes, typeRes, pictureRes] = await Promise.all([
-          getAllEquipments(),
-          getAllTypes(),
-          getAllPictures(),
-        ]);
-
-        if (equipmentRes.status) setEquipmentData(equipmentRes.data);
-        if (typeRes.status)
-          setTypeOptions(
-            typeRes.data.map((t: { type_name: any }) => t.type_name)
-          );
-        if (pictureRes.status && Array.isArray(pictureRes.data)) {
-          setPictureOptions(pictureRes.data);
-        } else {
-          console.error(
-            "Failed to fetch pictures:",
-            pictureRes.message || "Invalid response format"
-          );
+        try {
+            const equipmentRes = await getAllEquipments();
+            if (equipmentRes.status) {
+                setEquipmentData(equipmentRes.data || []);
+            } else {
+                console.error("Error fetching equipment:", equipmentRes.message);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
-      }
     };
 
     fetchData();
-  }, []);
+}, []);
+
+
   type FormControlElement =
     | HTMLInputElement
     | HTMLSelectElement

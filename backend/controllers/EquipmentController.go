@@ -1,9 +1,7 @@
 package controllers
 
 import (
-
 	"net/http"
-
 
 	"github.com/gin-gonic/gin"
 	"github.com/top002200/stockreversepea/config"
@@ -11,17 +9,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// CreateEquipment รับข้อมูลอุปกรณ์พร้อมรูปแบบ Base64
+// CreateEquipment - Create a new Equipment
 func CreateEquipment(c *gin.Context) {
 	var equipment models.Equipment
 
-	// Bind JSON to the Equipment struct
 	if err := c.ShouldBindJSON(&equipment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid input"})
 		return
 	}
 
-	// Save equipment to the database
 	if err := config.DB.Create(&equipment).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to create equipment"})
 		return
@@ -30,13 +26,13 @@ func CreateEquipment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": equipment})
 }
 
-
-// GetEquipmentByID - ดึงข้อมูล Equipment ตาม ID
+// GetEquipmentByID - Retrieve Equipment by ID
 func GetEquipmentByID(c *gin.Context) {
 	equipmentID := c.Param("id")
 
 	var equipment models.Equipment
-	if err := config.DB.Preload("Submissions").First(&equipment, "equipment_id = ?", equipmentID).Error; err != nil {
+	// Removed Preload("Submissions") as it is no longer relevant
+	if err := config.DB.First(&equipment, "equipment_id = ?", equipmentID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "Equipment not found"})
 		} else {
@@ -48,18 +44,26 @@ func GetEquipmentByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": equipment})
 }
 
-// GetAllEquipments - ดึงข้อมูล Equipment ทั้งหมด
+// GetAllEquipments - Retrieve all Equipments
 func GetAllEquipments(c *gin.Context) {
 	var equipments []models.Equipment
-	if err := config.DB.Preload("Submissions").Find(&equipments).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error retrieving equipments", "error": err.Error()})
+
+	if err := config.DB.Find(&equipments).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Error retrieving equipments",
+			"error":   err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": equipments})
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   equipments,
+	})
 }
 
-// UpdateEquipment - อัปเดตข้อมูล Equipment
+// UpdateEquipment - Update an existing Equipment
 func UpdateEquipment(c *gin.Context) {
 	equipmentID := c.Param("id")
 
@@ -74,7 +78,6 @@ func UpdateEquipment(c *gin.Context) {
 		return
 	}
 
-	// อัปเดตข้อมูล equipment ในฐานข้อมูล
 	if err := config.DB.Save(&equipment).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to update equipment details"})
 		return
@@ -83,7 +86,7 @@ func UpdateEquipment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Equipment updated successfully", "data": equipment})
 }
 
-// DeleteEquipment - ลบ Equipment ตาม ID
+// DeleteEquipment - Delete an Equipment by ID
 func DeleteEquipment(c *gin.Context) {
 	equipmentID := c.Param("id")
 

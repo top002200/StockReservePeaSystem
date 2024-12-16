@@ -4,8 +4,6 @@ import { Table, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faFileDownload } from "@fortawesome/free-solid-svg-icons";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
-import { THSarabunFont } from "../../fonts/THSarabun"; // Import THSarabunFont
 
 const Approval: React.FC = () => {
   const data = [
@@ -27,68 +25,31 @@ const Approval: React.FC = () => {
     },
   ];
 
-  const base64Data = THSarabunFont.normal.split(",")[1];
-  console.log("Base64 Data Only:", base64Data);
-
-  const generatePDF = (userData: any) => {
+  const generatePDF = (userData: typeof data[0]) => {
     const doc = new jsPDF();
 
-    try {
-      // ตรวจสอบฟอนต์
-      console.log("THSarabunFont.normal:", THSarabunFont.normal);
-      const base64Data = THSarabunFont.normal.split(",")[1];
-      console.log("Base64 Data Only:", base64Data);
-      console.log("Base64 Length:", base64Data?.length || 0);
+    // เพิ่มหัวข้อ
+    doc.setFontSize(16);
+    doc.text("คำขอยืมอุปกรณ์", 70, 20);
 
-      if (!base64Data || !isValidBase64(THSarabunFont.normal)) {
-        throw new Error("Font data is not valid Base64.");
-      }
+    // วาดกรอบหัวตาราง
+    doc.rect(10, 30, 190, 10);
+    doc.text("ลำดับที่", 12, 37);
+    doc.text("ผู้ขอยืม", 40, 37);
+    doc.text("รายการ", 90, 37);
+    doc.text("หมายเหตุ", 150, 37);
 
-      // เพิ่มฟอนต์
-      doc.addFileToVFS("THSarabunNew.ttf", base64Data);
-      doc.addFont("THSarabunNew.ttf", "THSarabun", "normal");
-      doc.setFont("THSarabun");
+    // เพิ่มข้อมูลในตาราง
+    let startY = 40; // จุดเริ่มต้นของตาราง
+    doc.rect(10, startY, 190, 10); // กรอบของแถว
+    doc.text("1", 12, startY + 7);
+    doc.text(userData.user_name, 40, startY + 7);
+    doc.text(`${userData.b_item} : ${userData.quantity}`, 90, startY + 7);
+    doc.text(userData.note, 150, startY + 7);
 
-      // ตั้งค่าฟอนต์และข้อความ
-      doc.setFontSize(16);
-      doc.text("คำขอยืมอุปกรณ์", 70, 20);
-
-      // วาดกรอบหัวตาราง
-      doc.rect(10, 30, 190, 10);
-      doc.text("ลำดับที่", 12, 37);
-      doc.text("ผู้ขอยืม", 40, 37);
-      doc.text("รายการ", 90, 37);
-      doc.text("หมายเหตุ", 150, 37);
-
-      // เพิ่มข้อมูลในตาราง
-      const startY = 40;
-      doc.rect(10, startY, 190, 10);
-      doc.text("1", 12, startY + 7);
-      doc.text(userData.user_name || "-", 40, startY + 7);
-      doc.text(
-        `${userData.b_item || "-"} : ${userData.quantity || "-"}`,
-        90,
-        startY + 7
-      );
-      doc.text(userData.note || "-", 150, startY + 7);
-
-      // ดาวน์โหลด PDF
-      doc.save(`คำขอยืมอุปกรณ์_${userData.user_id}.pdf`);
-    } catch (error) {
-      console.error("Failed to generate PDF:", error);
-    }
+    // ดาวน์โหลด PDF
+    doc.save(`คำขอยืมอุปกรณ์_${userData.user_id}.pdf`);
   };
-
-  // Helper function to validate Base64
-  function isValidBase64(str: string): boolean {
-    try {
-      const decoded = atob(str.split(",")[1]); // แยกส่วนข้อมูล Base64 ออกจาก "data:font/ttf;base64,"
-      return !!decoded;
-    } catch (e) {
-      console.error("Base64 validation error:", e);
-      return false;
-    }
-  }
 
   return (
     <Layout>
@@ -130,7 +91,7 @@ const Approval: React.FC = () => {
                   </Button>
                   <Button
                     variant="outline-success"
-                    onClick={() => generatePDF(item)}
+                    onClick={() => generatePDF(item)} // Pass user data here
                   >
                     <FontAwesomeIcon icon={faFileDownload} />
                   </Button>
@@ -145,3 +106,4 @@ const Approval: React.FC = () => {
 };
 
 export default Approval;
+    

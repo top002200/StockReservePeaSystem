@@ -51,13 +51,16 @@ const Borrowitem: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await getAllBorrowedEquipments();
-        console.log("Response from API:", response); // Debug response
-        if (response.status) {
-          const fetchedData = Array.isArray(response.data.data)
-            ? response.data.data
-            : [];
-          setBorrowedEquipmentData(fetchedData);
-          console.log("Borrowed Equipment Data:", fetchedData); // Debug extracted data
+        console.log("Response from API:", response);
+
+        // Correctly extract the array from the nested structure
+        if (
+          response.status &&
+          response.data &&
+          Array.isArray(response.data.data)
+        ) {
+          setBorrowedEquipmentData(response.data.data); // Use the nested `data` field
+          console.log("Borrowed Equipment Data Updated:", response.data.data);
         } else {
           console.error(
             "Failed to fetch borrowed equipment:",
@@ -295,21 +298,20 @@ const Borrowitem: React.FC = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-  <Form.Label>ประเภท</Form.Label>
-  <Form.Select
-    name="equipment_type"
-    value={formData.equipment_type}
-    onChange={handleInputChange}
-  >
-    <option value="">-- เลือกประเภท --</option>
-    {typeOptions.map((type) => (
-      <option key={type.type_id} value={type.type_name}>
-        {type.type_name}
-      </option>
-    ))}
-  </Form.Select>
-</Form.Group>
-
+              <Form.Label>ประเภท</Form.Label>
+              <Form.Select
+                name="equipment_type"
+                value={formData.equipment_type}
+                onChange={handleInputChange}
+              >
+                <option value="">-- เลือกประเภท --</option>
+                {typeOptions.map((type) => (
+                  <option key={type.type_id} value={type.type_name}>
+                    {type.type_name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>ยี่ห้อ</Form.Label>
@@ -356,25 +358,12 @@ const Borrowitem: React.FC = () => {
                 onChange={handleInputChange}
               >
                 <option value="">-- เลือกรูปภาพ --</option>
-                {Array.isArray(pictureOptions) &&
-                  pictureOptions.map((picture) => (
-                    <option
-                      key={picture.picture_id}
-                      value={picture.picture_data}
-                    >
-                      รูปภาพ {picture.picture_id}
-                    </option>
-                  ))}
+                {pictureOptions.map((picture) => (
+                  <option key={picture.picture_id} value={picture.picture_data}>
+                    รูปภาพ {picture.picture_id}
+                  </option>
+                ))}
               </Form.Select>
-              {formData.equip_img && (
-                <div className="mt-2 text-center">
-                  <img
-                    src={formData.equip_img}
-                    alt="Selected"
-                    style={{ maxWidth: "200px", maxHeight: "200px" }}
-                  />
-                </div>
-              )}
             </Form.Group>
           </Form>
         </Modal.Body>
