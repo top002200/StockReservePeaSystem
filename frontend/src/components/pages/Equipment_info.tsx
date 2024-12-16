@@ -344,7 +344,7 @@ function Equipment_info() {
               >
                 <option value="">-- เลือกประเภท --</option>
                 {typeOptions.map((type) => (
-                  <option key={type.type_id} value={type.type_id}>
+                  <option key={type.type_id} value={type.type_name}>
                     {type.type_name}
                   </option>
                 ))}
