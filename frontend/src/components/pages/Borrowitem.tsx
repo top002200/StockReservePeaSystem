@@ -210,8 +210,11 @@ const Borrowitem: React.FC = () => {
         try {
           await deleteBorrowedEquipment(id.toString());
           Swal.fire("ลบข้อมูลสำเร็จ!", "", "success");
-          const updatedData = await getAllBorrowedEquipments();
-          if (updatedData.status) setBorrowedEquipmentData(updatedData.data);
+          
+          // อัปเดตรายการใน state โดยกรองเอารายการที่ลบออก
+          setBorrowedEquipmentData((prevData) =>
+            prevData.filter((item) => item.borrowed_equipment_id !== id)
+          );
         } catch (error) {
           console.error("Error deleting borrowed equipment:", error);
           Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถลบข้อมูลได้", "error");
@@ -219,6 +222,7 @@ const Borrowitem: React.FC = () => {
       }
     });
   };
+  
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
