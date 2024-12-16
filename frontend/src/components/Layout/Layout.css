@@ -76,6 +76,25 @@
   border: 3px solid #c7911b;
 }
 
+.content-i {
+  flex: 1;
+  height: 100vh;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border: 3px solid #c7911b;
+}
+
+/*.content-header {
+  background-color: purple;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}*/
+
 /* Custom Modal Styles */
 .modal-header {
   background-color: #c7911b;
@@ -145,37 +164,68 @@
 }
 
 .card {
-  background-color: rgba(245,245,245, 0.8);
+  background-color: rgba(245, 245, 245, 0.8);
 }
 
 /* Sidebar Dropdown */
 
 .dropdown-menu {
-  background-color: rgba(52, 58, 64, 0.7);  /* Dark background */
-  border-radius: 20px;          /* Rounded corners */
-  min-width: 100px;            /* Minimum width of the dropdown */
-  padding: 0;                  /* Remove padding */
+  background-color: rgba(52, 58, 64, 0.7);
+  /* Dark background */
+  border-radius: 20px;
+  /* Rounded corners */
+  min-width: 100px;
+  /* Minimum width of the dropdown */
+  padding: 0;
+  /* Remove padding */
 }
 
 /* Custom Dropdown Item */
 .dropdown-item {
-  color: #fefcff;              /* Light text color */
+  color: #fefcff;
+  /* Light text color */
   border-radius: 20px;
-  padding: 10px 20px;          /* Padding inside items */
-  font-size: 14px;             /* Font size for items */
-  transition: background-color 0.3s ease;  /* Smooth transition */
+  padding: 10px 20px;
+  /* Padding inside items */
+  font-size: 14px;
+  /* Font size for items */
+  transition: background-color 0.3s ease;
+  /* Smooth transition */
 }
 
 .dropdown-item:hover {
-  background-color: #c7911b;  /* Blue background on hover */
+  background-color: #c7911b;
+  /* Blue background on hover */
   border-radius: 20px;
   background: linear-gradient(160deg, #c7911b 30%, #74045f 100%);
-  color: #fff;                /* White text on hover */
+  color: #fff;
+  /* White text on hover */
 }
 
 /* Icon Styling */
 .dropdown-item i {
   border-radius: 20px;
-  color: #fefcff; /* Set the icon color to match the text */
-  padding-right: 10px;  /* Space between icon and text */
+  color: #fefcff;
+  /* Set the icon color to match the text */
+  padding-right: 10px;
+  /* Space between icon and text */
 }
+
+.card-info {
+  border: none;
+  width: 90%;
+}
+
+.card-body-info {
+  border: none;
+  background-color: #fff;
+}
+
+/* user management */
+a.active-link {
+  text-decoration: underline !important;
+  font-weight: bold; /* เพิ่มน้ำหนักตัวอักษร */
+  color: white; /* คงสีไว้เป็นสีขาว */
+}
+
+

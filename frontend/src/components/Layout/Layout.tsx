@@ -33,10 +33,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Link to="/approval" className={`nav-link ${location.pathname === '/approval' ? 'active' : ''}`}>
               <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#fefcff', paddingRight: 10 }} />คำขอยืมอุปกรณ์</Link>
           </li>
-          <li className='nav-item'>
+          {/*<li className='nav-item'>
             <Link to="/user-management" className={`nav-link ${location.pathname === '/user-management' ? 'active' : ''}`}>
               <FontAwesomeIcon icon={faUser} style={{ color: '#fefcff', paddingRight: 10 }} />จัดการข้อมูลผู้ใช้งาน</Link>
-          </li>
+          </li>*/}
         </ul>
         
         <div className='footer'>
@@ -53,10 +53,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
              <FontAwesomeIcon icon={faCircleUser} style={{ color: '#fefcff', paddingRight: 5, fontSize: 25 }} /><span className='ms-1'>User</span>
             </button>
             <div className='dropdown-menu' aria-labelledby='triggerID'>
-              <Link to="/personal-info" className='dropdown-item'>
+              {/*<Link to="/personal-info" className='dropdown-item'>
                 <FontAwesomeIcon icon={faUserGear} style={{ color: '#fefcff', paddingRight: 10 }} />
                 ข้อมูลส่วนตัว
-              </Link>
+              </Link> */}
               <Link to="/login" className='dropdown-item'>
                 <FontAwesomeIcon icon={faRightFromBracket} style={{ color: '#fefcff', paddingRight: 10 }} />
                 ออกจากระบบ

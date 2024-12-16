@@ -4,7 +4,7 @@ import React from 'react';
 import './Layout.css';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleUser, faDesktop, faRightFromBracket, faTable, faUser, faUserGear } from '@fortawesome/free-solid-svg-icons';
+import { faCircleUser, faRightFromBracket, faTable, faUserGear } from '@fortawesome/free-solid-svg-icons';
 
 interface LayoutProps {
   children: React.ReactNode;

@@ -15,17 +15,36 @@ const Dashboard: React.FC = () => {
       }}
     >
       {/* Purple Header */}
-      <header
+     {/* Header with menu */}
+     <header
         style={{
           width: '100%',
           backgroundImage: 'linear-gradient(to bottom, #74045f 40%, #c7911b 100%)',
           padding: '20px 0',
-          textAlign: 'center',
-          fontSize: '24px',
-          fontWeight: 'bold',
         }}
       >
-        <img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" style={{width: "180px"}} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px' }}>
+          <img
+            src="src/assets/logo/PEA Logo on Violet.png"
+            alt="PEA Logo"
+            style={{ width: '180px', textAlign: 'left' }}
+          />
+
+          {/* Menu */}
+          <nav>
+            <ul style={{ listStyle: 'none', display: 'flex', margin: 0, padding: 0 }}>
+              <li style={{ margin: '0 15px' }}>
+                <a
+                  href="/login"
+                  style={{ textDecoration: 'none', color: 'white' }}
+                  className={location.pathname === "/login" ? "active-link" : ""}
+                >
+                  ออกจากระบบ
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </header>
 
       {/* Dashboard Content */}
@@ -53,21 +72,28 @@ const Dashboard: React.FC = () => {
             path="/borrowitem"
             icon="https://img2.pic.in.th/pic/borrowicon.md.png"
             title="ข้อมูลการยืมอุปกรณ์"
-            bgColor="#a0d8e4"
+            bgColor="#F2909D"
             iconSize="200px"
           />
           <DashboardItem
             path="/equipment-info"
             icon="https://img2.pic.in.th/pic/iconstock.png"
             title="ข้อมูลอุปกรณ์สำรอง"
-            bgColor="#bb96f7"
+            bgColor="#A2C0E6"
             iconSize="200px"
           />
           <DashboardItem
             path="/equipment-repair"
             icon="https://img2.pic.in.th/pic/pngtree-comicstyle-wrench-and-screwdriver-icon-on-white-background-vector-png-image_41876974-Photoroom.png"
             title="ข้อมูลอุปกรณ์ส่งซ่อม"
-            bgColor="#ffc684"
+            bgColor="#FFA780"
+            iconSize="200px"
+          />
+          <DashboardItem
+            path="/personal-info"
+            icon=""
+            title="จัดการข้อมูลผู้ใช้"
+            bgColor="#90C66E"
             iconSize="200px"
           />
         </div>
