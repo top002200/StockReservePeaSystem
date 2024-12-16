@@ -21,10 +21,12 @@ import {
 import { EquipmentData } from "../../interface/IEquipment";
 import { PictureData } from "../../interface/IPicture"; // Interface for pictures
 import Swal from "sweetalert2";
+import { TypeData } from "../../interface/IType";
+
 
 function Equipment_info() {
   const [equipmentData, setEquipmentData] = useState<EquipmentData[]>([]);
-  const [typeOptions, setTypeOptions] = useState<string[]>([]);
+  const [typeOptions, setTypeOptions] = useState<TypeData[]>([]);
   const [pictureOptions, setPictureOptions] = useState<PictureData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,24 +49,60 @@ function Equipment_info() {
 
   // Fetch initial data
   useEffect(() => {
-    const fetchData = async () => {
-        try {
-            const equipmentRes = await getAllEquipments();
-            if (equipmentRes.status) {
-                setEquipmentData(equipmentRes.data || []);
-            } else {
-                console.error("Error fetching equipment:", equipmentRes.message);
-            }
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        } finally {
-            setIsLoading(false);
+    const fetchDropdownData = async () => {
+      try {
+        const [typesResponse, picturesResponse] = await Promise.all([
+          getAllTypes(),
+          getAllPictures(),
+        ]);
+  
+        if (typesResponse.status && Array.isArray(typesResponse.data)) {
+          setTypeOptions(typesResponse.data as TypeData[]);
         }
+  
+        if (picturesResponse.status && Array.isArray(picturesResponse.data)) {
+          setPictureOptions(picturesResponse.data as PictureData[]);
+        }
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+      }
     };
-
-    fetchData();
-}, []);
-
+  
+    const fetchData = async () => {
+      try {
+        // เรียก API ทั้งหมดพร้อมกัน
+        const [equipmentRes, typesResponse, picturesResponse] = await Promise.all([
+          getAllEquipments(),
+          getAllTypes(),
+          getAllPictures(),
+        ]);
+  
+        // จัดการข้อมูลของอุปกรณ์
+        if (equipmentRes.status && Array.isArray(equipmentRes.data)) {
+          setEquipmentData(equipmentRes.data as EquipmentData[]);
+        } else {
+          console.error("Error fetching equipment:", equipmentRes.message);
+        }
+  
+        // จัดการข้อมูล Dropdown (ประเภทอุปกรณ์)
+        if (typesResponse.status && Array.isArray(typesResponse.data)) {
+          setTypeOptions(typesResponse.data as TypeData[]);
+        }
+  
+        // จัดการข้อมูล Dropdown (รูปภาพ)
+        if (picturesResponse.status && Array.isArray(picturesResponse.data)) {
+          setPictureOptions(picturesResponse.data as PictureData[]);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false); // ปิดสถานะ Loading
+      }
+    };
+  
+    fetchData(); // เรียกใช้ฟังก์ชัน fetchData
+    fetchDropdownData();
+  }, []);
 
   type FormControlElement =
     | HTMLInputElement
@@ -81,10 +119,12 @@ function Equipment_info() {
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  // Form input change handler
   const handleInputChange = (e: React.ChangeEvent<FormControlElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value, // บันทึกค่า `picture_data` หรืออื่นๆที่เลือกใน dropdown
+    }));
   };
 
   const handleEditRow = (item: EquipmentData) => {
@@ -211,9 +251,9 @@ function Equipment_info() {
             style={{ maxWidth: "300px" }}
           >
             <option value="">-- แสดงทั้งหมด --</option>
-            {typeOptions.map((type, index) => (
-              <option key={index} value={type}>
-                {type}
+            {typeOptions.map((type) => (
+              <option key={type.type_id} value={type.type_id}>
+                {type.type_name}
               </option>
             ))}
           </Form.Select>
@@ -303,9 +343,9 @@ function Equipment_info() {
                 onChange={handleInputChange}
               >
                 <option value="">-- เลือกประเภท --</option>
-                {typeOptions.map((type, index) => (
-                  <option key={index} value={type}>
-                    {type}
+                {typeOptions.map((type) => (
+                  <option key={type.type_id} value={type.type_id}>
+                    {type.type_name}
                   </option>
                 ))}
               </Form.Select>
@@ -350,20 +390,17 @@ function Equipment_info() {
               <Form.Label>เลือกรูปภาพ</Form.Label>
               <Form.Select
                 name="equip_img"
-                value={formData.equip_img || ""}
+                value={formData.equip_img}
                 onChange={handleInputChange}
               >
                 <option value="">-- เลือกรูปภาพ --</option>
-                {Array.isArray(pictureOptions) &&
-                  pictureOptions.map((picture) => (
-                    <option
-                      key={picture.picture_id}
-                      value={picture.picture_data}
-                    >
-                      รูปภาพ {picture.picture_id}
-                    </option>
-                  ))}
+                {pictureOptions.map((picture) => (
+                  <option key={picture.picture_id} value={picture.picture_data}>
+                    รูปภาพ {picture.picture_id}
+                  </option>
+                ))}
               </Form.Select>
+
               {formData.equip_img && (
                 <div className="mt-2 text-center">
                   <img

@@ -4,6 +4,7 @@ import { Table, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faFileDownload } from "@fortawesome/free-solid-svg-icons";
 import jsPDF from "jspdf";
+import backgroundImg from "../../assets/pdf/background.jpg"; // ใช้รูปที่แปลงจาก PDF
 import "jspdf-autotable";
 import { THSarabunFont } from "../../fonts/THSarabun"; // Import THSarabunFont
 
@@ -32,7 +33,10 @@ const Approval: React.FC = () => {
 
   const generatePDF = (userData: any) => {
     const doc = new jsPDF();
-
+      // เพิ่มรูปพื้นหลัง
+      const imgWidth = 210; // ความกว้างของหน้า PDF (A4)
+      const imgHeight = 297; // ความสูงของหน้า PDF (A4)
+      doc.addImage(backgroundImg, "JPEG", 0, 0, imgWidth, imgHeight);
     try {
       // ตรวจสอบฟอนต์
       console.log("THSarabunFont.normal:", THSarabunFont.normal);
@@ -54,7 +58,7 @@ const Approval: React.FC = () => {
       doc.text("คำขอยืมอุปกรณ์", 70, 20);
 
       // วาดกรอบหัวตาราง
-      doc.rect(10, 30, 190, 10);
+   
       doc.text("ลำดับที่", 12, 37);
       doc.text("ผู้ขอยืม", 40, 37);
       doc.text("รายการ", 90, 37);
@@ -62,7 +66,7 @@ const Approval: React.FC = () => {
 
       // เพิ่มข้อมูลในตาราง
       const startY = 40;
-      doc.rect(10, startY, 190, 10);
+     
       doc.text("1", 12, startY + 7);
       doc.text(userData.user_name || "-", 40, startY + 7);
       doc.text(

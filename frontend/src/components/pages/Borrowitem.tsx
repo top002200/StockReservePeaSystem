@@ -48,24 +48,42 @@ const Borrowitem: React.FC = () => {
 
   // Fetch Borrowed Equipment Data
   useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const [typesResponse, picturesResponse] = await Promise.all([
+          getAllTypes(), // ดึงข้อมูลประเภทอุปกรณ์
+          getAllPictures(), // ดึงข้อมูลรูปภาพ
+        ]);
+
+        // ตรวจสอบและตั้งค่า Type Options
+        if (typesResponse.status && Array.isArray(typesResponse.data)) {
+          setTypeOptions(typesResponse.data as TypeData[]);
+        }
+
+        // ตรวจสอบและตั้งค่า Picture Options
+        if (picturesResponse.status && Array.isArray(picturesResponse.data)) {
+          setPictureOptions(picturesResponse.data as PictureData[]);
+        }
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+      }
+    };
+
+    // เรียกใช้ฟังก์ชันใน useEffec
+
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await getAllBorrowedEquipments();
-        console.log("Response from API:", response);
-
-        // Correctly extract the array from the nested structure
+        console.log("API Response:", response);
         if (
           response.status &&
           response.data &&
           Array.isArray(response.data.data)
         ) {
-          setBorrowedEquipmentData(response.data.data); // Use the nested `data` field
-          console.log("Borrowed Equipment Data Updated:", response.data.data);
+          setBorrowedEquipmentData(response.data.data);
         } else {
-          console.error(
-            "Failed to fetch borrowed equipment:",
-            response.message
-          );
+          console.error("Invalid API data:", response);
         }
       } catch (error) {
         console.error("Error fetching borrowed equipment data:", error);
@@ -73,8 +91,8 @@ const Borrowitem: React.FC = () => {
         setIsLoading(false);
       }
     };
-
     fetchData();
+    fetchDropdownData();
   }, []);
 
   type FormControlElement =
@@ -90,8 +108,33 @@ const Borrowitem: React.FC = () => {
     }));
   };
 
+  const handleModalOpen = () => {
+    if (typeOptions.length === 0 || pictureOptions.length === 0) {
+      const fetchDropdownData = async () => {
+        try {
+          const [typesResponse, picturesResponse] = await Promise.all([
+            getAllTypes(),
+            getAllPictures(),
+          ]);
+
+          if (typesResponse.status && Array.isArray(typesResponse.data)) {
+            setTypeOptions(typesResponse.data);
+          }
+
+          if (picturesResponse.status && Array.isArray(picturesResponse.data)) {
+            setPictureOptions(picturesResponse.data);
+          }
+        } catch (error) {
+          console.error("Error fetching dropdown data:", error);
+        }
+      };
+
+      fetchDropdownData();
+    }
+    setShowModal(true);
+  };
   const handleSubmit = async () => {
-    console.log("Form Data:", formData); // แสดงข้อมูลใน formData ก่อนส่งไปยัง API
+    console.log("Form Data:", formData);
 
     if (
       !formData.equipment_name ||
@@ -111,14 +154,13 @@ const Borrowitem: React.FC = () => {
 
     try {
       if (isEdit && editingId !== null) {
-        console.log("Updating borrowed equipment with ID:", editingId);
         await updateBorrowedEquipment(editingId.toString(), formData);
         Swal.fire("สำเร็จ", "แก้ไขข้อมูลสำเร็จ", "success");
       } else {
-        console.log("Creating new borrowed equipment:", formData);
         await createBorrowedEquipment(formData);
         Swal.fire("สำเร็จ", "เพิ่มข้อมูลสำเร็จ", "success");
       }
+
       setShowModal(false);
       setFormData({
         equipment_name: "",
@@ -130,14 +172,19 @@ const Borrowitem: React.FC = () => {
         equip_img: "",
       });
 
-      const updatedData = await getAllBorrowedEquipments();
-      if (updatedData.status) {
-        console.log("Updated Borrowed Equipment Data:", updatedData.data);
-        setBorrowedEquipmentData(updatedData.data);
+      // โหลดข้อมูลใหม่
+      setIsLoading(true);
+      const response = await getAllBorrowedEquipments();
+      if (response.status && Array.isArray(response.data.data)) {
+        setBorrowedEquipmentData(response.data.data);
+      } else {
+        console.error("API response invalid:", response);
       }
     } catch (error) {
       console.error("Error saving borrowed equipment:", error);
       Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -197,7 +244,7 @@ const Borrowitem: React.FC = () => {
           <b>ข้อมูลอุปกรณ์ที่ยืม</b>
         </h3>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <Button variant="success" onClick={() => setShowModal(true)}>
+          <Button variant="success" onClick={handleModalOpen}>
             <FontAwesomeIcon icon={faPlus} />
           </Button>
         </div>
@@ -354,7 +401,7 @@ const Borrowitem: React.FC = () => {
               <Form.Label>เลือกรูปภาพ</Form.Label>
               <Form.Select
                 name="equip_img"
-                value={formData.equip_img || ""}
+                value={formData.equip_img}
                 onChange={handleInputChange}
               >
                 <option value="">-- เลือกรูปภาพ --</option>
