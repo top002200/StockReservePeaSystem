@@ -1,7 +1,8 @@
 // src/pages/Dashboard.tsx
 import React from 'react';
 import DashboardItem from '../Layout/DashboardItem';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 const Dashboard: React.FC = () => {
   return (
@@ -39,7 +40,7 @@ const Dashboard: React.FC = () => {
                   style={{ textDecoration: 'none', color: 'white' }}
                   className={location.pathname === "/login" ? "active-link" : ""}
                 >
-                  ออกจากระบบ
+                  <FontAwesomeIcon icon={faRightFromBracket} style={{ color: '#fefcff', paddingRight: 5 }} />ออกจากระบบ
                 </a>
               </li>
             </ul>
@@ -91,7 +92,7 @@ const Dashboard: React.FC = () => {
           />
           <DashboardItem
             path="/personal-info"
-            icon=""
+            icon="https://img2.pic.in.th/pic/team7d8b8f2a42525b4a.md.png"
             title="จัดการข้อมูลผู้ใช้"
             bgColor="#90C66E"
             iconSize="200px"
