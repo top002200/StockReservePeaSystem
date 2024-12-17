@@ -143,8 +143,8 @@ function Equipment_info() {
 
   const handleDeleteRow = async (id: number) => {
     Swal.fire({
-      title: "ยืนยันการลบ?",
-      text: "คุณต้องการลบข้อมูลนี้หรือไม่?",
+      title: "ต้องการลบข้อมูลนี้หรือไม่?",
+      text: "ยืนยันการลบ",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -156,7 +156,13 @@ function Equipment_info() {
         try {
           const response = await deleteEquipment(id.toString());
           if (response.status) {
-            Swal.fire("ลบข้อมูลสำเร็จ!", "", "success");
+            Swal.fire({
+                        icon: "success",
+                        title: "สำเร็จ",
+                        text: "ลบข้อมูลสำเร็จ", // Alert สำหรับการแก้ไขสำเร็จ
+                        showConfirmButton: false,
+                        timer: 2000, // ปิดอัตโนมัติใน 2 วินาที
+                      });
             const updatedData = await getAllEquipments();
             if (updatedData.status) setEquipmentData(updatedData.data);
           } else {

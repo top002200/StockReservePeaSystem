@@ -145,7 +145,7 @@ const Borrowitem: React.FC = () => {
   };
   const handleSubmit = async () => {
     console.log("Form Data:", formData);
-  
+
     if (
       !formData.equipment_name ||
       !formData.equipment_type ||
@@ -161,16 +161,29 @@ const Borrowitem: React.FC = () => {
       });
       return;
     }
-  
+
     try {
       if (isEdit && editingId !== null) {
         await updateBorrowedEquipment(editingId.toString(), formData);
-        Swal.fire("สำเร็จ", "แก้ไขข้อมูลสำเร็จ", "success");
+        Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "แก้ไขข้อมูลสำเร็จ", // Alert สำหรับการแก้ไขสำเร็จ
+          showConfirmButton: false,
+          timer: 2000, // ปิดอัตโนมัติใน 2 วินาที
+        });
       } else {
         await createBorrowedEquipment(formData);
-        Swal.fire("สำเร็จ", "เพิ่มข้อมูลสำเร็จ", "success");
+        Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "เพิ่มข้อมูลสำเร็จ", // Alert สำหรับการเพิ่มข้อมูลสำเร็จ
+          showConfirmButton: false,
+          timer: 2000, // ปิดอัตโนมัติใน 2 วินาที
+        });
       }
-  
+
+
       // Reset form and close modal
       setShowModal(false);
       setFormData({
@@ -183,7 +196,7 @@ const Borrowitem: React.FC = () => {
         equip_img: "",
       });
       setIsEdit(false);
-  
+
       // Reload data
       setIsLoading(true);
       const response = await getAllBorrowedEquipments();
@@ -199,7 +212,7 @@ const Borrowitem: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
+
 
   const handleEditRow = (item: BorrowedEquipmentData) => {
     setEditingId(item.borrowed_equipment_id || null);
@@ -210,8 +223,8 @@ const Borrowitem: React.FC = () => {
 
   const handleDeleteRow = async (id: number) => {
     Swal.fire({
-      title: "ยืนยันการลบ?",
-      text: "คุณต้องการลบข้อมูลนี้หรือไม่?",
+      title: "ต้องการลบข้อมูลนี้หรือไม่?",
+      text: "ยืนยันการลบ",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -222,7 +235,13 @@ const Borrowitem: React.FC = () => {
       if (result.isConfirmed) {
         try {
           await deleteBorrowedEquipment(id.toString());
-          Swal.fire("ลบข้อมูลสำเร็จ!", "", "success");
+          Swal.fire({
+            icon: "success",
+            title: "สำเร็จ",
+            text: "ลบข้อมูลสำเร็จ", // Alert สำหรับการแก้ไขสำเร็จ
+            showConfirmButton: false,
+            timer: 2000, // ปิดอัตโนมัติใน 2 วินาที
+          });
 
           // อัปเดตรายการใน state โดยกรองเอารายการที่ลบออก
           setBorrowedEquipmentData((prevData) =>
