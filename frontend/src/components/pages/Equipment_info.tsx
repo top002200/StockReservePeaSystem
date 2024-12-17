@@ -55,11 +55,11 @@ function Equipment_info() {
           getAllTypes(),
           getAllPictures(),
         ]);
-  
+
         if (typesResponse.status && Array.isArray(typesResponse.data)) {
           setTypeOptions(typesResponse.data as TypeData[]);
         }
-  
+
         if (picturesResponse.status && Array.isArray(picturesResponse.data)) {
           setPictureOptions(picturesResponse.data as PictureData[]);
         }
@@ -67,7 +67,7 @@ function Equipment_info() {
         console.error("Error fetching dropdown data:", error);
       }
     };
-  
+
     const fetchData = async () => {
       try {
         // เรียก API ทั้งหมดพร้อมกัน
@@ -76,19 +76,19 @@ function Equipment_info() {
           getAllTypes(),
           getAllPictures(),
         ]);
-  
+
         // จัดการข้อมูลของอุปกรณ์
         if (equipmentRes.status && Array.isArray(equipmentRes.data)) {
           setEquipmentData(equipmentRes.data as EquipmentData[]);
         } else {
           console.error("Error fetching equipment:", equipmentRes.message);
         }
-  
+
         // จัดการข้อมูล Dropdown (ประเภทอุปกรณ์)
         if (typesResponse.status && Array.isArray(typesResponse.data)) {
           setTypeOptions(typesResponse.data as TypeData[]);
         }
-  
+
         // จัดการข้อมูล Dropdown (รูปภาพ)
         if (picturesResponse.status && Array.isArray(picturesResponse.data)) {
           setPictureOptions(picturesResponse.data as PictureData[]);
@@ -99,7 +99,7 @@ function Equipment_info() {
         setIsLoading(false); // ปิดสถานะ Loading
       }
     };
-  
+
     fetchData(); // เรียกใช้ฟังก์ชัน fetchData
     fetchDropdownData();
   }, []);
@@ -234,6 +234,7 @@ function Equipment_info() {
     }
   };
 
+
   return (
     <Info_Layout>
       <div className="equipment-info-content">
@@ -260,11 +261,23 @@ function Equipment_info() {
 
           <Button
             variant="success"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setFormData({
+                equipment_type: "",
+                equipment_brand: "",
+                equipment_model: "",
+                equip_contract: "",
+                equip_assetcode: "",
+                equip_img: "",
+              }); // Reset formData
+              setIsEdit(false); // Indicate Add Mode
+              setShowModal(true); // Open the Modal
+            }}
             style={{ width: "40px", height: "40px" }}
           >
             <FontAwesomeIcon icon={faPlus} />
           </Button>
+
         </div>
 
         <Table bordered hover responsive>

@@ -131,11 +131,21 @@ const Borrowitem: React.FC = () => {
 
       fetchDropdownData();
     }
+    setFormData({
+      equipment_name: "",
+      equipment_type: "",
+      equipment_brand: "",
+      equipment_model: "",
+      equip_contract: "",
+      equip_assetcode: "",
+      equip_img: "",
+    });
+    setIsEdit(false); // รีเซ็ตสถานะแก้ไข
     setShowModal(true);
   };
   const handleSubmit = async () => {
     console.log("Form Data:", formData);
-
+  
     if (
       !formData.equipment_name ||
       !formData.equipment_type ||
@@ -151,7 +161,7 @@ const Borrowitem: React.FC = () => {
       });
       return;
     }
-
+  
     try {
       if (isEdit && editingId !== null) {
         await updateBorrowedEquipment(editingId.toString(), formData);
@@ -160,7 +170,8 @@ const Borrowitem: React.FC = () => {
         await createBorrowedEquipment(formData);
         Swal.fire("สำเร็จ", "เพิ่มข้อมูลสำเร็จ", "success");
       }
-
+  
+      // Reset form and close modal
       setShowModal(false);
       setFormData({
         equipment_name: "",
@@ -171,8 +182,9 @@ const Borrowitem: React.FC = () => {
         equip_assetcode: "",
         equip_img: "",
       });
-
-      // โหลดข้อมูลใหม่
+      setIsEdit(false);
+  
+      // Reload data
       setIsLoading(true);
       const response = await getAllBorrowedEquipments();
       if (response.status && Array.isArray(response.data.data)) {
@@ -187,6 +199,7 @@ const Borrowitem: React.FC = () => {
       setIsLoading(false);
     }
   };
+  
 
   const handleEditRow = (item: BorrowedEquipmentData) => {
     setEditingId(item.borrowed_equipment_id || null);
@@ -210,7 +223,7 @@ const Borrowitem: React.FC = () => {
         try {
           await deleteBorrowedEquipment(id.toString());
           Swal.fire("ลบข้อมูลสำเร็จ!", "", "success");
-          
+
           // อัปเดตรายการใน state โดยกรองเอารายการที่ลบออก
           setBorrowedEquipmentData((prevData) =>
             prevData.filter((item) => item.borrowed_equipment_id !== id)
@@ -222,7 +235,7 @@ const Borrowitem: React.FC = () => {
       }
     });
   };
-  
+
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -247,7 +260,7 @@ const Borrowitem: React.FC = () => {
         >
           <b>ข้อมูลอุปกรณ์ที่ยืม</b>
         </h3>
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-end align-items-center mb-3">
           <Button variant="success" onClick={handleModalOpen}>
             <FontAwesomeIcon icon={faPlus} />
           </Button>
@@ -333,7 +346,19 @@ const Borrowitem: React.FC = () => {
         </Pagination>
       </div>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      <Modal show={showModal} onHide={() => {
+        setShowModal(false);
+        setFormData({
+          equipment_name: "",
+          equipment_type: "",
+          equipment_brand: "",
+          equipment_model: "",
+          equip_contract: "",
+          equip_assetcode: "",
+          equip_img: "",
+        });
+        setIsEdit(false); // รีเซ็ตสถานะแก้ไขเมื่อปิด
+      }} centered>
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}</Modal.Title>
         </Modal.Header>
