@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRightFromBracket, faUserGear, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faRightFromBracket, faUserGear, faUsersGear } from '@fortawesome/free-solid-svg-icons';
 
 const Personal_info: React.FC = () => {
   const initialData = {
@@ -77,7 +77,7 @@ const Personal_info: React.FC = () => {
                   style={{ textDecoration: 'none', color: 'white' }}
                   className={location.pathname === "/user-management" ? "active-link" : ""}
                 >
-                  <FontAwesomeIcon icon={faUsers} style={{ color: '#fefcff', paddingRight: 5 }} />ข้อมูลผู้ใช้งาน
+                  <FontAwesomeIcon icon={faUsersGear} style={{ color: '#fefcff', paddingRight: 5 }} />ข้อมูลผู้ใช้งาน
                 </a>
               </li>
             </ul>

@@ -4,7 +4,7 @@ import React from 'react';
 import './Layout.css';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleUser, faRightFromBracket, faTable, faUserGear } from '@fortawesome/free-solid-svg-icons';
+import { faCheckToSlot, faCircleUser, faComputer, faRightFromBracket, faUserGear } from '@fortawesome/free-solid-svg-icons';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -24,7 +24,11 @@ const Info_Layout: React.FC<LayoutProps> = ({ children }) => {
         <ul className="nav nav-pills flex-column">
           <li className='nav-item'>
             <Link to="/equipment-info" className={`nav-link ${location.pathname === '/equipment-info' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลอุปกรณ์สำรอง</Link>
+              <FontAwesomeIcon icon={faComputer} style={{ color: '#fefcff', paddingRight: 10, width: '19px' }} />ข้อมูลอุปกรณ์สำรอง</Link>
+          </li>
+          <li className='nav-item'>
+            <Link to="/distribution" className={`nav-link ${location.pathname === '/distribution' ? 'active' : ''}`}>
+              <FontAwesomeIcon icon={faCheckToSlot} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลการจำหน่าย</Link>
           </li>
         </ul>
         <div className='footer equip'>

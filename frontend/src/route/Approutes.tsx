@@ -16,6 +16,7 @@ import Personal_info from "../components/pages/Personal_info";
 import User_DB from "../components/pages/User_DB";
 import Approval_Status from "../components/pages/Approval_Status";
 import Login from "../components/pages/Login";
+import Distribution from "../components/pages/Distribution";
 
 
 export default function AppRoutes() {
@@ -32,6 +33,7 @@ export default function AppRoutes() {
         <Route path="/equipment-info" element={<Equipment_info />} />
         <Route path="/equipment-repair" element={<Equipment_Repair />} />
         <Route path="/personal-info" element={<Personal_info />} />
+        <Route path="/distribution" element={<Distribution />} />
 
         {/* User */}
         <Route path="/user-dashboard" element={<User_DB />} />

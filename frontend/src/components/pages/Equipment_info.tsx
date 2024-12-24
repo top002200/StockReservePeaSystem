@@ -294,8 +294,8 @@ function Equipment_info() {
               <th>รูปภาพ</th>
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
-              <th>เลขที่สัญญา</th>
-              <th>รหัสทรัพย์สิน</th>
+             {/* <th>เลขที่สัญญา</th>
+              <th>รหัสทรัพย์สิน</th>*/}
               <th style={{ width: 150 }}></th>
             </tr>
           </thead>
@@ -313,8 +313,8 @@ function Equipment_info() {
                 </td>
                 <td>{item.equipment_brand}</td>
                 <td>{item.equipment_model}</td>
-                <td>{item.equip_contract}</td>
-                <td>{item.equip_assetcode}</td>
+               {/*} <td>{item.equip_contract}</td>
+                <td>{item.equip_assetcode}</td> */}
                 <td>
                   <Button
                     variant="outline-primary"

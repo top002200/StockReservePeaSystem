@@ -2,8 +2,8 @@
 import React from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashCan, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { faRightFromBracket, faUserGear, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashCan, faPlus, faUsersGear } from '@fortawesome/free-solid-svg-icons';
+import { faRightFromBracket, faUserGear } from '@fortawesome/free-solid-svg-icons';
 
 
 const User_Managment: React.FC = () => {
@@ -51,7 +51,7 @@ const User_Managment: React.FC = () => {
                         style={{ textDecoration: 'none', color: 'white' }}
                         className={location.pathname === "/user-management" ? "active-link" : ""}
                       >
-                        <FontAwesomeIcon icon={faUsers} style={{ color: '#fefcff', paddingRight: 5 }} />ข้อมูลผู้ใช้งาน
+                        <FontAwesomeIcon icon={faUsersGear} style={{ color: '#fefcff', paddingRight: 5 }} />ข้อมูลผู้ใช้งาน
                       </a>
                     </li>
                   </ul>
