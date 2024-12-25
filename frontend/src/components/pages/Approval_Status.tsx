@@ -23,6 +23,12 @@ const Approval_Status: React.FC = () => {
             type: 'Monitor',
             quantity: '1',
             status: 'ไม่อนุมัติ'
+        },
+        {
+            id: 4,
+            type: 'Monitor',
+            quantity: '1',
+            status: 'คืนแล้ว'
         }
     ];
 
@@ -34,6 +40,8 @@ const Approval_Status: React.FC = () => {
                 return 'text-danger'; // Red
             case 'รอการอนุมัติ':
                 return 'text-warning'; // Yellow
+            case 'คืนแล้ว':
+                return 'text-muted'; // gray
             default:
                 return '';
         }

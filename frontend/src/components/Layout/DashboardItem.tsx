@@ -17,12 +17,12 @@ const DashboardItem: React.FC<DashboardItemProps> = ({ path, icon, title, bgColo
     <div
       onClick={() => navigate(path)} // Navigate to the path when clicked
       style={{
-        backgroundColor: bgColor,
+        background: bgColor,
         padding: '20px',
         borderRadius: '12px',
         textAlign: 'center',
-        width: '450px',
-        height: '350px',
+        width: '300px',
+        height: '300px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -64,7 +64,7 @@ const DashboardItem: React.FC<DashboardItemProps> = ({ path, icon, title, bgColo
       <p
         style={{
           margin: '10px 0 0',
-          fontSize: '32px',
+          fontSize: '25px',
           fontWeight: 'bold',
           color: '#ffffff',
           textAlign: 'center',

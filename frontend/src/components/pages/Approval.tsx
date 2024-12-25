@@ -16,7 +16,7 @@ const Approval: React.FC = () => {
       user_name: "นางสาวxxx xxxx",
       b_item: "Notebook",
       quantity: "1",
-      note: "xxxxxxxxxxxxxxxxxxxx",
+      status: "อนุมัติ",
     },
     {
       id: 2,
@@ -24,7 +24,23 @@ const Approval: React.FC = () => {
       user_name: "นางสาวxxx xxxx",
       b_item: "Wireless Mouse",
       quantity: "1",
-      note: "xxxxxxxxxxxxxxxxxxxx",
+      status: "ไม่อนุมัติ",
+    },
+    {
+      id: 3,
+      user_id: "543210",
+      user_name: "นางสาวxxx xxxx",
+      b_item: "Wireless Mouse",
+      quantity: "1",
+      status: "รอการอนุมัติ",
+    },
+    {
+      id: 4,
+      user_id: "543210",
+      user_name: "นางสาวxxx xxxx",
+      b_item: "Wireless Mouse",
+      quantity: "1",
+      status: "คืนแล้ว",
     },
   ];
 
@@ -94,6 +110,21 @@ const Approval: React.FC = () => {
     }
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'อนุมัติ':
+            return 'text-success'; // Green
+        case 'ไม่อนุมัติ':
+            return 'text-danger'; // Red
+        case 'รอการอนุมัติ':
+            return 'text-warning'; // Yellow
+        case 'คืนแล้ว':
+            return 'text-muted'; // gray
+        default:
+            return '';
+    }
+};
+
   return (
     <Layout>
       <div className="approval-content">
@@ -110,7 +141,7 @@ const Approval: React.FC = () => {
               <th>ผู้ขอยืม</th>
               <th>เลขประจำตัวพนักงาน</th>
               <th>รายการ</th>
-              <th>หมายเหตุ</th>
+              <th>สถานะ</th>
               <th style={{ width: 200 }}></th>
             </tr>
           </thead>
@@ -123,7 +154,7 @@ const Approval: React.FC = () => {
                 <td className="align-middle text-left">
                   {item.b_item} : {item.quantity}
                 </td>
-                <td className="align-middle text-left">{item.note}</td>
+                <td className={getStatusColor(item.status)} style={{alignContent:'center', textAlign:'center'}}>{item.status}</td>
                 <td className="align-middle text-center">
                   <Button
                     variant="outline-primary"

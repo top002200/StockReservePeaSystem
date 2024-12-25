@@ -24,7 +24,7 @@ const Info_Layout: React.FC<LayoutProps> = ({ children }) => {
         <ul className="nav nav-pills flex-column">
           <li className='nav-item'>
             <Link to="/equipment-info" className={`nav-link ${location.pathname === '/equipment-info' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faComputer} style={{ color: '#fefcff', paddingRight: 10, width: '19px' }} />ข้อมูลอุปกรณ์สำรอง</Link>
+              <FontAwesomeIcon icon={faComputer} style={{ color: '#fefcff', paddingRight: 10, width: '19px' }} />อุปกรณ์สำรอง</Link>
           </li>
           <li className='nav-item'>
             <Link to="/distribution" className={`nav-link ${location.pathname === '/distribution' ? 'active' : ''}`}>

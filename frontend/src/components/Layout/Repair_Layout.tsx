@@ -24,7 +24,7 @@ const Repair_Layout: React.FC<LayoutProps> = ({ children }) => {
         <ul className="nav nav-pills flex-column">
           <li className='nav-item'>
             <Link to="/equipment-repair" className={`nav-link ${location.pathname === '/equipment-repair' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 6 }} />ข้อมูลอุปกรณ์ส่งซ่อม</Link>
+              <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 6 }} />อุปกรณ์ส่งซ่อม</Link>
           </li>
         </ul>
         <div className='footer equip'>

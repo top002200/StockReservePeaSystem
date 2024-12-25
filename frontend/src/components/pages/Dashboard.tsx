@@ -74,28 +74,28 @@ const Dashboard: React.FC = () => {
             icon="https://img2.pic.in.th/pic/borrowicon.md.png"
             title="ข้อมูลการยืมอุปกรณ์"
             bgColor="#F2909D"
-            iconSize="200px"
+            iconSize="150px"
           />
           <DashboardItem
             path="/equipment-info"
             icon="https://img2.pic.in.th/pic/iconstock.png"
             title="ข้อมูลอุปกรณ์สำรอง"
             bgColor="#A2C0E6"
-            iconSize="200px"
+            iconSize="150px"
           />
           <DashboardItem
             path="/equipment-repair"
             icon="https://img2.pic.in.th/pic/pngtree-comicstyle-wrench-and-screwdriver-icon-on-white-background-vector-png-image_41876974-Photoroom.png"
             title="ข้อมูลอุปกรณ์ส่งซ่อม"
             bgColor="#FFA780"
-            iconSize="200px"
+            iconSize="150px"
           />
           <DashboardItem
             path="/personal-info"
-            icon="https://img2.pic.in.th/pic/team7d8b8f2a42525b4a.md.png"
+            icon="https://img2.pic.in.th/pic/setting58c7ca34f4b6809d.md.png"
             title="จัดการข้อมูลผู้ใช้"
             bgColor="#90C66E"
-            iconSize="200px"
+            iconSize="150px"
           />
         </div>
       </div>
