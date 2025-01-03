@@ -5,6 +5,7 @@ import { BrandData } from "../interface/IBrand";
 import { ModelData } from "../interface/IModel";
 import { TypeData } from "../interface/IType";
 import { BorrowedEquipmentData } from "../interface/IBorrowedEquipment";
+import { RepairData } from "../interface/IRepair";
 
 // const apiURL = "http://localhost:8080";
 const apiURL = "http://localhost:8080";
@@ -658,6 +659,193 @@ async function deleteBorrowedEquipment(borrowedEquipmentId: string) {
     return { status: false, message: "An unexpected error occurred" };
   }
 }
+async function createRepair(data: RepairData) {
+  try {
+    const response = await fetch(`${apiURL}/repair`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to create repair",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error creating repair:", error);
+    return { status: false, message: error.message || "An error occurred" };
+  }
+}
+
+// Get All Repairs
+async function getAllRepairs() {
+  try {
+    const response = await fetch(`${apiURL}/repairs`, { method: "GET" });
+
+    if (response.ok) {
+      const jsonData = await response.json();
+      return { status: true, data: jsonData.data }; // Extract 'data' field
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch repairs",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching repairs:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Get Repair by ID
+async function getRepairById(repairId: string) {
+  try {
+    const response = await fetch(`${apiURL}/repair/${repairId}`, {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch repair",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching repair by ID:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Update Repair
+async function updateRepair(repairId: string, data: RepairData) {
+  try {
+    const response = await fetch(`${apiURL}/repair/${repairId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to update repair",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error updating repair:", error);
+    return { status: false, message: error.message || "An error occurred" };
+  }
+}
+
+// Delete Repair
+async function deleteRepair(repairId: string) {
+  try {
+    const response = await fetch(`${apiURL}/repair/${repairId}`, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      return { status: true, message: "Repair deleted successfully" };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to delete repair",
+      };
+    }
+  } catch (error) {
+    console.error("Error deleting repair:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Mark Repair as Completed
+async function completeRepair(repairId: string) {
+  try {
+    const response = await fetch(`${apiURL}/repair/${repairId}/complete`, {
+      method: "POST",
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to mark repair as completed",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error marking repair as completed:", error);
+    return { status: false, message: error.message || "An error occurred" };
+  }
+}
+
+// Get Completed Repairs
+async function getCompletedRepairs() {
+  try {
+    const response = await fetch(`${apiURL}/repairs/completed`, {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch completed repairs",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching completed repairs:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Get Repairs by Equipment
+async function getRepairsByEquipment(equipmentId: string) {
+  try {
+    const response = await fetch(`${apiURL}/repairs/equipment/${equipmentId}`, {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch repairs for equipment",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching repairs for equipment:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
 export {
   createAdmin,
   getAllAdmins,
@@ -686,4 +874,12 @@ export {
   getBorrowedEquipmentById,
   updateBorrowedEquipment,
   deleteBorrowedEquipment,
+  createRepair,
+  getAllRepairs,
+  getRepairById,
+  updateRepair,
+  deleteRepair,
+  completeRepair,
+  getCompletedRepairs,
+  getRepairsByEquipment,
 };

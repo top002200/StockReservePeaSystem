@@ -1,4 +1,3 @@
-// config/database.go
 package config
 
 import (
@@ -40,6 +39,7 @@ func InitDatabase() {
 		&models.Type{}, 
 		&models.Picture{},
 		&models.BorrowedEquipment{},
+		&models.Repair{}, // Added Repair model for migration
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database schema:", err)

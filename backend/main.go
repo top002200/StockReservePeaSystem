@@ -80,6 +80,13 @@ func main() {
 		protectedRoutes.GET("/picture/:id", controllers.GetPictureByID)
 		protectedRoutes.GET("/pictures", controllers.GetAllPictures)
 		protectedRoutes.DELETE("/picture/:id", controllers.DeletePicture)
+
+		// Repair routes - Added for managing repairs
+		protectedRoutes.POST("/repair", controllers.CreateRepair)
+		protectedRoutes.GET("/repair/:id", controllers.GetRepairByID)
+		protectedRoutes.GET("/repairs", controllers.GetAllRepairs)
+		protectedRoutes.PUT("/repair/:id", controllers.UpdateRepair)
+		protectedRoutes.DELETE("/repair/:id", controllers.DeleteRepair)
 	}
 
 	// Determine the port to run on

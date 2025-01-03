@@ -9,6 +9,7 @@ type Repair struct {
 	UserName   string    `json:"user_name"`
 	Department string    `json:"dept"`
 	Type       string    `json:"type"`
+	DeviceName string    `json:"device_name"`
 	Brand      string    `json:"brand"`
 	Model      string    `json:"model"`
 	Contract   string    `json:"contract"`
