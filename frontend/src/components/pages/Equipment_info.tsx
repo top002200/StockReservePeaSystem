@@ -8,7 +8,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrashCan, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faTrashCan, faPlus, faArrowRightToBracket, faArrowUpRightFromSquare, faArrowRightFromBracket, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import Info_Layout from "../Layout/info_Layout";
 import {
   getAllEquipments,
@@ -58,51 +58,51 @@ function Equipment_info() {
       [name]: value,
     }));
   };
- 
 
-  
+
+
   const handleSubmitPaid = async () => {
     const equipmentIdPaid = parseInt(formDataPaid.equipment_id, 10);
-  
+
     // ตรวจสอบว่า equipmentIdPaid เป็นตัวเลขที่ถูกต้อง
     if (isNaN(equipmentIdPaid)) {
       alert("รหัสอุปกรณ์ไม่ถูกต้อง");
       return;
     }
-  
+
     // ค้นหาข้อมูลอุปกรณ์จาก equipmentData ตาม ID ที่เลือก
     const selectedEquipment = equipmentData.find(
       (item: EquipmentData) => item.equipment_id === equipmentIdPaid
     );
-  
+
     if (!selectedEquipment) {
       alert('ไม่พบอุปกรณ์ที่เลือก');
       return;
     }
-  
+
     // แปลง equip_contract จาก string เป็น number
     const availableAmount = parseInt(selectedEquipment.equip_contract, 10);
-  
+
     // Convert formDataPaid.amount to a number
     const amountToReduce = parseInt(formDataPaid.amount, 10);
-  
+
     if (isNaN(amountToReduce)) {
       alert("กรุณากรอกจำนวนที่ถูกต้อง");
       return;
     }
-  
+
     if (amountToReduce > availableAmount) {
       alert('คุณใส่จำนวนเกิน Stock อุปกรณ์');
     } else {
       // ลดจำนวนใน equip_contract
       selectedEquipment.equip_contract = (availableAmount - amountToReduce).toString();
-  
+
       // เรียกใช้ updateEquipment API เพื่ออัปเดตข้อมูลในฐานข้อมูล
       const result = await updateEquipment(
         String(selectedEquipment.equipment_id),  // Convert to string
         selectedEquipment
       );
-  
+
       if (result.status) {
         alert("ข้อมูลถูกอัปเดตสำเร็จ");
         setShowModalPaid(false);
@@ -118,7 +118,7 @@ function Equipment_info() {
     }
   };
 
-  
+
 
   // Toggle ModalPaid visibility
   const ModalPaid = (equipment_id?: number | undefined) => setShowModalPaid(true);
@@ -380,6 +380,7 @@ function Equipment_info() {
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
               <th>จำนวน</th> {/* เพิ่มเลขที่สัญญา */}
+              <th>จำหน่าย</th>
               <th style={{ width: 150 }}></th>
             </tr>
           </thead>
@@ -400,6 +401,15 @@ function Equipment_info() {
                 <td>{item.equip_contract}</td> {/* เพิ่มการแสดงเลขที่สัญญา */}
                 <td>
                   <Button
+                    variant="outline-warning"
+                    className="me-2"
+                    onClick={() => ModalPaid(item.equipment_id)} // ส่ง equipment_id ไปที่ ModalPaid
+                  >
+                    <FontAwesomeIcon icon={faArrowUp} />{" "}
+                  </Button>
+                </td>
+                <td>
+                  <Button
                     variant="outline-primary"
                     className="me-2"
                     onClick={() => handleEditRow(item)}
@@ -408,15 +418,10 @@ function Equipment_info() {
                   </Button>
                   <Button
                     variant="outline-danger"
+                    className="me-2"
                     onClick={() => handleDeleteRow(item.equipment_id ?? 0)}
                   >
                     <FontAwesomeIcon icon={faTrashCan} />
-                  </Button>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => ModalPaid(item.equipment_id)} // ส่ง equipment_id ไปที่ ModalPaid
-                  >
-                    <FontAwesomeIcon icon={faPlus} />{" "}
                   </Button>
                 </td>
               </tr>
@@ -437,6 +442,7 @@ function Equipment_info() {
         </Pagination>
       </div>
 
+      {/* Distrib Modal */}
       <Modal
         show={showModalPaid}
         onHide={() => setShowModalPaid(false)}
@@ -474,6 +480,7 @@ function Equipment_info() {
                 type="number"
                 name="amount"
                 value={formDataPaid.amount}
+                max={formData.equip_contract}
                 onChange={handleInputChangePaid}
                 placeholder="กรุณากรอกจำนวน"
               />

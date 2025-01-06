@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Info_Layout from '../Layout/info_Layout';
 import { Button, Modal, Table, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 const Distribution: React.FC = () => {
     const [isEdit, setIsEdit] = useState(false);
@@ -66,15 +66,6 @@ const Distribution: React.FC = () => {
                 >
                     <b>ข้อมูลการจำหน่ายอุปกรณ์</b>
                 </h3>
-                <div className="d-flex justify-content-end align-items-center mb-3">
-                    <Button
-                        variant="success"
-                        style={{ width: "40px", height: "40px" }}
-                        onClick={() => handleOpenModal(false)}
-                    >
-                        <FontAwesomeIcon icon={faPlus} />
-                    </Button>
-                </div>
 
                 <Table bordered hover responsive>
                     <thead>
@@ -99,6 +90,7 @@ const Distribution: React.FC = () => {
                                     <br />
                                     รุ่น : {item.equipment_model}
                                     <br />
+                                    จำนวน :
                                 </td>
                                 <td className="align-middle text-center">{item.receiver}</td>
                                 <td className="align-middle text-center">{item.date}</td>
