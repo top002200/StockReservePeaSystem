@@ -6,7 +6,7 @@ type Equipment struct {
 	Type          string       `json:"equipment_type"`
 	Brand         string       `json:"equipment_brand"`
 	Model         string       `json:"equipment_model"`
-	Contract      string       `json:"equip_contract"`
+	Amount      int       `json:"equip_amount"`
 	AssetCode     string       `json:"equip_assetcode"`
 	EquipmentImg  string       `json:"equip_img"`
 

@@ -8,7 +8,15 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrashCan, faPlus, faArrowRightToBracket, faArrowUpRightFromSquare, faArrowRightFromBracket, faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrashCan,
+  faPlus,
+  faArrowRightToBracket,
+  faArrowUpRightFromSquare,
+  faArrowRightFromBracket,
+  faArrowUp,
+} from "@fortawesome/free-solid-svg-icons";
 import Info_Layout from "../Layout/info_Layout";
 import {
   getAllEquipments,
@@ -59,8 +67,6 @@ function Equipment_info() {
     }));
   };
 
-
-
   const handleSubmitPaid = async () => {
     const equipmentIdPaid = parseInt(formDataPaid.equipment_id, 10);
 
@@ -76,12 +82,12 @@ function Equipment_info() {
     );
 
     if (!selectedEquipment) {
-      alert('ไม่พบอุปกรณ์ที่เลือก');
+      alert("ไม่พบอุปกรณ์ที่เลือก");
       return;
     }
 
     // แปลง equip_contract จาก string เป็น number
-    const availableAmount = parseInt(selectedEquipment.equip_contract, 10);
+    const availableAmount = selectedEquipment.equip_amount;
 
     // Convert formDataPaid.amount to a number
     const amountToReduce = parseInt(formDataPaid.amount, 10);
@@ -92,14 +98,14 @@ function Equipment_info() {
     }
 
     if (amountToReduce > availableAmount) {
-      alert('คุณใส่จำนวนเกิน Stock อุปกรณ์');
+      alert("คุณใส่จำนวนเกิน Stock อุปกรณ์");
     } else {
       // ลดจำนวนใน equip_contract
-      selectedEquipment.equip_contract = (availableAmount - amountToReduce).toString();
+      selectedEquipment.equip_amount = availableAmount - amountToReduce;
 
       // เรียกใช้ updateEquipment API เพื่ออัปเดตข้อมูลในฐานข้อมูล
       const result = await updateEquipment(
-        String(selectedEquipment.equipment_id),  // Convert to string
+        String(selectedEquipment.equipment_id), // Convert to string
         selectedEquipment
       );
 
@@ -108,8 +114,8 @@ function Equipment_info() {
         setShowModalPaid(false);
         setFormDataPaid({
           equipment_id: "", // รีเซ็ตค่า
-          name: '',
-          date: '',
+          name: "",
+          date: "",
           amount: "", // รีเซ็ตจำนวน
         });
       } else {
@@ -118,16 +124,15 @@ function Equipment_info() {
     }
   };
 
-
-
   // Toggle ModalPaid visibility
-  const ModalPaid = (equipment_id?: number | undefined) => setShowModalPaid(true);
+  const ModalPaid = (equipment_id?: number | undefined) =>
+    setShowModalPaid(true);
 
   const [formData, setFormData] = useState({
     equipment_type: "",
     equipment_brand: "",
     equipment_model: "",
-    equip_contract: "",
+    equip_amount: 0,
     equip_assetcode: "",
     equip_img: "",
   });
@@ -207,12 +212,21 @@ function Equipment_info() {
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  const handleInputChange = (e: React.ChangeEvent<FormControlElement>) => {
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value, // บันทึกค่า `picture_data` หรืออื่นๆที่เลือกใน dropdown
-    }));
+
+    // ถ้าเป็นค่าจำนวน (equip_amount) ให้แปลงเป็นตัวเลข
+    if (name === "equip_amount") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value ? Number(value) : "", // ถ้ามีค่า ก็แปลงเป็นตัวเลข ถ้าไม่มีค่า ให้เป็นค่าว่าง
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleEditRow = (item: EquipmentData) => {
@@ -221,7 +235,7 @@ function Equipment_info() {
       equipment_type: item.equipment_type,
       equipment_brand: item.equipment_brand,
       equipment_model: item.equipment_model,
-      equip_contract: item.equip_contract,
+      equip_amount: item.equip_amount,
       equip_assetcode: item.equip_assetcode,
       equip_img: item.equip_img,
     });
@@ -269,7 +283,7 @@ function Equipment_info() {
       !formData.equipment_type ||
       !formData.equipment_brand ||
       !formData.equipment_model ||
-      !formData.equip_contract ||
+      !formData.equip_amount ||
       !formData.equip_img
     ) {
       Swal.fire({
@@ -358,7 +372,7 @@ function Equipment_info() {
                 equipment_type: "",
                 equipment_brand: "",
                 equipment_model: "",
-                equip_contract: "",
+                equip_amount: 0,
                 equip_assetcode: "",
                 equip_img: "",
               }); // Reset formData
@@ -380,8 +394,9 @@ function Equipment_info() {
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
               <th>จำนวน</th> {/* เพิ่มเลขที่สัญญา */}
+              <th>จัดสรร</th> {/* เพิ่มเลขที่สัญญา */}
               <th>จำหน่าย</th>
-              <th style={{ width: 150 }}></th>
+            
             </tr>
           </thead>
           <tbody>
@@ -398,7 +413,7 @@ function Equipment_info() {
                 </td>
                 <td>{item.equipment_brand}</td>
                 <td>{item.equipment_model}</td>
-                <td>{item.equip_contract}</td> {/* เพิ่มการแสดงเลขที่สัญญา */}
+                <td>{item.equip_amount}</td> {/* เพิ่มการแสดงเลขที่สัญญา */}
                 <td>
                   <Button
                     variant="outline-warning"
@@ -477,12 +492,10 @@ function Equipment_info() {
             <Form.Group className="mb-3">
               <Form.Label>จำนวน</Form.Label>
               <Form.Control
-                type="number"
-                name="amount"
-                value={formDataPaid.amount}
-                max={formData.equip_contract}
-                onChange={handleInputChangePaid}
-                placeholder="กรุณากรอกจำนวน"
+                type="number" // ใช้ type="number"
+                name="equip_amount"
+                value={formData.equip_amount} // ค่านี้จะเป็น string หรือ number ขึ้นอยู่กับการกรอก
+                onChange={handleInputChange} // ฟังก์ชันอัปเดตค่า
               />
             </Form.Group>
           </Form>
@@ -518,6 +531,7 @@ function Equipment_info() {
                 ))}
               </Form.Select>
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>ยี่ห้อ</Form.Label>
               <Form.Control
@@ -527,6 +541,7 @@ function Equipment_info() {
                 onChange={handleInputChange}
               />
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>รุ่น</Form.Label>
               <Form.Control
@@ -536,12 +551,24 @@ function Equipment_info() {
                 onChange={handleInputChange}
               />
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>จำนวน</Form.Label>
               <Form.Control
+                type="number"
+                name="equip_amount"
+                value={formData.equip_amount}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+
+            {/* เพิ่มฟิลด์ Asset code ที่นี่ */}
+            <Form.Group className="mb-3">
+              <Form.Label>Asset Code</Form.Label>
+              <Form.Control
                 type="text"
-                name="equip_contract"
-                value={formData.equip_contract}
+                name="equip_assetcode"
+                value={formData.equip_assetcode}
                 onChange={handleInputChange}
               />
             </Form.Group>

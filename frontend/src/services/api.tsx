@@ -129,6 +129,9 @@ async function createEquipment(data: EquipmentData) {
   try {
     const response = await fetch(`${apiURL}/equipment`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json", // กำหนด Content-Type เป็น application/json
+      },
       body: JSON.stringify(data),
     });
 
@@ -137,9 +140,10 @@ async function createEquipment(data: EquipmentData) {
     if (response.ok) {
       return { status: true, message: res.message, data: res.data };
     } else {
+      // ตรวจสอบ error ที่ส่งจาก API
       return {
         status: false,
-        message: res.error || "Failed to create equipment",
+        message: res.error || res.message || "Failed to create equipment",
       };
     }
   } catch (error: any) {
@@ -147,6 +151,7 @@ async function createEquipment(data: EquipmentData) {
     return { status: false, message: error.message || "An error occurred" };
   }
 }
+
 
 async function getAllEquipments() {
   try {
