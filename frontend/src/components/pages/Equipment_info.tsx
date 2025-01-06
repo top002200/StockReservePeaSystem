@@ -23,7 +23,6 @@ import { PictureData } from "../../interface/IPicture"; // Interface for picture
 import Swal from "sweetalert2";
 import { TypeData } from "../../interface/IType";
 
-
 function Equipment_info() {
   const [equipmentData, setEquipmentData] = useState<EquipmentData[]>([]);
   const [typeOptions, setTypeOptions] = useState<TypeData[]>([]);
@@ -31,10 +30,98 @@ function Equipment_info() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<
+    string | number | null
+  >(null); // เก็บ ID ของอุปกรณ์ที่เลือก
 
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false); // <-- Add this line
   const [editingId, setEditingId] = useState<number | string | null>(null);
+  const [showModalPaid, setShowModalPaid] = useState(false); // To control visibility of ModalPaid
+  const [formDataPaid, setFormDataPaid] = useState({
+    equipment_id: "", // เพิ่ม equipment_id
+    name: "",
+    date: "",
+    amount: "",
+  });
+
+  const handleRowClick = (equipmentId: string | number) => {
+    setSelectedEquipmentId(equipmentId); // บันทึก ID ของอุปกรณ์ที่เลือก
+    setShowModalPaid(true); // เปิด Modal สำหรับข้อมูลการขาย
+  };
+
+  // ฟังก์ชันการจัดการกรอกข้อมูล
+  const handleInputChangePaid = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormDataPaid((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+ 
+
+  
+  const handleSubmitPaid = async () => {
+    const equipmentIdPaid = parseInt(formDataPaid.equipment_id, 10);
+  
+    // ตรวจสอบว่า equipmentIdPaid เป็นตัวเลขที่ถูกต้อง
+    if (isNaN(equipmentIdPaid)) {
+      alert("รหัสอุปกรณ์ไม่ถูกต้อง");
+      return;
+    }
+  
+    // ค้นหาข้อมูลอุปกรณ์จาก equipmentData ตาม ID ที่เลือก
+    const selectedEquipment = equipmentData.find(
+      (item: EquipmentData) => item.equipment_id === equipmentIdPaid
+    );
+  
+    if (!selectedEquipment) {
+      alert('ไม่พบอุปกรณ์ที่เลือก');
+      return;
+    }
+  
+    // แปลง equip_contract จาก string เป็น number
+    const availableAmount = parseInt(selectedEquipment.equip_contract, 10);
+  
+    // Convert formDataPaid.amount to a number
+    const amountToReduce = parseInt(formDataPaid.amount, 10);
+  
+    if (isNaN(amountToReduce)) {
+      alert("กรุณากรอกจำนวนที่ถูกต้อง");
+      return;
+    }
+  
+    if (amountToReduce > availableAmount) {
+      alert('คุณใส่จำนวนเกิน Stock อุปกรณ์');
+    } else {
+      // ลดจำนวนใน equip_contract
+      selectedEquipment.equip_contract = (availableAmount - amountToReduce).toString();
+  
+      // เรียกใช้ updateEquipment API เพื่ออัปเดตข้อมูลในฐานข้อมูล
+      const result = await updateEquipment(
+        String(selectedEquipment.equipment_id),  // Convert to string
+        selectedEquipment
+      );
+  
+      if (result.status) {
+        alert("ข้อมูลถูกอัปเดตสำเร็จ");
+        setShowModalPaid(false);
+        setFormDataPaid({
+          equipment_id: "", // รีเซ็ตค่า
+          name: '',
+          date: '',
+          amount: "", // รีเซ็ตจำนวน
+        });
+      } else {
+        alert(result.message);
+      }
+    }
+  };
+
+  
+
+  // Toggle ModalPaid visibility
+  const ModalPaid = (equipment_id?: number | undefined) => setShowModalPaid(true);
 
   const [formData, setFormData] = useState({
     equipment_type: "",
@@ -71,11 +158,12 @@ function Equipment_info() {
     const fetchData = async () => {
       try {
         // เรียก API ทั้งหมดพร้อมกัน
-        const [equipmentRes, typesResponse, picturesResponse] = await Promise.all([
-          getAllEquipments(),
-          getAllTypes(),
-          getAllPictures(),
-        ]);
+        const [equipmentRes, typesResponse, picturesResponse] =
+          await Promise.all([
+            getAllEquipments(),
+            getAllTypes(),
+            getAllPictures(),
+          ]);
 
         // จัดการข้อมูลของอุปกรณ์
         if (equipmentRes.status && Array.isArray(equipmentRes.data)) {
@@ -157,12 +245,12 @@ function Equipment_info() {
           const response = await deleteEquipment(id.toString());
           if (response.status) {
             Swal.fire({
-                        icon: "success",
-                        title: "สำเร็จ",
-                        text: "ลบข้อมูลสำเร็จ", // Alert สำหรับการแก้ไขสำเร็จ
-                        showConfirmButton: false,
-                        timer: 2000, // ปิดอัตโนมัติใน 2 วินาที
-                      });
+              icon: "success",
+              title: "สำเร็จ",
+              text: "ลบข้อมูลสำเร็จ", // Alert สำหรับการแก้ไขสำเร็จ
+              showConfirmButton: false,
+              timer: 2000, // ปิดอัตโนมัติใน 2 วินาที
+            });
             const updatedData = await getAllEquipments();
             if (updatedData.status) setEquipmentData(updatedData.data);
           } else {
@@ -182,7 +270,6 @@ function Equipment_info() {
       !formData.equipment_brand ||
       !formData.equipment_model ||
       !formData.equip_contract ||
-      !formData.equip_assetcode ||
       !formData.equip_img
     ) {
       Swal.fire({
@@ -240,7 +327,6 @@ function Equipment_info() {
     }
   };
 
-
   return (
     <Info_Layout>
       <div className="equipment-info-content">
@@ -283,7 +369,6 @@ function Equipment_info() {
           >
             <FontAwesomeIcon icon={faPlus} />
           </Button>
-
         </div>
 
         <Table bordered hover responsive>
@@ -294,8 +379,7 @@ function Equipment_info() {
               <th>รูปภาพ</th>
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
-             {/* <th>เลขที่สัญญา</th>
-              <th>รหัสทรัพย์สิน</th>*/}
+              <th>จำนวน</th> {/* เพิ่มเลขที่สัญญา */}
               <th style={{ width: 150 }}></th>
             </tr>
           </thead>
@@ -313,21 +397,26 @@ function Equipment_info() {
                 </td>
                 <td>{item.equipment_brand}</td>
                 <td>{item.equipment_model}</td>
-               {/*} <td>{item.equip_contract}</td>
-                <td>{item.equip_assetcode}</td> */}
+                <td>{item.equip_contract}</td> {/* เพิ่มการแสดงเลขที่สัญญา */}
                 <td>
                   <Button
                     variant="outline-primary"
                     className="me-2"
-                    onClick={() => handleEditRow(item)} // Calls the edit handler with the current row's data
+                    onClick={() => handleEditRow(item)}
                   >
                     <FontAwesomeIcon icon={faEdit} />
                   </Button>
                   <Button
                     variant="outline-danger"
-                    onClick={() => handleDeleteRow(item.equipment_id ?? 0)} // Calls the delete handler with the current row's ID
+                    onClick={() => handleDeleteRow(item.equipment_id ?? 0)}
                   >
                     <FontAwesomeIcon icon={faTrashCan} />
+                  </Button>
+                  <Button
+                    variant="outline-success"
+                    onClick={() => ModalPaid(item.equipment_id)} // ส่ง equipment_id ไปที่ ModalPaid
+                  >
+                    <FontAwesomeIcon icon={faPlus} />{" "}
                   </Button>
                 </td>
               </tr>
@@ -347,6 +436,59 @@ function Equipment_info() {
           ))}
         </Pagination>
       </div>
+
+      <Modal
+        show={showModalPaid}
+        onHide={() => setShowModalPaid(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>เพิ่มข้อมูลการจำหน่ายอุปกรณ์สำรอง</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>ชื่อ</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formDataPaid.name}
+                onChange={handleInputChangePaid}
+                placeholder="กรุณากรอกชื่อ"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>วันที่</Form.Label>
+              <Form.Control
+                type="date"
+                name="date"
+                value={formDataPaid.date}
+                onChange={handleInputChangePaid}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>จำนวน</Form.Label>
+              <Form.Control
+                type="number"
+                name="amount"
+                value={formDataPaid.amount}
+                onChange={handleInputChangePaid}
+                placeholder="กรุณากรอกจำนวน"
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModalPaid(false)}>
+            ยกเลิก
+          </Button>
+          <Button variant="success" onClick={handleSubmitPaid}>
+            บันทึก
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
@@ -388,7 +530,7 @@ function Equipment_info() {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>เลขที่สัญญา</Form.Label>
+              <Form.Label>จำนวน</Form.Label>
               <Form.Control
                 type="text"
                 name="equip_contract"
@@ -396,15 +538,7 @@ function Equipment_info() {
                 onChange={handleInputChange}
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>รหัสทรัพย์สิน</Form.Label>
-              <Form.Control
-                type="text"
-                name="equip_assetcode"
-                value={formData.equip_assetcode}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>เลือกรูปภาพ</Form.Label>
               <Form.Select
@@ -432,6 +566,7 @@ function Equipment_info() {
             </Form.Group>
           </Form>
         </Modal.Body>
+
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             ยกเลิก

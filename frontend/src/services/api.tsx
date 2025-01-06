@@ -661,27 +661,34 @@ async function deleteBorrowedEquipment(borrowedEquipmentId: string) {
 }
 async function createRepair(data: RepairData) {
   try {
+    // แปลงวันที่ให้อยู่ในรูปแบบ ISO ที่ backend รองรับ
+    const formattedData = {
+      ...data,
+      date: data.date
+        ? new Date(data.date).toISOString()
+        : new Date().toISOString(),
+    };
+
+    console.log("Sending data:", formattedData);
+
     const response = await fetch(`${apiURL}/repair`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(formattedData),
     });
 
-    const res = await response.json();
-
-    if (response.ok) {
-      return { status: true, message: res.message, data: res.data };
-    } else {
-      return {
-        status: false,
-        message: res.error || "Failed to create repair",
-      };
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      throw new Error(errorResponse.error || "Failed to create repair");
     }
+
+    const res = await response.json();
+    return { status: true, message: res.message, data: res.data };
   } catch (error: any) {
-    console.error("Error creating repair:", error);
-    return { status: false, message: error.message || "An error occurred" };
+    console.error("Error creating repair:", error.message);
+    return { status: false, message: error.message };
   }
 }
 
@@ -730,9 +737,9 @@ async function getRepairById(repairId: string) {
 }
 
 // Update Repair
-async function updateRepair(repairId: string, data: RepairData) {
+async function updateRepair(data: RepairData) {
   try {
-    const response = await fetch(`${apiURL}/repair/${repairId}`, {
+    const response = await fetch(`${apiURL}/repair/${data.repair_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -745,10 +752,7 @@ async function updateRepair(repairId: string, data: RepairData) {
     if (response.ok) {
       return { status: true, message: res.message, data: res.data };
     } else {
-      return {
-        status: false,
-        message: res.error || "Failed to update repair",
-      };
+      return { status: false, message: res.error || "Failed to update repair" };
     }
   } catch (error: any) {
     console.error("Error updating repair:", error);
@@ -757,26 +761,25 @@ async function updateRepair(repairId: string, data: RepairData) {
 }
 
 // Delete Repair
-async function deleteRepair(repairId: string) {
+async function deleteRepair(repair_id: number) {
   try {
-    const response = await fetch(`${apiURL}/repair/${repairId}`, {
+    const response = await fetch(`${apiURL}/repair/${repair_id.toString()}`, {
       method: "DELETE",
     });
 
+    const res = await response.json();
+
     if (response.ok) {
-      return { status: true, message: "Repair deleted successfully" };
+      return { status: true, message: res.message };
     } else {
-      const error = await response.json();
-      return {
-        status: false,
-        message: error.message || "Failed to delete repair",
-      };
+      return { status: false, message: res.error || "Failed to delete repair" };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting repair:", error);
-    return { status: false, message: "An unexpected error occurred" };
+    return { status: false, message: error.message || "An error occurred" };
   }
 }
+
 
 // Mark Repair as Completed
 async function completeRepair(repairId: string) {
