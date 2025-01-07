@@ -64,7 +64,7 @@ const Distribution: React.FC = () => {
                     className="text-center mb-4"
                     style={{ color: "#74045f", textDecoration: "underline" }}
                 >
-                    <b>ข้อมูลการจำหน่ายอุปกรณ์</b>
+                    <b>ข้อมูลการจัดสรรอุปกรณ์</b>
                 </h3>
 
                 <Table bordered hover responsive>
@@ -72,8 +72,10 @@ const Distribution: React.FC = () => {
                         <tr className="align-middle text-center">
                             <th>ลำดับที่</th>
                             <th>อุปกรณ์</th>
-                            <th>ผู้รับ</th>
-                            <th>วันที่จำหน่าย</th>
+                            <th>จำนวน</th>
+                            <th>ผู้จัดสรร</th>
+                            <th>ผู้รับจัดสรร</th>
+                            <th>วันที่จัดสรร</th>
                             <th style={{ width: 150 }}></th>
                         </tr>
                     </thead>
@@ -89,9 +91,9 @@ const Distribution: React.FC = () => {
                                     ยี่ห้อ : {item.equipment_brand}
                                     <br />
                                     รุ่น : {item.equipment_model}
-                                    <br />
-                                    จำนวน :
                                 </td>
+                                <td className="align-middle text-center"></td>
+                                <td className="align-middle text-center"></td>
                                 <td className="align-middle text-center">{item.receiver}</td>
                                 <td className="align-middle text-center">{item.date}</td>
                                 <td className="align-middle text-center">
