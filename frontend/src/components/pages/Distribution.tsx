@@ -84,13 +84,18 @@ const Distribution: React.FC = () => {
                             <tr key={item.id}>
                                 <td className="align-middle text-center">{index + 1}</td>
                                 <td className="align-middle text-left">
-                                    ประเภท : {item.equipment_type}
-                                    <br />
-                                    ชื่ออุปกรณ์ : {item.equipment_name}
-                                    <br />
-                                    ยี่ห้อ : {item.equipment_brand}
-                                    <br />
-                                    รุ่น : {item.equipment_model}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <div style={{ flex: 1, paddingRight: '5px', borderRight: '1px solid #ccc' }}>
+                                            <strong>ประเภท:</strong> {item.equipment_type}
+                                            <br />
+                                            <strong>ชื่ออุปกรณ์:</strong> {item.equipment_name}
+                                        </div>
+                                        <div style={{ flex: 1, paddingLeft: '10px' }}>
+                                            <strong>ยี่ห้อ:</strong> {item.equipment_brand}
+                                            <br />
+                                            <strong>รุ่น:</strong> {item.equipment_model}
+                                        </div>
+                                    </div>
                                 </td>
                                 <td className="align-middle text-center"></td>
                                 <td className="align-middle text-center"></td>

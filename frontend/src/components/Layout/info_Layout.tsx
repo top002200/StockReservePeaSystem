@@ -28,7 +28,7 @@ const Info_Layout: React.FC<LayoutProps> = ({ children }) => {
           </li>
           <li className='nav-item'>
             <Link to="/distribution" className={`nav-link ${location.pathname === '/distribution' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faCheckToSlot} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลการจำหน่าย</Link>
+              <FontAwesomeIcon icon={faCheckToSlot} style={{ color: '#fefcff', paddingRight: 10 }} />ข้อมูลการจัดสรร</Link>
           </li>
         </ul>
         <div className='footer equip'>
