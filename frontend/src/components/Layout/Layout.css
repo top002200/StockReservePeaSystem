@@ -227,3 +227,12 @@ a.active-link {
   font-weight: bold; /* เพิ่มน้ำหนักตัวอักษร */
   color: white; /* คงสีไว้เป็นสีขาว */
 }
+
+.word-break {
+  word-break: break-word;
+}
+
+.text-wrap {
+  white-space: normal;
+  overflow-wrap: break-word; /* Ensures wrapping at any suitable point */
+}

@@ -48,7 +48,8 @@ function Equipment_info() {
   const [showModalPaid, setShowModalPaid] = useState(false); // To control visibility of ModalPaid
   const [formDataPaid, setFormDataPaid] = useState({
     equipment_id: "", // เพิ่ม equipment_id
-    name: "",
+    g_name: "",
+    r_name: "",
     date: "",
     amount: "",
   });
@@ -114,7 +115,8 @@ function Equipment_info() {
         setShowModalPaid(false);
         setFormDataPaid({
           equipment_id: "", // รีเซ็ตค่า
-          name: "",
+          g_name: "",
+          r_name: "",
           date: "",
           amount: "", // รีเซ็ตจำนวน
         });
@@ -393,8 +395,8 @@ function Equipment_info() {
               <th>รูปภาพ</th>
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
-              <th>จำนวน</th> {/* เพิ่มเลขที่สัญญา */}
-              <th>จัดสรร</th> {/* เพิ่มเลขที่สัญญา */}
+              <th>จำนวน</th> 
+              <th>จัดสรร</th>
               <th>จำหน่าย</th>
             
             </tr>
@@ -403,7 +405,7 @@ function Equipment_info() {
             {currentRows.map((item, index) => (
               <tr key={item.equipment_id} className="align-middle text-center">
                 <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                <td>{item.equipment_type}</td>
+                <td style={{ width: "150px"}}>{item.equipment_type}</td>
                 <td>
                   <img
                     src={item.equip_img}
@@ -412,7 +414,9 @@ function Equipment_info() {
                   />
                 </td>
                 <td>{item.equipment_brand}</td>
-                <td>{item.equipment_model}</td>
+                <td className="word-break text-wrap" style={{ width: "200px"}}>
+                  {item.equipment_model}
+                </td>
                 <td>{item.equip_amount}</td> {/* เพิ่มการแสดงเลขที่สัญญา */}
                 <td>
                   <Button
@@ -468,24 +472,25 @@ function Equipment_info() {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>ชื่อ</Form.Label>
+          <Form.Group className="mb-3">
+              <Form.Label>ผู้จัดสรร</Form.Label>
               <Form.Control
                 type="text"
                 name="name"
-                value={formDataPaid.name}
+                value={formDataPaid.g_name}
                 onChange={handleInputChangePaid}
                 placeholder="กรุณากรอกชื่อ"
               />
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>วันที่</Form.Label>
+              <Form.Label>ผู้รับจัดสรร</Form.Label>
               <Form.Control
-                type="date"
-                name="date"
-                value={formDataPaid.date}
+                type="text"
+                name="name"
+                value={formDataPaid.r_name}
                 onChange={handleInputChangePaid}
+                placeholder="กรุณากรอกชื่อ"
               />
             </Form.Group>
 
@@ -496,6 +501,16 @@ function Equipment_info() {
                 name="equip_amount"
                 value={formData.equip_amount} // ค่านี้จะเป็น string หรือ number ขึ้นอยู่กับการกรอก
                 onChange={handleInputChange} // ฟังก์ชันอัปเดตค่า
+              />
+            </Form.Group>
+
+             <Form.Group className="mb-3">
+              <Form.Label>วันที่จัดสรร</Form.Label>
+              <Form.Control
+                type="date"
+                name="date"
+                value={formDataPaid.date}
+                onChange={handleInputChangePaid}
               />
             </Form.Group>
           </Form>
@@ -510,6 +525,7 @@ function Equipment_info() {
         </Modal.Footer>
       </Modal>
 
+      {/*Add Equip Modal*/}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}</Modal.Title>
@@ -562,7 +578,7 @@ function Equipment_info() {
               />
             </Form.Group>
 
-            {/* เพิ่มฟิลด์ Asset code ที่นี่ */}
+            {/* เพิ่มฟิลด์ Asset code ที่นี่ 
             <Form.Group className="mb-3">
               <Form.Label>Asset Code</Form.Label>
               <Form.Control
@@ -571,7 +587,7 @@ function Equipment_info() {
                 value={formData.equip_assetcode}
                 onChange={handleInputChange}
               />
-            </Form.Group>
+            </Form.Group> */}
 
             <Form.Group className="mb-3">
               <Form.Label>เลือกรูปภาพ</Form.Label>
