@@ -395,26 +395,26 @@ function Equipment_info() {
               <th>รูปภาพ</th>
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
-              <th>จำนวน</th> 
+              <th>จำนวน</th>
               <th>จัดสรร</th>
-              <th>จำหน่าย</th>
-            
+              <th></th>
+
             </tr>
           </thead>
           <tbody>
             {currentRows.map((item, index) => (
               <tr key={item.equipment_id} className="align-middle text-center">
-                <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                <td style={{ width: "150px"}}>{item.equipment_type}</td>
+                <td style={{ width: "100px" }}>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                <td style={{ width: "150px" }}>{item.equipment_type}</td>
                 <td>
                   <img
                     src={item.equip_img}
                     alt={item.equipment_name}
-                    style={{ maxWidth: "100px", maxHeight: "100px" }}
+                    style={{ maxWidth: "60px", maxHeight: "60px" }}
                   />
                 </td>
                 <td>{item.equipment_brand}</td>
-                <td className="word-break text-wrap" style={{ width: "200px"}}>
+                <td className="word-break text-wrap" style={{ width: "300px" }}>
                   {item.equipment_model}
                 </td>
                 <td>{item.equip_amount}</td> {/* เพิ่มการแสดงเลขที่สัญญา */}
@@ -449,6 +449,10 @@ function Equipment_info() {
         </Table>
 
         <Pagination className="justify-content-center">
+          <Pagination.Prev
+            disabled={currentPage === 1}
+            onClick={() => paginate(currentPage - 1)}
+          />
           {[...Array(totalPages)].map((_, pageIndex) => (
             <Pagination.Item
               key={pageIndex + 1}
@@ -458,6 +462,10 @@ function Equipment_info() {
               {pageIndex + 1}
             </Pagination.Item>
           ))}
+          <Pagination.Next
+            disabled={currentPage === totalPages}
+            onClick={() => paginate(currentPage + 1)}
+          />
         </Pagination>
       </div>
 
@@ -472,7 +480,7 @@ function Equipment_info() {
         </Modal.Header>
         <Modal.Body>
           <Form>
-          <Form.Group className="mb-3">
+            <Form.Group className="mb-3">
               <Form.Label>ผู้จัดสรร</Form.Label>
               <Form.Control
                 type="text"
@@ -504,7 +512,7 @@ function Equipment_info() {
               />
             </Form.Group>
 
-             <Form.Group className="mb-3">
+            <Form.Group className="mb-3">
               <Form.Label>วันที่จัดสรร</Form.Label>
               <Form.Control
                 type="date"

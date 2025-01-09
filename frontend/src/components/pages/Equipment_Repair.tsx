@@ -16,6 +16,7 @@ import {
 } from "../../services/api";
 import { RepairData } from "../../interface/IRepair";
 import Swal from "sweetalert2";
+import { Pagination } from "react-bootstrap";
 
 const Equipment_Repair: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
@@ -36,6 +37,7 @@ const Equipment_Repair: React.FC = () => {
     date: "",
   });
   const [data, setData] = useState<RepairData[]>([]);
+
 
   // Fetch repairs data
   const fetchRepairs = async () => {
@@ -166,11 +168,27 @@ const Equipment_Repair: React.FC = () => {
     }
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 8;
+
+  // Calculate total pages
+  const totalPages = Math.ceil(data.length / rowsPerPage);
+
+  // Get data for the current page
+  const paginatedData = data.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <Repair_Layout>
       <div className="equipment-info-content">
         <h3
-          className="text-center mb-4"
+          className="text-center"
           style={{ color: "#74045f", textDecoration: "underline" }}
         >
           <b>ข้อมูลอุปกรณ์ส่งซ่อม</b>
@@ -192,6 +210,7 @@ const Equipment_Repair: React.FC = () => {
           </button>
         </div>
 
+        {/* Existing content */}
         <Table bordered hover responsive>
           <thead>
             <tr className="align-middle text-center">
@@ -199,17 +218,19 @@ const Equipment_Repair: React.FC = () => {
               <th>ผู้ส่งซ่อม</th>
               <th>ประเภทอุปกรณ์</th>
               <th>ชื่ออุปกรณ์</th>
+              <th>วันที่ส่งซ่อม</th>
               <th style={{ width: 100 }}>รายละเอียด</th>
               <th style={{ width: 150 }}></th>
             </tr>
           </thead>
           <tbody>
-            {data.map((item, index) => (
+            {paginatedData.map((item, index) => (
               <tr key={item.repair_id} className="align-middle text-center">
-                <td>{index + 1}</td>
+                <td>{(currentPage - 1) * rowsPerPage + index + 1}</td>
                 <td>{item.user_name}</td>
                 <td>{item.type}</td>
                 <td>{item.device_name}</td>
+                <td>{item.date}</td>
                 <td>
                   <Button
                     variant="outline-info"
@@ -227,23 +248,37 @@ const Equipment_Repair: React.FC = () => {
                     <FontAwesomeIcon icon={faEdit} />
                   </Button>
                   <Button
-                  variant="outline-danger"
-                  onClick={() => {
-                    // ตรวจสอบว่า repair_id ไม่เป็น undefined ก่อนเรียก handleDelete
-                    if (item.repair_id !== undefined) {
-                      handleDelete(item.repair_id);
-                    } else {
-                      console.error("repair_id is undefined");
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon icon={faTrashCan} />
-                </Button>
+                    variant="outline-danger"
+                    onClick={() => handleDelete(item.repair_id!)}
+                  >
+                    <FontAwesomeIcon icon={faTrashCan} />
+                  </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
+
+        {/* Pagination Controls */}
+        <Pagination className="justify-content-center">
+          <Pagination.Prev
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+          />
+          {[...Array(totalPages).keys()].map((page) => (
+            <Pagination.Item
+              key={page + 1}
+              active={page + 1 === currentPage}
+              onClick={() => handlePageChange(page + 1)}
+            >
+              {page + 1}
+            </Pagination.Item>
+          ))}
+          <Pagination.Next
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+          />
+        </Pagination>
 
         {/* Add Modal */}
         <Modal
