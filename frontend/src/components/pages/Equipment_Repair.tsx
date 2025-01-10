@@ -330,7 +330,7 @@ const Equipment_Repair: React.FC = () => {
                 <td>{item.user_name}</td>
                 <td>{item.type}</td>
                 <td>{item.device_name}</td>
-                <td>{item.date}</td>
+                <td>{item.date ? new Date(item.date).toLocaleDateString() : ''}</td>
                 <td>
                   <Button
                     variant="outline-info"
