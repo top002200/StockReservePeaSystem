@@ -41,6 +41,48 @@ const Equipment_Repair: React.FC = () => {
     date: "",
   });
   const [data, setData] = useState<RepairData[]>([]);
+  // Add these states and functions to handle editing
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState<RepairData | null>(null);
+
+  const handleShowEditModal = (repair: RepairData) => {
+    setEditFormData(repair);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditFormData(null);
+  };
+
+  const handleEditFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    if (editFormData) {
+      setEditFormData((prevData) => ({
+        ...prevData!,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (editFormData) {
+      const result = await updateRepair(editFormData);
+      if (result.status) {
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.repair_id === editFormData.repair_id ? editFormData : item
+          )
+        );
+        Swal.fire("สำเร็จ", "ข้อมูลได้รับการแก้ไขเรียบร้อยแล้ว", "success");
+        handleCloseEditModal();
+      } else {
+        Swal.fire("ผิดพลาด", "ไม่สามารถแก้ไขข้อมูลได้", "error");
+      }
+    }
+  };
 
   // Fetch repairs data
   const fetchRepairs = async () => {
@@ -369,6 +411,7 @@ const Equipment_Repair: React.FC = () => {
                     variant="outline-primary"
                     className="me-2"
                     style={{ width: "40px" }}
+                    onClick={() => handleShowEditModal(item)}
                   >
                     <FontAwesomeIcon icon={faEdit} />
                   </Button>
@@ -555,6 +598,161 @@ const Equipment_Repair: React.FC = () => {
             </Button>
             <Button variant="secondary" onClick={() => setShowAddModal(false)}>
               ยกเลิก
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={showEditModal}
+          onHide={handleCloseEditModal}
+          size="lg"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <b>แก้ไขข้อมูลอุปกรณ์</b>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {editFormData && (
+              <Form>
+                {/* ข้อมูลผู้ส่งซ่อม */}
+                <div className="mb-4">
+                  <h6 className="border-bottom pb-2 text-secondary fw-bold">
+                    ข้อมูลผู้ส่งซ่อม
+                  </h6>
+                  <div className="row">
+                    <Form.Group className="col-md-5 mb-3">
+                      <Form.Label>ผู้ส่งซ่อม:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="user_name"
+                        value={editFormData.user_name}
+                        onChange={handleEditFormChange}
+                      />
+                    </Form.Group>
+                    <Form.Group className="col-md-5 mb-3">
+                      <Form.Label>แผนก:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="dept"
+                        value={editFormData.dept}
+                        onChange={handleEditFormChange}
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
+
+                {/* ข้อมูลอุปกรณ์ */}
+                <div className="mb-4">
+                  <h6 className="border-bottom pb-2 text-secondary fw-bold">
+                    ข้อมูลอุปกรณ์
+                  </h6>
+                  <div className="row">
+                    <Form.Group className="col-md-4 mb-3">
+                      <Form.Label>ประเภท:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="type"
+                        value={editFormData.type}
+                        onChange={handleEditFormChange}
+                      />
+                    </Form.Group>
+                    <Form.Group className="col-md-4 mb-3">
+                      <Form.Label>ชื่ออุปกรณ์:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="device_name"
+                        value={editFormData.device_name}
+                        onChange={handleEditFormChange}
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="row">
+                    <Form.Group className="col-md-4 mb-3">
+                      <Form.Label>ยี่ห้อ:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="brand"
+                        value={editFormData.brand}
+                        onChange={handleEditFormChange}
+                      />
+                    </Form.Group>
+                    <Form.Group className="col-md-4 mb-3">
+                      <Form.Label>รุ่น:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="model"
+                        value={editFormData.model}
+                        onChange={handleEditFormChange}
+                      />
+                    </Form.Group>
+                    <Form.Group className="col-md-4 mb-3">
+                      <Form.Label>เลขที่สัญญา:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="contract"
+                        value={editFormData.contract}
+                        onChange={handleEditFormChange}
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
+
+                {/* รายละเอียดการซ่อม */}
+                <div className="mb-4">
+                  <h6 className="border-bottom pb-2 text-secondary fw-bold">
+                    รายละเอียดการซ่อม
+                  </h6>
+                  <Form.Group className="col-md-4 mb-3">
+                    <Form.Label>วันที่ส่งซ่อม:</Form.Label>
+                    <Form.Control
+                      type="date"
+                      name="date"
+                      value={editFormData.date}
+                      onChange={handleEditFormChange}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>สาเหตุที่ส่งซ่อม:</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      name="problem"
+                      value={editFormData.problem}
+                      onChange={handleEditFormChange}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>การแก้ไข:</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      name="fixing"
+                      value={editFormData.fixing}
+                      onChange={handleEditFormChange}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>หมายเหตุ:</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={1}
+                      name="note"
+                      value={editFormData.note}
+                      onChange={handleEditFormChange}
+                    />
+                  </Form.Group>
+                </div>
+              </Form>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseEditModal}>
+              ยกเลิก
+            </Button>
+            <Button variant="primary" onClick={handleSaveEdit}>
+              บันทึก
             </Button>
           </Modal.Footer>
         </Modal>
