@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Repair_Layout from "../Layout/Repair_Layout";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import { Table, Button, Modal, Form, Card, Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleInfo,
@@ -17,6 +17,10 @@ import {
 import { RepairData } from "../../interface/IRepair";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
+import { Doughnut } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Equipment_Repair: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
@@ -169,7 +173,7 @@ const Equipment_Repair: React.FC = () => {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 8;
+  const rowsPerPage = 5;
 
   // Calculate total pages
   const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -184,6 +188,28 @@ const Equipment_Repair: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
+  // Group data by type for the chart
+  const equipmentTypeCounts = data.reduce((acc: { [key: string]: number }, item) => {
+    acc[item.type] = (acc[item.type] || 0) + 1;
+    return acc;
+  }, {});
+
+  const chartData = {
+    labels: Object.keys(equipmentTypeCounts),
+    datasets: [
+      {
+        data: Object.values(equipmentTypeCounts),
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+        hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+      },
+    ],
+  };
+
+  const equipmentModelCounts = data.reduce((acc: { [key: string]: number }, item) => {
+    acc[item.model] = (acc[item.model] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <Repair_Layout>
       <div className="equipment-info-content">
@@ -193,6 +219,80 @@ const Equipment_Repair: React.FC = () => {
         >
           <b>ข้อมูลอุปกรณ์ส่งซ่อม</b>
         </h3>
+
+        {/* Row for Overview Cards */}
+        <Row>
+          <Col md={4} sm={3} className="">
+            <Card className="shadow-sm card-dash">
+              <Card.Body className="d-flex justify-content-between align-items-center dash-body">
+                {/* ข้อมูลด้านซ้าย */}
+                <div className="text-start">
+                  <p className="mb-2"><b>ประเภทอุปกรณ์ที่ส่งซ่อม</b></p>
+                  {/* Legend ด้านล่าง */}
+                  <div className="mb-3 text-start">
+                    <ul className="list-unstyled d-flex flex-column">
+                      <li className="d-flex align-items-center mb-1">
+                        <span
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            backgroundColor: "#FF6384",
+                            display: "inline-block",
+                            marginRight: "8px",
+                            borderRadius: "50%",
+                          }}
+                        ></span>
+                        <span>PC</span>
+                      </li>
+                      <li className="d-flex align-items-center">
+                        <span
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            backgroundColor: "#36A2EB",
+                            display: "inline-block",
+                            marginRight: "8px",
+                            borderRadius: "50%",
+                          }}
+                        ></span>
+                        <span>Printer</span>
+                      </li>
+                      <li className="d-flex align-items-center">
+                        <span
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            backgroundColor: "#FFCE56",
+                            display: "inline-block",
+                            marginRight: "8px",
+                            borderRadius: "50%",
+                          }}
+                        ></span>
+                        <span>Notebook</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* แผนภูมิด้านขวา */}
+                <div className="ms-auto" style={{ width: "100%", maxWidth: "100px", height: "auto" }}>
+                  <Doughnut
+                    data={chartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        tooltip: { enabled: true },
+                        legend: { display: false },
+                      },
+                    }}
+                  />
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
         <div
           style={{
             display: "flex",

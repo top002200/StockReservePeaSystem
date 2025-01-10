@@ -236,3 +236,13 @@ a.active-link {
   white-space: normal;
   overflow-wrap: break-word; /* Ensures wrapping at any suitable point */
 }
+
+.custom-card {
+  max-width: 300px;
+  margin: 0 auto; /* จัดให้อยู่กลาง */
+  
+}
+
+.card-dash {
+  background-color: #f5f5f5;
+}
