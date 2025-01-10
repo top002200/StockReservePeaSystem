@@ -6,6 +6,7 @@ import { ModelData } from "../interface/IModel";
 import { TypeData } from "../interface/IType";
 import { BorrowedEquipmentData } from "../interface/IBorrowedEquipment";
 import { RepairData } from "../interface/IRepair";
+import { DistributionData } from "../interface/IDistribution";
 
 // const apiURL = "http://localhost:8080";
 const apiURL = "http://localhost:8080";
@@ -151,7 +152,6 @@ async function createEquipment(data: EquipmentData) {
     return { status: false, message: error.message || "An error occurred" };
   }
 }
-
 
 async function getAllEquipments() {
   try {
@@ -785,7 +785,6 @@ async function deleteRepair(repair_id: number) {
   }
 }
 
-
 // Mark Repair as Completed
 async function completeRepair(repairId: string) {
   try {
@@ -854,6 +853,152 @@ async function getRepairsByEquipment(equipmentId: string) {
     return { status: false, message: "An unexpected error occurred" };
   }
 }
+const createDistribution = async (data: DistributionData) => {
+  try {
+    // แปลงข้อมูลที่จำเป็นเป็นตัวเลข (number)
+    const formattedData = {
+      g_name: data.g_name,
+      r_name: data.r_name,
+      distribution_amount: Number(data.distribution_amount), // แปลงเป็น number
+      equipment_id: Number(data.equipment_id), // แปลงเป็น number
+      date: data.date,
+      name: data.name,
+    };
+
+    console.log("Data to send:", formattedData); // ตรวจสอบข้อมูลที่แปลงแล้ว
+
+    const response = await fetch(`${apiURL}/distribution`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formattedData),
+    });
+
+    console.log("Response status:", response.status); // ตรวจสอบสถานะการตอบกลับจาก API
+
+    const res = await response.json();
+
+    console.log("Response from API:", res); // ตรวจสอบการตอบกลับจาก API
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to create distribution",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error creating distribution:", error);
+    return {
+      status: false,
+      message: error.message || "An unexpected error occurred",
+    };
+  }
+};
+
+// Update Distribution
+async function updateDistribution(data: DistributionData) {
+  try {
+    const response = await fetch(`${apiURL}/distribution/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to update distribution",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error updating distribution:", error);
+    return {
+      status: false,
+      message: error.message || "An unexpected error occurred",
+    };
+  }
+}
+
+// Delete Distribution
+async function deleteDistribution(distributionId: string) {
+  try {
+    const response = await fetch(`${apiURL}/distribution/${distributionId}`, {
+      method: "DELETE",
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to delete distribution",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error deleting distribution:", error);
+    return {
+      status: false,
+      message: error.message || "An unexpected error occurred",
+    };
+  }
+}
+
+// Get All Distributions
+async function getAllDistributions() {
+  try {
+    const response = await fetch(`${apiURL}/distributions`, {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch distributions",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching distributions:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
+
+// Get Distribution by ID
+async function getDistributionById(distributionId: string) {
+  try {
+    const response = await fetch(`${apiURL}/distribution/${distributionId}`, {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return { status: true, data };
+    } else {
+      const error = await response.json();
+      return {
+        status: false,
+        message: error.message || "Failed to fetch distribution",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching distribution:", error);
+    return { status: false, message: "An unexpected error occurred" };
+  }
+}
 export {
   createAdmin,
   getAllAdmins,
@@ -890,4 +1035,9 @@ export {
   completeRepair,
   getCompletedRepairs,
   getRepairsByEquipment,
+  getDistributionById,
+  createDistribution,
+  getAllDistributions,
+  deleteDistribution,
+  updateDistribution,
 };

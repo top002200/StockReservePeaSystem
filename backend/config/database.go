@@ -31,15 +31,16 @@ func InitDatabase() {
 
 	// Run AutoMigrate for all models
 	err = DB.AutoMigrate(
-		&models.Admin{}, 
-		&models.Equipment{}, 
-		&models.Submission{}, 
-		&models.Brand{}, 
-		&models.Model{}, 
-		&models.Type{}, 
+		&models.Admin{},
+		&models.Equipment{},
+		&models.Submission{},
+		&models.Brand{},
+		&models.Model{},
+		&models.Type{},
 		&models.Picture{},
 		&models.BorrowedEquipment{},
-		&models.Repair{}, // Added Repair model for migration
+		&models.Repair{},
+		&models.Distribution{}, // Added Distribution model for migration
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database schema:", err)

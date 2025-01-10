@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/top002200/stockreversepea/controllers"
 	"github.com/top002200/stockreversepea/config"
+	"github.com/top002200/stockreversepea/controllers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,13 +17,6 @@ func main() {
 
 	// Apply CORS middleware globally
 	r.Use(CORSMiddleware())
-
-	// Public routes
-	// publicRoutes := r.Group("/")
-	// {
-	// 	publicRoutes.POST("/login", controllers.Login)
-	// 	// publicRoutes.POST("/signup", controllers.Signup) // Add signup if needed
-	// }
 
 	// Protected routes
 	protectedRoutes := r.Group("/")
@@ -81,12 +74,21 @@ func main() {
 		protectedRoutes.GET("/pictures", controllers.GetAllPictures)
 		protectedRoutes.DELETE("/picture/:id", controllers.DeletePicture)
 
-		// Repair routes - Added for managing repairs
+		// Repair routes
 		protectedRoutes.POST("/repair", controllers.CreateRepair)
 		protectedRoutes.GET("/repair/:id", controllers.GetRepairByID)
 		protectedRoutes.GET("/repairs", controllers.GetAllRepairs)
 		protectedRoutes.PUT("/repair/:id", controllers.UpdateRepair)
 		protectedRoutes.DELETE("/repair/:id", controllers.DeleteRepair)
+
+		// Distribution routes
+		protectedRoutes.POST("/distribution", controllers.CreateDistribution)
+		protectedRoutes.GET("/distribution/:id", controllers.GetDistributionByID)
+		protectedRoutes.GET("/distributions", controllers.GetAllDistributions)
+		protectedRoutes.PUT("/distribution/:id", controllers.UpdateDistribution)
+		protectedRoutes.DELETE("/distribution/:id", controllers.DeleteDistribution)
+
+	
 	}
 
 	// Determine the port to run on
