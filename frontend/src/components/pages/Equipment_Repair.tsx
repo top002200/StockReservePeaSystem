@@ -42,7 +42,6 @@ const Equipment_Repair: React.FC = () => {
   });
   const [data, setData] = useState<RepairData[]>([]);
 
-
   // Fetch repairs data
   const fetchRepairs = async () => {
     const response = await getAllRepairs();
@@ -109,12 +108,12 @@ const Equipment_Repair: React.FC = () => {
   const handleDelete = async (repair_id: number) => {
     // ใช้ SweetAlert2 แทน window.confirm
     const result = await Swal.fire({
-      title: 'คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้?',
+      title: "คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้?",
       text: "ข้อมูลจะถูกลบไปและไม่สามารถกู้คืนได้",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'ลบ',
-      cancelButtonText: 'ยกเลิก',
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
     });
 
     if (result.isConfirmed) {
@@ -123,22 +122,23 @@ const Equipment_Repair: React.FC = () => {
 
       if (deleteResult.status) {
         // ลบข้อมูลออกจาก state
-        setData((prevData) => prevData.filter((item) => item.repair_id !== repair_id));
+        setData((prevData) =>
+          prevData.filter((item) => item.repair_id !== repair_id)
+        );
         Swal.fire(
-          'ลบสำเร็จ!',
-          'ข้อมูลอุปกรณ์ได้ถูกลบเรียบร้อยแล้ว.',
-          'success'
+          "ลบสำเร็จ!",
+          "ข้อมูลอุปกรณ์ได้ถูกลบเรียบร้อยแล้ว.",
+          "success"
         );
       } else {
         Swal.fire(
-          'ลบไม่สำเร็จ!',
-          'ไม่สามารถลบข้อมูลได้, โปรดลองใหม่อีกครั้ง.',
-          'error'
+          "ลบไม่สำเร็จ!",
+          "ไม่สามารถลบข้อมูลได้, โปรดลองใหม่อีกครั้ง.",
+          "error"
         );
       }
     }
   };
-
 
   const handleAddData = async () => {
     const { repair_id, ...rest } = formData;
@@ -189,26 +189,44 @@ const Equipment_Repair: React.FC = () => {
   };
 
   // Group data by type for the chart
-  const equipmentTypeCounts = data.reduce((acc: { [key: string]: number }, item) => {
-    acc[item.type] = (acc[item.type] || 0) + 1;
-    return acc;
-  }, {});
+  const equipmentTypeCounts = data.reduce(
+    (acc: { [key: string]: number }, item) => {
+      acc[item.type] = (acc[item.type] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
   const chartData = {
     labels: Object.keys(equipmentTypeCounts),
     datasets: [
       {
         data: Object.values(equipmentTypeCounts),
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
-        hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+        ],
+        hoverBackgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+        ],
       },
     ],
   };
 
-  const equipmentModelCounts = data.reduce((acc: { [key: string]: number }, item) => {
-    acc[item.model] = (acc[item.model] || 0) + 1;
-    return acc;
-  }, {});
+  const equipmentModelCounts = data.reduce(
+    (acc: { [key: string]: number }, item) => {
+      acc[item.model] = (acc[item.model] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
   return (
     <Repair_Layout>
@@ -227,7 +245,9 @@ const Equipment_Repair: React.FC = () => {
               <Card.Body className="d-flex justify-content-between align-items-center dash-body">
                 {/* ข้อมูลด้านซ้าย */}
                 <div className="text-start">
-                  <p className="mb-2"><b>ประเภทอุปกรณ์ที่ส่งซ่อม</b></p>
+                  <p className="mb-2">
+                    <b>ประเภทอุปกรณ์ที่ส่งซ่อม</b>
+                  </p>
                   {/* Legend ด้านล่าง */}
                   <div className="mb-3 text-start">
                     <ul className="list-unstyled d-flex flex-column">
@@ -275,7 +295,10 @@ const Equipment_Repair: React.FC = () => {
                 </div>
 
                 {/* แผนภูมิด้านขวา */}
-                <div className="ms-auto" style={{ width: "100%", maxWidth: "100px", height: "auto" }}>
+                <div
+                  className="ms-auto"
+                  style={{ width: "100%", maxWidth: "100px", height: "auto" }}
+                >
                   <Doughnut
                     data={chartData}
                     options={{
@@ -330,7 +353,9 @@ const Equipment_Repair: React.FC = () => {
                 <td>{item.user_name}</td>
                 <td>{item.type}</td>
                 <td>{item.device_name}</td>
-                <td>{item.date ? new Date(item.date).toLocaleDateString() : ''}</td>
+                <td>
+                  {item.date ? new Date(item.date).toLocaleDateString() : ""}
+                </td>
                 <td>
                   <Button
                     variant="outline-info"
@@ -603,7 +628,12 @@ const Equipment_Repair: React.FC = () => {
                     รายละเอียดการซ่อม
                   </h5>
                   <p>
-                    <b>วันที่ส่งซ่อม :</b> {selectedDetail.date}
+                    <b>วันที่ส่งซ่อม :</b>{" "}
+                    {selectedDetail.date
+                      ? new Date(selectedDetail.date)
+                          .toISOString()
+                          .split("T")[0]
+                      : "วันที่ไม่ระบุ"}
                   </p>
                   <p
                     style={{
