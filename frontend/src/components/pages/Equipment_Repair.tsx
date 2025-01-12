@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Repair_Layout from "../Layout/Repair_Layout";
-import { Table, Button, Modal, Form, Card, Row, Col } from "react-bootstrap";
+import { Table, Button, Modal, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleInfo,
@@ -17,10 +17,6 @@ import {
 import { RepairData } from "../../interface/IRepair";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
-import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Equipment_Repair: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
@@ -45,6 +41,7 @@ const Equipment_Repair: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState<RepairData | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(""); // State สำหรับเดือนที่เลือก
+  const [selectedYear, setSelectedYear] = useState("");
 
   const handleShowEditModal = (repair: RepairData) => {
     setEditFormData(repair);
@@ -203,18 +200,26 @@ const Equipment_Repair: React.FC = () => {
     }
   };
 
-  // ฟังก์ชันกรองข้อมูลตามเดือนที่เลือก
-  const filteredData = selectedMonth
-    ? data.filter((item) => {
-      if (!item.date) return false; // ตรวจสอบว่าค่า date มีอยู่หรือไม่
-      const itemMonth = new Date(item.date).getMonth() + 1; // แปลงวันที่เพื่อดึงเดือน
-      return itemMonth === parseInt(selectedMonth);
-    })
-    : data;
-
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMonth(e.target.value); // อัปเดตเดือนที่เลือก
   };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(e.target.value);
+  };
+
+  /// กรองข้อมูลตามปีและเดือน
+  const filteredData = data.filter((item) => {
+    if (!item.date) return false;
+    const date = new Date(item.date);
+    const itemMonth = date.getMonth() + 1;
+    const itemYear = date.getFullYear();
+    const isMonthMatched =
+      selectedMonth === "" || itemMonth === parseInt(selectedMonth);
+    const isYearMatched =
+      selectedYear === "" || itemYear === parseInt(selectedYear);
+    return isMonthMatched && isYearMatched;
+  });
 
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
@@ -242,7 +247,7 @@ const Equipment_Repair: React.FC = () => {
         </h4>
 
         <div
-           style={{
+          style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -250,13 +255,14 @@ const Equipment_Repair: React.FC = () => {
             padding: "0 20px", // เพิ่ม padding ด้านข้างเพื่อความสมดุล
           }}
         >
-          {/* Dropdown สำหรับเลือกเดือน */}
-          <div>
+          {/* Dropdown สำหรับเลือกเดือน และปี */}
+          <div style={{ display: "flex", gap: "10px" }}>
+            {/* Dropdown สำหรับเลือกเดือน */}
             <Form.Select
               aria-label="เลือกเดือน"
               onChange={handleMonthChange}
               value={selectedMonth}
-              style={{ width: "200px", margin: "0 auto" }}
+              style={{ width: "200px" }}
             >
               <option value="">เลือกเดือน</option>
               <option value="1">มกราคม</option>
@@ -272,7 +278,42 @@ const Equipment_Repair: React.FC = () => {
               <option value="11">พฤศจิกายน</option>
               <option value="12">ธันวาคม</option>
             </Form.Select>
+
+            {/* Dropdown สำหรับเลือกปี */}
+            <Form.Select
+              aria-label="เลือกปี"
+              onChange={handleYearChange}
+              value={selectedYear}
+              style={{ width: "200px" }}
+            >
+              <option value="">เลือกปี</option>
+              {Array.from(
+                new Set(
+                  data
+                    .filter((item) => {
+                      // กรองข้อมูลตามเดือนก่อน
+                      if (selectedMonth) {
+                        const itemMonth = new Date(item.date as string).getMonth() + 1;
+                        return itemMonth === parseInt(selectedMonth);
+                      }
+                      return true;
+                    })
+                    .filter((item) => item.date) // กรองเฉพาะข้อมูลที่มีวันที่
+                    .map((item) => {
+                      const date = new Date(item.date as string); // กำหนด item.date เป็น string
+                      return date.getFullYear();
+                    })
+                )
+              )
+                .sort()
+                .map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+            </Form.Select>
           </div>
+
           <button
             type="button"
             className="btn btn-success"
