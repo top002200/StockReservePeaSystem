@@ -1,69 +1,94 @@
-// src/components/Layout.tsx
-
 import React from 'react';
 import './Layout.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleUser, faRightFromBracket, faTable, faUserGear } from '@fortawesome/free-solid-svg-icons';
+import { faChartPie, faCircleUser, faRightFromBracket, faTable, faUserGear } from '@fortawesome/free-solid-svg-icons';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-
 const Repair_Layout: React.FC<LayoutProps> = ({ children }) => {
+  const location = useLocation(); // To highlight the active link in sidebar
 
   return (
     <div className="layout">
       {/* Sidebar */}
       <aside className="sidebar d-flex flex-column p-4">
         <div className="logo">
-          <a href='/Dashboard'><img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" className="logo-img" /></a>
+          <a href="/Dashboard">
+            <img src="src/assets/logo/PEA Logo on Violet.png" alt="PEA Logo" className="logo-img" />
+          </a>
           <hr />
         </div>
         <ul className="nav nav-pills flex-column">
-          <li className='nav-item'>
-            <Link to="/equipment-repair" className={`nav-link ${location.pathname === '/equipment-repair' ? 'active' : ''}`}>
-              <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 6 }} />อุปกรณ์ส่งซ่อม</Link>
+          <li className="nav-item">
+            <Link
+              to="/equipment-repair"
+              className={`nav-link ${location.pathname === '/equipment-repair' ? 'active' : ''}`}
+            >
+              <FontAwesomeIcon icon={faTable} style={{ color: '#fefcff', paddingRight: 6 }} />
+              อุปกรณ์ส่งซ่อม
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link
+              to="/summary"
+              className={`nav-link ${location.pathname === '/summary' ? 'active' : ''}`}
+            >
+              <FontAwesomeIcon icon={faChartPie} style={{ color: '#fefcff', paddingRight: 6 }} />
+              สรุปการส่งซ่อม
+            </Link>
           </li>
         </ul>
-        <div className='footer equip'>
+        <div className="footer equip">
           <hr />
-          <div className='dropdown open'>
+          <div className="dropdown open">
             <button
-              className='btn border-none dropdown-toggle text-white'
+              className="btn border-none dropdown-toggle text-white"
               type="button"
               id="triggerID"
               data-bs-toggle="dropdown"
               aria-expanded="false"
-              style={{padding: '10px 50px'}}
+              style={{ padding: '10px 50px' }}
             >
-             <FontAwesomeIcon icon={faCircleUser} style={{ color: '#fefcff', paddingRight: 5, fontSize: 25 }} /><span className='ms-1'>User</span>
+              <FontAwesomeIcon
+                icon={faCircleUser}
+                style={{ color: '#fefcff', paddingRight: 5, fontSize: 25 }}
+              />
+              <span className="ms-1">User</span>
             </button>
-            <div className='dropdown-menu' aria-labelledby='triggerID'>
-              <Link to="/personal-info" className='dropdown-item'>
+            <div className="dropdown-menu" aria-labelledby="triggerID">
+              <Link to="/personal-info" className="dropdown-item">
                 <FontAwesomeIcon icon={faUserGear} style={{ color: '#fefcff', paddingRight: 10 }} />
                 ข้อมูลส่วนตัว
               </Link>
-              <Link to="/login" className='dropdown-item'>
-                <FontAwesomeIcon icon={faRightFromBracket} style={{ color: '#fefcff', paddingRight: 10 }} />
+              <Link to="/login" className="dropdown-item">
+                <FontAwesomeIcon
+                  icon={faRightFromBracket}
+                  style={{ color: '#fefcff', paddingRight: 10 }}
+                />
                 ออกจากระบบ
               </Link>
             </div>
           </div>
         </div>
-        
       </aside>
 
       {/* Main Content */}
       <div className="content">
-        <main className="content-main">
-          {children}
-        </main>
+        {/* Navbar */}
+        <nav className="navbar navbar-m-expand-lg navbar-light bg-light">
+          <div className="container-fluid">
+            <span className="navbar-brand mb-0 h1 " style={{color: "#fefcff" , fontSize: "20px"}}>
+              <b>ระบบข้อมูลอุปกรณ์ส่งซ่อม</b>
+            </span>
+          </div>
+        </nav>
+
+        <main className="content-main mt-2">{children}</main>
       </div>
     </div>
-
-    
   );
 };
 

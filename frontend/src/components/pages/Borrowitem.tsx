@@ -273,12 +273,12 @@ const Borrowitem: React.FC = () => {
   return (
     <Layout>
       <div className="borrowitem-content">
-        <h3
+        <h4
           className="text-center mb-4"
           style={{ color: "#74045f", textDecoration: "underline" }}
         >
           <b>ข้อมูลอุปกรณ์ที่ยืม</b>
-        </h3>
+        </h4>
         <div className="d-flex justify-content-end align-items-center mb-3">
           <Button variant="success" onClick={handleModalOpen}>
             <FontAwesomeIcon icon={faPlus} />

@@ -60,12 +60,12 @@ const Distribution: React.FC = () => {
     return (
         <Info_Layout>
             <div className="distribute-content">
-                <h3
+                <h4
                     className="text-center mb-4"
                     style={{ color: "#74045f", textDecoration: "underline" }}
                 >
                     <b>ข้อมูลการจัดสรรอุปกรณ์</b>
-                </h3>
+                </h4>
 
                 <Table bordered hover responsive>
                     <thead>

@@ -326,12 +326,12 @@ function Equipment_info() {
   return (
     <Info_Layout>
       <div className="equipment-info-content">
-        <h3
+        <h4
           className="text-center mb-4"
           style={{ color: "#74045f", textDecoration: "underline" }}
         >
           <b>ข้อมูลอุปกรณ์สำรอง</b>
-        </h3>
+        </h4>
 
         <div className="d-flex justify-content-between align-items-center mb-3">
           <Form.Select

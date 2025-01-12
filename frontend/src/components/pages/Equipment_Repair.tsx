@@ -44,6 +44,7 @@ const Equipment_Repair: React.FC = () => {
   // Add these states and functions to handle editing
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState<RepairData | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState(""); // State สำหรับเดือนที่เลือก
 
   const handleShowEditModal = (repair: RepairData) => {
     setEditFormData(repair);
@@ -84,25 +85,13 @@ const Equipment_Repair: React.FC = () => {
     }
   };
 
-  // Fetch repairs data
+  // ฟังก์ชันดึงข้อมูลจาก API
   const fetchRepairs = async () => {
     const response = await getAllRepairs();
-
     if (response.status) {
-      const data = response.data; // Extract the 'data' field
-
-      if (Array.isArray(data)) {
-        setData(data); // Set the extracted data
-      } else {
-        console.error(
-          "Invalid data format. Expected an array, received:",
-          data
-        );
-        setData([]); // Fallback to an empty array
-      }
+      setData(response.data || []);
     } else {
       console.error("Failed to fetch repairs:", response.message);
-      setData([]); // Fallback to an empty array
     }
   };
 
@@ -214,14 +203,25 @@ const Equipment_Repair: React.FC = () => {
     }
   };
 
+  // ฟังก์ชันกรองข้อมูลตามเดือนที่เลือก
+  const filteredData = selectedMonth
+    ? data.filter((item) => {
+      if (!item.date) return false; // ตรวจสอบว่าค่า date มีอยู่หรือไม่
+      const itemMonth = new Date(item.date).getMonth() + 1; // แปลงวันที่เพื่อดึงเดือน
+      return itemMonth === parseInt(selectedMonth);
+    })
+    : data;
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMonth(e.target.value); // อัปเดตเดือนที่เลือก
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
 
-  // Calculate total pages
-  const totalPages = Math.ceil(data.length / rowsPerPage);
-
-  // Get data for the current page
-  const paginatedData = data.slice(
+  // การแบ่งหน้า
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const paginatedData = filteredData.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -230,142 +230,49 @@ const Equipment_Repair: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  // Group data by type for the chart
-  const equipmentTypeCounts = data.reduce(
-    (acc: { [key: string]: number }, item) => {
-      acc[item.type] = (acc[item.type] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
-
-  const chartData = {
-    labels: Object.keys(equipmentTypeCounts),
-    datasets: [
-      {
-        data: Object.values(equipmentTypeCounts),
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-        ],
-        hoverBackgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-        ],
-      },
-    ],
-  };
-
-  const equipmentModelCounts = data.reduce(
-    (acc: { [key: string]: number }, item) => {
-      acc[item.model] = (acc[item.model] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
 
   return (
     <Repair_Layout>
       <div className="equipment-info-content">
-        <h3
+        <h4
           className="text-center"
           style={{ color: "#74045f", textDecoration: "underline" }}
         >
           <b>ข้อมูลอุปกรณ์ส่งซ่อม</b>
-        </h3>
-
-        {/* Row for Overview Cards */}
-        <Row>
-          <Col md={4} sm={3} className="">
-            <Card className="shadow-sm card-dash">
-              <Card.Body className="d-flex justify-content-between align-items-center dash-body">
-                {/* ข้อมูลด้านซ้าย */}
-                <div className="text-start">
-                  <p className="mb-2">
-                    <b>ประเภทอุปกรณ์ที่ส่งซ่อม</b>
-                  </p>
-                  {/* Legend ด้านล่าง */}
-                  <div className="mb-3 text-start">
-                    <ul className="list-unstyled d-flex flex-column">
-                      <li className="d-flex align-items-center mb-1">
-                        <span
-                          style={{
-                            width: "10px",
-                            height: "10px",
-                            backgroundColor: "#FF6384",
-                            display: "inline-block",
-                            marginRight: "8px",
-                            borderRadius: "50%",
-                          }}
-                        ></span>
-                        <span>PC</span>
-                      </li>
-                      <li className="d-flex align-items-center">
-                        <span
-                          style={{
-                            width: "10px",
-                            height: "10px",
-                            backgroundColor: "#36A2EB",
-                            display: "inline-block",
-                            marginRight: "8px",
-                            borderRadius: "50%",
-                          }}
-                        ></span>
-                        <span>Printer</span>
-                      </li>
-                      <li className="d-flex align-items-center">
-                        <span
-                          style={{
-                            width: "10px",
-                            height: "10px",
-                            backgroundColor: "#FFCE56",
-                            display: "inline-block",
-                            marginRight: "8px",
-                            borderRadius: "50%",
-                          }}
-                        ></span>
-                        <span>Notebook</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* แผนภูมิด้านขวา */}
-                <div
-                  className="ms-auto"
-                  style={{ width: "100%", maxWidth: "100px", height: "auto" }}
-                >
-                  <Doughnut
-                    data={chartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        tooltip: { enabled: true },
-                        legend: { display: false },
-                      },
-                    }}
-                  />
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+        </h4>
 
         <div
-          style={{
+           style={{
             display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: 10,
-            paddingRight: 20,
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 15,
+            padding: "0 20px", // เพิ่ม padding ด้านข้างเพื่อความสมดุล
           }}
         >
+          {/* Dropdown สำหรับเลือกเดือน */}
+          <div>
+            <Form.Select
+              aria-label="เลือกเดือน"
+              onChange={handleMonthChange}
+              value={selectedMonth}
+              style={{ width: "200px", margin: "0 auto" }}
+            >
+              <option value="">เลือกเดือน</option>
+              <option value="1">มกราคม</option>
+              <option value="2">กุมภาพันธ์</option>
+              <option value="3">มีนาคม</option>
+              <option value="4">เมษายน</option>
+              <option value="5">พฤษภาคม</option>
+              <option value="6">มิถุนายน</option>
+              <option value="7">กรกฎาคม</option>
+              <option value="8">สิงหาคม</option>
+              <option value="9">กันยายน</option>
+              <option value="10">ตุลาคม</option>
+              <option value="11">พฤศจิกายน</option>
+              <option value="12">ธันวาคม</option>
+            </Form.Select>
+          </div>
           <button
             type="button"
             className="btn btn-success"
@@ -829,8 +736,8 @@ const Equipment_Repair: React.FC = () => {
                     <b>วันที่ส่งซ่อม :</b>{" "}
                     {selectedDetail.date
                       ? new Date(selectedDetail.date)
-                          .toISOString()
-                          .split("T")[0]
+                        .toISOString()
+                        .split("T")[0]
                       : "วันที่ไม่ระบุ"}
                   </p>
                   <p

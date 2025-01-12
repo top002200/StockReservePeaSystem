@@ -17,6 +17,7 @@ import User_DB from "../components/pages/User_DB";
 import Approval_Status from "../components/pages/Approval_Status";
 import Login from "../components/pages/Login";
 import Distribution from "../components/pages/Distribution";
+import Summary from "../components/pages/Summary";
 
 
 export default function AppRoutes() {
@@ -34,6 +35,7 @@ export default function AppRoutes() {
         <Route path="/equipment-repair" element={<Equipment_Repair />} />
         <Route path="/personal-info" element={<Personal_info />} />
         <Route path="/distribution" element={<Distribution />} />
+        <Route path="/summary" element={<Summary />} />
 
         {/* User */}
         <Route path="/user-dashboard" element={<User_DB />} />

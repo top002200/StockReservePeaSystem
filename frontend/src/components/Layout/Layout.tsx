@@ -69,9 +69,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <div className="content">
-        <main className="content-main">
-          {children}
-        </main>
+        {/* Navbar */}
+        <nav className="navbar navbar-m-expand-lg navbar-light bg-light">
+          <div className="container-fluid">
+            <span className="navbar-brand mb-0 h1 " style={{color: "#fefcff" , fontSize: "20px"}}>
+              <b>ระบบข้อมูลการยืมอุปกรณ์</b>
+            </span>
+          </div>
+        </nav>
+
+        <main className="content-main mt-2">{children}</main>
       </div>
     </div>
 
