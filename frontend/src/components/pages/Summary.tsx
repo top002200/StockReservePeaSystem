@@ -14,8 +14,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const Summary: React.FC = () => {
 
   const [data, setData] = useState<RepairData[]>([]);
-  
- 
+
+
 
   // Fetch repairs data
   const fetchRepairs = async () => {
@@ -58,18 +58,18 @@ const Summary: React.FC = () => {
       {
         data: Object.values(equipmentTypeCounts),
         backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
+          "#ffa600",
+          "#ff6361",
+          "#bc5090",
+          "#58508d",
+          "#003f5c",
         ],
         hoverBackgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
+          "#ffa600",
+          "#ff6361",
+          "#bc5090",
+          "#58508d",
+          "#003f5c",
         ],
       },
     ],
@@ -89,18 +89,26 @@ const Summary: React.FC = () => {
       {
         data: Object.values(equipmentDeptCounts),
         backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
+          "#fd7f6f",
+          "#7eb0d5",
+          "#b2e061",
+          "#bd7ebe",
+          "#ffb55a",
+          "#ffee65",
+          "#beb9db",
+          "#fdcce5",
+          "#8bd3c7",
         ],
         hoverBackgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
+          "#fd7f6f",
+          "#7eb0d5",
+          "#b2e061",
+          "#bd7ebe",
+          "#ffb55a",
+          "#ffee65",
+          "#beb9db",
+          "#fdcce5",
+          "#8bd3c7",
         ],
       },
     ],
@@ -111,16 +119,18 @@ const Summary: React.FC = () => {
       <div className="equipment-info-content">
         <h4
           className="text-center"
-          style={{ color: "#74045f", textDecoration: "underline" , marginBottom: "20px"}}
+          style={{ color: "#74045f", textDecoration: "underline", marginBottom: "20px" }}
         >
           <b>สรุปข้อมูลอุปกรณ์ส่งซ่อม</b>
         </h4>
 
         {/* Type */}
         <Row>
-          <Col md={4} sm={12} style={{ height: "100px"}}>
+          <Col md={4} sm={12} style={{ height: "100px" }}>
             <Card className="shadow-sm card-dash">
-                <Card.Header> <b style={{color: "#f6c23e"}}>ประเภทอุปกรณ์ที่ส่งซ่อม</b></Card.Header>
+              <Card.Header className="text-center" style={{ backgroundColor: "#54504c", color: "#fff" }}>
+                ประเภทอุปกรณ์ที่ส่งซ่อม
+              </Card.Header>
               <Card.Body className="d-flex justify-content-between dash-body">
                 <div
                   className="md-auto"
@@ -129,31 +139,33 @@ const Summary: React.FC = () => {
                   <Doughnut
                     data={chartData}
                     options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          tooltip: { enabled: true },
-                          legend: {
-                            display: true,
-                            position: "left", 
-                            labels: {
-                              font: {
-                                size: 10 // ปรับขนาดตัวอักษร
-                              },
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        tooltip: { enabled: true },
+                        legend: {
+                          display: true,
+                          position: "left",
+                          labels: {
+                            font: {
+                              size: 10 // ปรับขนาดตัวอักษร
                             },
                           },
                         },
-                      }}
+                      },
+                    }}
                   />
                 </div>
               </Card.Body>
             </Card>
           </Col>
 
-        {/*Dept*/}
-          <Col md={4} sm={12} style={{ height: "100px"}}>
+          {/*Dept*/}
+          <Col md={4} sm={12} style={{ height: "100px" }}>
             <Card className="shadow-sm card-dash">
-                <Card.Header><b style={{color: "#4e73df"}}>แผนกที่ส่งซ่อม</b></Card.Header>
+              <Card.Header className="text-center" style={{ backgroundColor: "#54504c", color: "#fff" }}>
+                แผนกที่ส่งซ่อม
+              </Card.Header>
               <Card.Body className="d-flex justify-content-center dash-body">
                 <div
                   className="md-auto"
@@ -162,22 +174,22 @@ const Summary: React.FC = () => {
                   <Pie
                     data={chartDept}
                     options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          tooltip: { enabled: true },
-                          legend: {
-                            display: true,
-                            position: "left", 
-                            labels: {
-                              font: {
-                                size: 10 // ปรับขนาดตัวอักษร
-                              },
-                              color: "#333", // เปลี่ยนสีตัวอักษร
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        tooltip: { enabled: true },
+                        legend: {
+                          display: true,
+                          position: "left",
+                          labels: {
+                            font: {
+                              size: 10 // ปรับขนาดตัวอักษร
                             },
+                            color: "#333", // เปลี่ยนสีตัวอักษร
                           },
                         },
-                      }}
+                      },
+                    }}
                   />
                 </div>
               </Card.Body>

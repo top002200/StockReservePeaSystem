@@ -239,8 +239,7 @@ a.active-link {
 
 .custom-card {
   max-width: 300px;
-  margin: 0 auto; /* จัดให้อยู่กลาง */
-  
+  margin: 0 auto; /* จัดให้อยู่กลาง */  
 }
 
 .card-dash {
