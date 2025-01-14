@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Repair_Layout from "../Layout/Repair_Layout";
-import { Table, Button, Modal, Form, Card, Row, Col } from "react-bootstrap";
+import { Card, Row, Col, Form } from "react-bootstrap";
 import {
   getAllRepairs,
 } from "../../services/api";
 import { RepairData } from "../../interface/IRepair";
 
-import { Doughnut, Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Doughnut, Pie, Bar } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from "chart.js";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const Summary: React.FC = () => {
 
   const [data, setData] = useState<RepairData[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState(""); // State สำหรับเดือนที่เลือก
+  const [selectedYears, setSelectedYears] = useState<number[]>([]); // รองรับการเลือกหลายปี
 
 
 
@@ -114,6 +116,62 @@ const Summary: React.FC = () => {
     ],
   };
 
+  const handleYearChange = (year: number) => {
+    setSelectedYears((prev) =>
+      prev.includes(year)
+        ? prev.filter((y) => y !== year) // ลบปีออกถ้าถูกเลือกอยู่
+        : [...prev, year] // เพิ่มปีใหม่ถ้ายังไม่ได้เลือก
+    );
+  };
+
+  const filteredData = data.filter((item) => {
+    if (!item.date) return false;
+    const date = new Date(item.date);
+    const itemMonth = date.getMonth() + 1;
+    const itemYear = date.getFullYear();
+    const isMonthMatched =
+      selectedMonth === "" || itemMonth === parseInt(selectedMonth);
+    const isYearMatched =
+      selectedYears.length === 0 || selectedYears.includes(itemYear);
+    return isMonthMatched && isYearMatched;
+  });
+
+  const getBarChartData = () => {
+    const monthlyCounts = Array(12).fill(0); // จำนวน 12 เดือน
+    filteredData.forEach((item) => {
+      if (item.date) {
+        const month = new Date(item.date).getMonth(); // หาค่าเดือน (0-11)
+        monthlyCounts[month]++;
+      }
+    });
+
+    return {
+      labels: [
+        "ม.ค.",
+        "ก.พ.",
+        "มี.ค.",
+        "เม.ย.",
+        "พ.ค.",
+        "มิ.ย.",
+        "ก.ค.",
+        "ส.ค.",
+        "ก.ย.",
+        "ต.ค.",
+        "พ.ย.",
+        "ธ.ค.",
+      ],
+      datasets: [
+        {
+          label: "จำนวนอุปกรณ์ส่งซ่อม",
+          data: monthlyCounts,
+          backgroundColor: "rgba(75, 192, 192, 0.6)",
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
   return (
     <Repair_Layout>
       <div className="equipment-info-content">
@@ -124,17 +182,22 @@ const Summary: React.FC = () => {
           <b>สรุปข้อมูลอุปกรณ์ส่งซ่อม</b>
         </h4>
 
-        {/* Type */}
-        <Row>
-          <Col md={4} sm={12} style={{ height: "100px" }}>
-            <Card className="shadow-sm card-dash">
-              <Card.Header className="text-center" style={{ backgroundColor: "#54504c", color: "#fff" }}>
+        <Row className="mb-4 justify-content-center">
+          <Col md={4} lg={4} sm={12} className="mb-4">
+            <Card className="shadow-sm card-dash h-100">
+              <Card.Header
+                className="text-center"
+                style={{ backgroundColor: "#54504c", color: "#fff" }}
+              >
                 ประเภทอุปกรณ์ที่ส่งซ่อม
               </Card.Header>
-              <Card.Body className="d-flex justify-content-between dash-body">
+              <Card.Body className="d-flex justify-content-between align-items-center">
                 <div
-                  className="md-auto"
-                  style={{ width: "100%", maxWidth: "300px", height: "auto" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "300px",
+                    height: "auto",
+                  }}
                 >
                   <Doughnut
                     data={chartData}
@@ -148,7 +211,7 @@ const Summary: React.FC = () => {
                           position: "left",
                           labels: {
                             font: {
-                              size: 10 // ปรับขนาดตัวอักษร
+                              size: 10,
                             },
                           },
                         },
@@ -160,16 +223,21 @@ const Summary: React.FC = () => {
             </Card>
           </Col>
 
-          {/*Dept*/}
-          <Col md={4} sm={12} style={{ height: "100px" }}>
-            <Card className="shadow-sm card-dash">
-              <Card.Header className="text-center" style={{ backgroundColor: "#54504c", color: "#fff" }}>
+          <Col md={4} lg={4} sm={12} className="mb-4">
+            <Card className="shadow-sm card-dash h-100">
+              <Card.Header
+                className="text-center"
+                style={{ backgroundColor: "#54504c", color: "#fff" }}
+              >
                 แผนกที่ส่งซ่อม
               </Card.Header>
-              <Card.Body className="d-flex justify-content-center dash-body">
+              <Card.Body className="d-flex justify-content-center align-items-center">
                 <div
-                  className="md-auto"
-                  style={{ width: "100%", maxWidth: "300px", height: "auto" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "300px",
+                    height: "auto",
+                  }}
                 >
                   <Pie
                     data={chartDept}
@@ -183,9 +251,9 @@ const Summary: React.FC = () => {
                           position: "left",
                           labels: {
                             font: {
-                              size: 10 // ปรับขนาดตัวอักษร
+                              size: 10,
                             },
-                            color: "#333", // เปลี่ยนสีตัวอักษร
+                            color: "#333",
                           },
                         },
                       },
@@ -197,6 +265,88 @@ const Summary: React.FC = () => {
           </Col>
         </Row>
 
+        {/* BarChart Card */}
+        <Row className="mb-4  justify-content-center">
+          <Col md={8} className="mb-4">
+            <Card
+              className="shadow-sm card-dash h-100"
+              style={{ height: "200px", width: "100%" }} // เพิ่มขนาด Card
+            >
+              <Card.Header
+                className="text-center"
+                style={{ backgroundColor: "#54504c", color: "#fff" }}
+              >
+                จำนวนการส่งซ่อมอุปกรณ์
+              </Card.Header>
+              <Card.Body className="d-flex justify-content-center align-items-center">
+                <div
+                  className="chart-container"
+                  style={{
+                    width: "100%",
+                    maxWidth: "500px", // เพิ่มขนาด BarChart
+                    height: "auto",
+                    margin: "20px 0",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row", // เปลี่ยนเป็นเรียงแนวนอน
+                      gap: "10px", // ระยะห่างระหว่าง radio
+                      flexWrap: "wrap", // รองรับการแสดงผลเมื่อพื้นที่ไม่พอ
+                    }}
+                  >
+                    {Array.from(
+                      new Set(
+                        data
+                          .filter((item) => {
+                            if (selectedMonth) {
+                              const itemMonth = new Date(item.date as string).getMonth() + 1;
+                              return itemMonth === parseInt(selectedMonth);
+                            }
+                            return true;
+                          })
+                          .filter((item) => item.date)
+                          .map((item) => {
+                            const date = new Date(item.date as string);
+                            return date.getFullYear();
+                          })
+                      )
+                    )
+                      .sort()
+                      .map((year) => (
+                        <div key={year} style={{ display: "flex", alignItems: "center" }}>
+                          <input
+                            type="radio"
+                            id={`year-${year}`}
+                            name="selectedYear"
+                            value={year}
+                            checked={selectedYears.includes(year)}
+                            onChange={() => setSelectedYears([year])}
+                            style={{
+                              appearance: "none",
+                              width: "10px",
+                              height: "10px",
+                              border: "2px solid #555",
+                              borderRadius: "50%",
+                              outline: "none",
+                              cursor: "pointer",
+                              backgroundColor: selectedYears.includes(year) ? "#555" : "#fff", // สีที่เลือก
+                              transition: "background-color 0.3s",
+                            }}
+                          />
+                          <label htmlFor={`year-${year}`} style={{ marginLeft: "5px" }}>
+                            {year}
+                          </label>
+                        </div>
+                      ))}
+                  </div>
+                  <Bar data={getBarChartData()} />
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </div>
     </Repair_Layout>
   );
