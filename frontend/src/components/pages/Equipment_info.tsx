@@ -291,18 +291,18 @@ function Equipment_info() {
   const handleSubmitPaid = async () => {
     // แปลง equipment_id ให้เป็น number ก่อนส่ง
     distributionData.equipment_id = Number(distributionData.equipment_id);
-  
+
     console.log("Distribution data before submitting:", distributionData);
-  
+
     const response = await createDistribution(distributionData);
-  
+
     if (response.status) {
       const resData = response.data;
-  
+
       // ตรวจสอบข้อมูลใน response ว่าครบถ้วนหรือไม่
       if (resData && resData.distribution_id && resData.equipment) {
         console.log("Successfully created distribution:", resData);
-  
+
         // แสดง SweetAlert2 แจ้งเตือนว่า บันทึกข้อมูลสำเร็จ
         Swal.fire({
           title: "Success!",
@@ -310,7 +310,7 @@ function Equipment_info() {
           icon: "success",
           confirmButtonText: "OK",
         });
-  
+
         handleCloseModal();
       } else {
         // แสดง SweetAlert2 แจ้งเตือนว่า ข้อมูลไม่ครบถ้วน
@@ -331,7 +331,13 @@ function Equipment_info() {
       });
     }
   };
-  
+
+  const handleSetEquipmentId = (equipmentId: number) => {
+    setDistributionData((prevState) => ({
+      ...prevState,
+      equipment_id: equipmentId, // อัปเดตค่า equipment_id จากแถวที่คลิก
+    }));
+  };
 
   return (
     <Info_Layout>
@@ -413,7 +419,10 @@ function Equipment_info() {
                   <Button
                     variant="outline-warning"
                     className="me-2"
-                    onClick={() => handleOpenModal()} // ส่ง equipment_id ไปที่ ModalPaid
+                    onClick={() => {
+                      handleSetEquipmentId(item.equipment_id ?? 0); // กำหนด equipment_id ก่อนเปิด modal
+                      handleOpenModal(); // เปิด modal
+                    }}
                   >
                     <FontAwesomeIcon icon={faArrowUp} />{" "}
                   </Button>
@@ -509,16 +518,17 @@ function Equipment_info() {
               />
             </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Equipment ID</Form.Label>
-              <Form.Control
-                type="number"
-                name="equipment_id"
-                value={distributionData.equipment_id}
-                onChange={handleInputChangePaid}
-                placeholder="กรุณากรอก Equipment ID"
-              />
-            </Form.Group>
+            {/* เอาออกจากฟอร์มแล้ว */}
+            {/* <Form.Group className="mb-3">
+        <Form.Label>Equipment ID</Form.Label>
+        <Form.Control
+          type="number"
+          name="equipment_id"
+          value={distributionData.equipment_id}
+          onChange={handleInputChangePaid}
+          placeholder="กรุณากรอก Equipment ID"
+        />
+      </Form.Group> */}
           </Form>
         </Modal.Body>
         <Modal.Footer>
