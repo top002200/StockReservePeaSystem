@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Pagination, Modal, Form } from "react-bootstrap";
+import { Table, Button, Pagination, Modal, Form, FormControl } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEdit,
@@ -53,7 +53,7 @@ function Equipment_info() {
       ...prevData,
       equipment_id: equipmentId, // ตั้งค่า equipment_id จากปุ่มที่คลิก
     }));
-    setShowModal(true); // แสดง Modal
+    setShowModalPaid(true); // แสดง Modal
   };
   const handleOpenModal = () => {
     setShowModalPaid(true); // แสดง Modal
@@ -453,7 +453,7 @@ function Equipment_info() {
       {/* Distrib Modal */}
       <Modal show={showModalPaid} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>เพิ่มข้อมูลการจำหน่ายอุปกรณ์สำรอง</Modal.Title>
+          <Modal.Title>เพิ่มข้อมูลการจัดสรรอุปกรณ์สำรอง</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>

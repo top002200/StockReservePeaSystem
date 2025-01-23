@@ -164,8 +164,8 @@ const Summary: React.FC = () => {
         {
           label: "จำนวนอุปกรณ์ส่งซ่อม",
           data: monthlyCounts,
-          backgroundColor: "rgba(75, 192, 192, 0.6)",
-          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor: "#ff096c",
+          borderColor: "#2a3843",
           borderWidth: 1,
         },
       ],

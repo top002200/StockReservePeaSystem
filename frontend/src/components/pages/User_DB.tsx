@@ -1,27 +1,21 @@
 // src/pages/User_DB.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import User_Layout from '../Layout/User_Layout';
 import { Table, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExport } from '@fortawesome/free-solid-svg-icons';
 import { Modal, Form } from 'react-bootstrap';
+import { BorrowedEquipmentData } from "../../interface/IBorrowedEquipment";
+import { getAllBorrowedEquipments } from "../../services/api";
 
 const User_DB: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 5;
+    const [borrowedequipmentData, setBorrowedEquipmentData] = useState<BorrowedEquipmentData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const data = [
-        {
-            id: 1,
-            type: 'Notebook',
-            quantity: '3'
-        },
-        {
-            id: 2,
-            type: 'Wirless Mouse',
-            quantity: '5'
-        }
-    ];
 
     const handleShowModal = (type: any) => {
         setSelectedItem(type); // เก็บข้อมูลที่เกี่ยวข้องกับแถว
@@ -32,6 +26,45 @@ const User_DB: React.FC = () => {
         setShowModal(false);
         setSelectedItem(null);
     };
+
+    const [typeFilter, setTypeFilter] = useState<string>("");
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // เรียก API ทั้งหมดพร้อมกัน
+                const [borrowedequipRes] =
+                    await Promise.all([
+                        getAllBorrowedEquipments()
+                    ]);
+
+                // จัดการข้อมูลของอุปกรณ์
+                if (borrowedequipRes.status && Array.isArray(borrowedequipRes.data)) {
+                    setBorrowedEquipmentData(borrowedequipRes.data as BorrowedEquipmentData[]);
+                } else {
+                    console.error("Error fetching equipment:", borrowedequipRes.message);
+                }
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                setIsLoading(false); // ปิดสถานะ Loading
+            }
+        };
+
+        fetchData(); // เรียกใช้ฟังก์ชัน fetchData
+    }, []);
+
+
+    // Pagination
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    const filteredData = typeFilter
+        ? borrowedequipmentData.filter((item) => item.equipment_type === typeFilter)
+        : borrowedequipmentData;
+    const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
     return (
         <User_Layout>
@@ -47,11 +80,13 @@ const User_DB: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map((item, index) => (
-                            <tr key={item.id} className="align-middle text-center">
-                                <td>{index + 1}</td>
-                                <td>{item.type}</td>
-                                <td>{item.quantity}</td>
+                        {currentRows.map((item, index) => (
+                            <tr key={item.borrowed_equipment_id} className="align-middle text-center">
+                                <td style={{ width: "100px" }}>
+                                    {index + 1 + (currentPage - 1) * rowsPerPage}
+                                </td>
+                                <td style={{ width: "150px" }}>{item.equipment_type}</td>
+                                <td style={{ width: "150px" }}></td>
                                 <td>
                                     <Button variant="outline-secondary" className="me-1" style={{ color: '#c7911b', borderColor: '#c7911b', width: '40px' }}
                                         onClick={() => handleShowModal(item)} >
@@ -79,8 +114,8 @@ const User_DB: React.FC = () => {
                                         /*value={formData.gender}
                                         onChange={handleFormSubmit}*/
                                         className="me-3"
-                                        style={{ width: '150px' }} disabled
-                                        placeholder="นางสาว"
+                                        style={{ width: '150px' }}
+
                                     />
                                     <Form.Label className="me-2">ชื่อ-สกุล : </Form.Label>
                                     <Form.Control
@@ -89,8 +124,7 @@ const User_DB: React.FC = () => {
                                         /**value={formData.user_name}
                                         onChange={handleFormSubmit}*/
                                         className="me-3"
-                                        style={{ width: '350px' }} disabled
-                                        placeholder='xxxx xxxxxxx'
+                                        style={{ width: '350px' }}
                                     />
                                     <Form.Label className="me-2">เลขประจำตัวพนักงาน : </Form.Label>
                                     <Form.Control
@@ -98,8 +132,7 @@ const User_DB: React.FC = () => {
                                         name="user_id"
                                         /*value={formData.user_id}
                                         onChange={handleFormSubmit}*/
-                                        style={{ width: '200px' }} disabled
-                                        placeholder='123456'
+                                        style={{ width: '200px' }}
                                     />
                                 </Form.Group>
 
@@ -111,15 +144,15 @@ const User_DB: React.FC = () => {
                                         name="type"
                                         /*value={formData.type}
                                         onChange={handleFormSubmit}*/
-                                        className="me-3" 
-                                        style={{ width: '300px' }} disabled
+                                        className="me-3"
+                                        style={{ width: '300px' }}
                                         placeholder={selectedItem.type}
                                     />
                                     <Form.Label className="me-2">จำนวน : </Form.Label>
                                     <Form.Control
                                         type="number"
                                         name="b_quantity"
-                                        className="me-3" 
+                                        className="me-3"
                                         style={{ width: '100px' }} min="1" max={selectedItem.quantity}
                                     />
                                 </Form.Group>

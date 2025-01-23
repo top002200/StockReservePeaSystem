@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleInfo,
   faEdit,
+  faFilePdf,
   faPlus,
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
@@ -17,6 +18,9 @@ import {
 import { RepairData } from "../../interface/IRepair";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { THSarabunFont } from "../../fonts/THSarabun";
 
 const Equipment_Repair: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
@@ -235,6 +239,170 @@ const Equipment_Repair: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
+  const base64Data = THSarabunFont.normal.split(",")[1];
+  console.log("Base64 Data Only:", base64Data);
+
+  // Helper function to validate Base64
+  function isValidBase64(str: string): boolean {
+    try {
+      const decoded = atob(str.split(",")[1]); // แยกส่วนข้อมูล Base64 ออกจาก "data:font/ttf;base64,"
+      return !!decoded;
+    } catch (e) {
+      console.error("Base64 validation error:", e);
+      return false;
+    }
+  }
+
+  // เพิ่มฟังก์ชันสำหรับสร้าง PDF
+  const exportToPDF = () => {
+    // สร้าง PDF โดยกำหนดให้เป็นแนวนอน (Landscape)
+    const doc = new jsPDF({
+      orientation: "landscape", // กำหนด orientation เป็น "landscape"
+    });
+
+    try {
+      // ตรวจสอบฟอนต์
+      const base64Data = THSarabunFont.normal.split(",")[1];
+      if (!base64Data || !isValidBase64(THSarabunFont.normal)) {
+        throw new Error("Font data is not valid Base64.");
+      }
+
+      // เพิ่มฟอนต์
+      doc.addFileToVFS("THSarabunNew.ttf", base64Data);
+      doc.addFont("THSarabunNew.ttf", "THSarabun", "normal");
+      doc.setFont("THSarabun");
+      doc.setFontSize(16); // ขนาดฟอนต์เริ่มต้น
+
+      // สร้างชื่อเดือนและปีจากตัวเลือก
+      const monthNames = [
+        "มกราคม",
+        "กุมภาพันธ์",
+        "มีนาคม",
+        "เมษายน",
+        "พฤษภาคม",
+        "มิถุนายน",
+        "กรกฎาคม",
+        "สิงหาคม",
+        "กันยายน",
+        "ตุลาคม",
+        "พฤศจิกายน",
+        "ธันวาคม",
+      ];
+
+      const selectedMonthName =
+        selectedMonth !== "" ? monthNames[parseInt(selectedMonth) - 1] : "ทั้งหมด";
+      const selectedYearText = selectedYear !== "" ? selectedYear : "ทั้งหมด";
+
+      // ชื่อเอกสาร
+      const documentTitle = `รายงานข้อมูลอุปกรณ์ส่งซ่อม: เดือน ${selectedMonthName} ปี ${selectedYearText}`;
+      doc.text(documentTitle, 14, 10); // ตำแหน่งของชื่อเรื่อง
+
+      // กรองข้อมูลตามเดือนและปีที่เลือก
+      const filteredDataByMonthYear = filteredData.filter((item) => {
+        if (!item.date) return false;
+        const date = new Date(item.date);
+        const itemMonth = date.getMonth() + 1;
+        const itemYear = date.getFullYear();
+        const isMonthMatched =
+          selectedMonth === "" || itemMonth === parseInt(selectedMonth);
+        const isYearMatched =
+          selectedYear === "" || itemYear === parseInt(selectedYear);
+        return isMonthMatched && isYearMatched;
+      });
+
+      // ข้อมูลตาราง
+      const tableColumn = [
+        "ลำดับ",
+        "วันที่ส่งซ่อม",
+        "ผู้ส่งซ่อม",
+        "แผนก",
+        "ประเภท",
+        "ชื่ออุปกรณ์",
+        "ยี่ห้อ",
+        "รุ่น",
+        "เลขที่สัญญา",
+        "สาเหตุที่ส่งซ่อม",
+        "การแก้ไข",
+        "หมายเหตุ",
+      ];
+      const tableRows: any[] = [];
+
+      // เตรียมข้อมูลจาก `filteredDataByMonthYear`
+      filteredDataByMonthYear.forEach((item, index) => {
+        const rowData = [
+          index + 1, // ลำดับที่
+          item.date ? new Date(item.date).toLocaleDateString() : "-", // วันที่ส่งซ่อม
+          item.user_name, // ผู้ส่งซ่อม
+          item.dept, // แผนก
+          item.type, // ประเภทอุปกรณ์
+          item.device_name, // ชื่ออุปกรณ์
+          item.brand, //ยี่ห้อ
+          item.model, //รุ่น
+          item.contract, // เลขที่สัญญา
+          item.problem, //สาเหตุ
+          item.fixing,
+          item.note,
+        ];
+        tableRows.push(rowData);
+      });
+
+      // ตรวจสอบว่ามีข้อมูลหรือไม่
+      if (tableRows.length === 0) {
+        Swal.fire("แจ้งเตือน", "ไม่มีข้อมูลสำหรับเดือนและปีที่เลือก", "info");
+        return;
+      }
+
+      // เพิ่มข้อมูลตารางลงใน PDF
+      (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 15,
+        styles: {
+          font: "THSarabun", // กำหนดฟอนต์
+          fontSize: 12, // ขนาดฟอนต์
+          lineColor: [200, 200, 200], // สีเส้นขอบ
+          lineWidth: 0.3, // ความหนาของเส้นขอบ
+          overflow: "linebreak",
+          minCellHeight: 10,
+        },
+        headStyles: {
+          fillColor: [0, 102, 204], // สีพื้นหลังหัวตาราง
+          textColor: [255, 255, 255], // สีข้อความหัวตาราง
+          fontStyle: "bold", // รูปแบบข้อความหัวตาราง
+          valign: "middle",
+          halign: "center",
+        },
+        bodyStyles: {
+          font: "THSarabun", // ฟอนต์ข้อความในตาราง
+          textColor: [0, 0, 0], // สีข้อความ
+          overflow: "linebreak",
+        },
+        columnStyles: {
+          0: { halign: "center", cellWidth: 10 }, // ลำดับ
+          1: { halign: "center", cellWidth: 20 }, //วันที่
+          2: { halign: "center", cellWidth: 20 }, //ผู้ส่งซ่อม
+          3: { halign: "center" }, //แผนก
+          4: { halign: "center" }, //ชื่อเครื่อง
+          5: { halign: "center", cellWidth: 20 }, //ประเภท
+          6: { halign: "center", cellWidth: 20 }, //ยี่ห้อ
+          7: { halign: "center", cellWidth: 25 }, //รุ่น
+          8: { halign: "center" }, //เลขที่สัญญา
+          9: { halign: "left" }, //สาเหตุ
+          10: { halign: "left" }, //การแก้ไข
+          11: { halign: "left" }, //หมายเหตุ
+        },
+      });
+
+      // ชื่อไฟล์ PDF
+      const fileName = `รายงานข้อมูลอุปกรณ์ส่งซ่อม_${selectedMonthName}_${selectedYearText}.pdf`;
+
+      // ดาวน์โหลดไฟล์ PDF
+      doc.save(fileName);
+    } catch (error) {
+      console.error("Failed to export PDF:", error);
+    }
+  };
+
 
   return (
     <Repair_Layout>
@@ -314,14 +482,33 @@ const Equipment_Repair: React.FC = () => {
             </Form.Select>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-success"
-            onClick={() => setShowAddModal(true)}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "20px", // เพิ่มระยะห่างระหว่างปุ่ม PDF และปุ่ม + 
+            }}
           >
-            <FontAwesomeIcon icon={faPlus} />
-          </button>
+            {/* ปุ่มดาวน์โหลด PDF */}
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={exportToPDF}
+            >
+              <FontAwesomeIcon icon={faFilePdf} />
+            </button>
+
+            {/* ปุ่มเพิ่มข้อมูล (ปุ่ม Plus) */}
+            <button
+              type="button"
+              className="btn btn-success"
+              onClick={() => setShowAddModal(true)}
+            >
+              <FontAwesomeIcon icon={faPlus} />
+            </button>
+          </div>
         </div>
+
 
         {/* Existing content */}
         <Table bordered hover responsive>

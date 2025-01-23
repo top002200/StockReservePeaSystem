@@ -288,8 +288,8 @@ const Borrowitem: React.FC = () => {
           <thead>
             <tr className="align-middle text-center">
               <th>ลำดับที่</th>
-              <th>ชื่ออุปกรณ์</th>
               <th>ประเภท</th>
+              <th>ชื่ออุปกรณ์</th>
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
               <th>รหัสทรัพย์สิน</th>
@@ -310,8 +310,8 @@ const Borrowitem: React.FC = () => {
                   className="align-middle text-center"
                 >
                   <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                  <td>{item.equipment_name}</td>
                   <td>{item.equipment_type}</td>
+                  <td>{item.equipment_name}</td>
                   <td>{item.equipment_brand}</td>
                   <td>{item.equipment_model}</td>
                   <td>{item.equip_assetcode}</td>
@@ -383,16 +383,7 @@ const Borrowitem: React.FC = () => {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>ชื่ออุปกรณ์</Form.Label>
-              <Form.Control
-                type="text"
-                name="equipment_name"
-                value={formData.equipment_name}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
+          <Form.Group className="mb-3">
               <Form.Label>ประเภท</Form.Label>
               <Form.Select
                 name="equipment_type"
@@ -406,6 +397,15 @@ const Borrowitem: React.FC = () => {
                   </option>
                 ))}
               </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>ชื่ออุปกรณ์</Form.Label>
+              <Form.Control
+                type="text"
+                name="equipment_name"
+                value={formData.equipment_name}
+                onChange={handleInputChange}
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
