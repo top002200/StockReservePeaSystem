@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Pagination, Modal, Form, FormControl } from "react-bootstrap";
+import {
+  Table,
+  Button,
+  Pagination,
+  Modal,
+  Form,
+  FormControl,
+} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEdit,
@@ -31,15 +38,14 @@ function Equipment_info() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
   const [distributionData, setDistributionData] = useState<DistributionData>({
-    g_name: "",  // ผู้จัดสรร
-    r_name: "",  // ผู้รับจัดสรร
-    distribution_amount: 0,  // จำนวนที่จัดสรร
-    equipment_id: 0,  // รหัสอุปกรณ์
-    date: "",  // วันที่
-    name: "",  // ชื่อผู้จัดสรร
+    g_name: "", // ผู้จัดสรร
+    r_name: "", // ผู้รับจัดสรร
+    distribution_amount: 0, // จำนวนที่จัดสรร
+    equipment_id: 0, // รหัสอุปกรณ์
+    date: "", // วันที่
+    name: "", // ชื่อผู้จัดสรร
   });
-  
-  
+
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false); // <-- Add this line
   const [editingId, setEditingId] = useState<number | string | null>(null);
@@ -283,9 +289,12 @@ function Equipment_info() {
   };
 
   const handleSubmitPaid = async () => {
-    const response = await createDistribution(distributionData);
+    // แปลง equipment_id ให้เป็น number ก่อนส่ง
+    distributionData.equipment_id = Number(distributionData.equipment_id);
   
     console.log("Distribution data before submitting:", distributionData);
+  
+    const response = await createDistribution(distributionData);
   
     if (response.status) {
       const resData = response.data;
@@ -293,36 +302,37 @@ function Equipment_info() {
       // ตรวจสอบข้อมูลใน response ว่าครบถ้วนหรือไม่
       if (resData && resData.distribution_id && resData.equipment) {
         console.log("Successfully created distribution:", resData);
-        
+  
         // แสดง SweetAlert2 แจ้งเตือนว่า บันทึกข้อมูลสำเร็จ
         Swal.fire({
-          title: 'Success!',
-          text: 'บันทึกข้อมูลสำเร็จ',
-          icon: 'success',
-          confirmButtonText: 'OK'
+          title: "Success!",
+          text: "บันทึกข้อมูลสำเร็จ",
+          icon: "success",
+          confirmButtonText: "OK",
         });
   
         handleCloseModal();
       } else {
         // แสดง SweetAlert2 แจ้งเตือนว่า ข้อมูลไม่ครบถ้วน
         Swal.fire({
-          title: 'Success!',
-          text: 'บันทึกข้อมูลสำเร็จ',
-          icon: 'success',
-          confirmButtonText: 'OK'
+          title: "Error!",
+          text: "ข้อมูลไม่ครบถ้วน",
+          icon: "error",
+          confirmButtonText: "OK",
         });
       }
     } else {
       // แสดง SweetAlert2 แจ้งเตือนในกรณีที่เกิดข้อผิดพลาด
       Swal.fire({
-        title: 'Error!',
-        text: response.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text: response.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
   };
   
+
   return (
     <Info_Layout>
       <div className="equipment-info-content">
@@ -544,11 +554,17 @@ function Equipment_info() {
               <Form.Select
                 name="equipment_type"
                 value={formData.equipment_type}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const selectedTypeName = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    equipment_type: selectedTypeName, // เก็บเป็นชื่อประเภท
+                  }));
+                }}
               >
                 <option value="">-- เลือกประเภท --</option>
                 {typeOptions.map((type) => (
-                  <option key={type.type_id} value={type.type_id}>
+                  <option key={type.type_id} value={type.type_name}>
                     {type.type_name}
                   </option>
                 ))}

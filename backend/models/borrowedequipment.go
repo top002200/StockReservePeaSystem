@@ -10,4 +10,5 @@ type BorrowedEquipment struct {
 	AssetCode            string       `json:"equip_assetcode"`                                      // Asset code
 	EquipmentImg         string       `json:"equip_img"`                                            // Image of the equipment
 	Submissions          []Submission `gorm:"foreignKey:BorrowedEquipmentID;references:BorrowedEquipmentID" json:"submissions"` // Relationships
+
 }

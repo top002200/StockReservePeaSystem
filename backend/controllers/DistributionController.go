@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,37 +11,55 @@ import (
 
 // CreateDistribution creates a new distribution
 func CreateDistribution(c *gin.Context) {
-	var distribution models.Distribution
-	if err := c.ShouldBindJSON(&distribution); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid input"})
-		return
-	}
+    var distribution models.Distribution
 
-	// ตรวจสอบว่า equipment_id ถูกต้องหรือไม่
-	if distribution.EquipmentID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid equipment_id"})
-		return
-	}
+    // รับข้อมูล JSON และ bind เข้ากับ distribution
+    if err := c.ShouldBindJSON(&distribution); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid input"})
+        return
+    }
 
-	// ตรวจสอบการเชื่อมโยงกับข้อมูล equipment
-	var equipment models.Equipment
-	if err := config.DB.Preload("Equipment").First(&equipment, distribution.EquipmentID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Equipment not found"})
-		return
-	}
+    // ตรวจสอบว่า equipment_id ถูกต้องหรือไม่
+    if distribution.EquipmentID == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid equipment_id"})
+        return
+    }
 
-	// เชื่อมโยงข้อมูล equipment กับ distribution
-	distribution.Equipment = equipment
+    // ตรวจสอบว่า equipment มีอยู่จริง
+    var equipment models.Equipment
+    if err := config.DB.First(&equipment, "equipment_id = ?", distribution.EquipmentID).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Equipment not found"})
+        return
+    }
 
-	// บันทึกข้อมูล distribution
-	if err := config.DB.Create(&distribution).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to create distribution"})
-		return
-	}
+    // เชื่อมโยงข้อมูล equipment กับ distribution
+    distribution.Equipment = equipment
+    distribution.EquipmentID = equipment.EquipmentID
 
-	// ส่งข้อมูลกลับไป
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": distribution})
+    // กำหนด distribution_id ให้ตรงกับ equipment_id
+    distribution.DistributionID = distribution.EquipmentID
+
+    // บันทึกข้อมูล distribution
+    if err := config.DB.Create(&distribution).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to create distribution"})
+        return
+    }
+
+    // ใช้ Preload เพื่อดึงข้อมูล Equipment ที่เชื่อมโยงกับ Distribution
+    if err := config.DB.Preload("Equipment").First(&distribution, distribution.DistributionID).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to load distribution with equipment"})
+        return
+    }
+
+    // log ผลลัพธ์
+    fmt.Printf("Successfully created distribution with Equipment: %+v\n", distribution)
+
+    // ส่งข้อมูลกลับ
+    c.JSON(http.StatusOK, gin.H{"status": "success", "data": distribution})
 }
+
+
+
 
 // GetAllDistributions retrieves all distributions and preloads the associated equipment
 func GetAllDistributions(c *gin.Context) {

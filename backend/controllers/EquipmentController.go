@@ -47,8 +47,21 @@ func GetEquipmentByID(c *gin.Context) {
 // GetAllEquipments - Retrieve all Equipments
 func GetAllEquipments(c *gin.Context) {
 	var equipments []models.Equipment
+	// รับพารามิเตอร์การค้นหา
+	equipmentName := c.DefaultQuery("equipment_name", "")
+	equipmentType := c.DefaultQuery("equipment_type", "")
 
-	if err := config.DB.Find(&equipments).Error; err != nil {
+	// กรองข้อมูลตามพารามิเตอร์ที่ได้รับ
+	query := config.DB.Model(&models.Equipment{})
+	if equipmentName != "" {
+		query = query.Where("equipment_name LIKE ?", "%"+equipmentName+"%")
+	}
+	if equipmentType != "" {
+		query = query.Where("equipment_type LIKE ?", "%"+equipmentType+"%")
+	}
+
+	// ดึงข้อมูลตามเงื่อนไขที่กรองไว้
+	if err := query.Find(&equipments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":  "error",
 			"message": "Error retrieving equipments",
@@ -62,6 +75,8 @@ func GetAllEquipments(c *gin.Context) {
 		"data":   equipments,
 	})
 }
+
+
 
 // UpdateEquipment - Update an existing Equipment
 func UpdateEquipment(c *gin.Context) {

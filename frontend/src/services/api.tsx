@@ -855,17 +855,14 @@ async function getRepairsByEquipment(equipmentId: string) {
 }
 const createDistribution = async (data: DistributionData) => {
   try {
-    // แปลงข้อมูลที่จำเป็นเป็นตัวเลข (number)
-    const formattedData = {
-      g_name: data.g_name,
-      r_name: data.r_name,
-      distribution_amount: Number(data.distribution_amount), // แปลงเป็น number
-      equipment_id: Number(data.equipment_id), // แปลงเป็น number
-      date: data.date,
-      name: data.name,
+    // แปลงข้อมูล equipment_id และ distribution_amount ให้เป็น number เพื่อความแน่นอน
+    const formattedData: DistributionData = {
+      ...data,
+      equipment_id: Number(data.equipment_id),
+      distribution_amount: Number(data.distribution_amount),
     };
 
-    console.log("Data to send:", formattedData); // ตรวจสอบข้อมูลที่แปลงแล้ว
+    console.log("Formatted Data:", formattedData); // log ค่าก่อนส่งไปยัง backend
 
     const response = await fetch(`${apiURL}/distribution`, {
       method: "POST",
@@ -875,11 +872,9 @@ const createDistribution = async (data: DistributionData) => {
       body: JSON.stringify(formattedData),
     });
 
-    console.log("Response status:", response.status); // ตรวจสอบสถานะการตอบกลับจาก API
-
     const res = await response.json();
 
-    console.log("Response from API:", res); // ตรวจสอบการตอบกลับจาก API
+    console.log("API Response:", res); // log ค่าที่ได้รับจาก API
 
     if (response.ok) {
       return { status: true, message: res.message, data: res.data };
