@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleInfo,
   faEdit,
+  faFileExcel,
   faFilePdf,
   faPlus,
   faTrashCan,
@@ -21,6 +22,8 @@ import { Pagination } from "react-bootstrap";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { THSarabunFont } from "../../fonts/THSarabun";
+import * as XLSX from "xlsx";
+
 
 const Equipment_Repair: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
@@ -404,6 +407,116 @@ const Equipment_Repair: React.FC = () => {
   };
 
 
+  const exportToExcel = () => {
+    try {
+      const monthNames = [
+        "มกราคม",
+        "กุมภาพันธ์",
+        "มีนาคม",
+        "เมษายน",
+        "พฤษภาคม",
+        "มิถุนายน",
+        "กรกฎาคม",
+        "สิงหาคม",
+        "กันยายน",
+        "ตุลาคม",
+        "พฤศจิกายน",
+        "ธันวาคม",
+      ];
+
+      const selectedMonthName =
+        selectedMonth !== "" ? monthNames[parseInt(selectedMonth) - 1] : "ทั้งหมด";
+      const selectedYearText = selectedYear !== "" ? selectedYear : "ทั้งหมด";
+      const fileName = `รายงานข้อมูลอุปกรณ์ส่งซ่อม_${selectedMonthName}_${selectedYearText}.xlsx`;
+
+      const filteredDataByMonthYear = filteredData.filter((item) => {
+        if (!item.date) return false;
+        const date = new Date(item.date);
+        const itemMonth = date.getMonth() + 1;
+        const itemYear = date.getFullYear();
+        const isMonthMatched =
+          selectedMonth === "" || itemMonth === parseInt(selectedMonth);
+        const isYearMatched =
+          selectedYear === "" || itemYear === parseInt(selectedYear);
+        return isMonthMatched && isYearMatched;
+      });
+
+      if (filteredDataByMonthYear.length === 0) {
+        Swal.fire("แจ้งเตือน", "ไม่มีข้อมูลสำหรับเดือนและปีที่เลือก", "info");
+        return;
+      }
+
+      // เตรียมข้อมูลสำหรับ Excel
+      const excelData = filteredDataByMonthYear.map((item, index) => ({
+        "ลำดับ": index + 1,
+        "วันที่ส่งซ่อม": item.date
+          ? new Date(item.date).toLocaleDateString()
+          : "-",
+        "ผู้ส่งซ่อม": item.user_name,
+        "แผนก": item.dept,
+        "ประเภท": item.type,
+        "ชื่ออุปกรณ์": item.device_name,
+        "ยี่ห้อ": item.brand,
+        "รุ่น": item.model,
+        "เลขที่สัญญา": item.contract,
+        "สาเหตุที่ส่งซ่อม": item.problem,
+        "การแก้ไข": item.fixing,
+        "หมายเหตุ": item.note,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      // เพิ่มการจัดสไตล์
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+          if (!worksheet[cellAddress]) continue;
+          worksheet[cellAddress].s = {
+            font: { name: "Arial", sz: 12, bold: R === 0 }, // ฟอนต์และขนาด, หัวข้อหนา
+            alignment: {
+              horizontal: "center", // จัดข้อความแนวนอนกึ่งกลาง
+              vertical: "center", // จัดข้อความแนวตั้งกึ่งกลาง
+              wrapText: true, // รองรับข้อความยาว (break word)
+            },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          };
+        }
+      }
+
+      // กำหนดความกว้างของคอลัมน์
+      const columnWidths = [
+        { wch: 5 },
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 25 },
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 40 },
+        { wch: 40 },
+        { wch: 30 },
+      ];
+      worksheet["!cols"] = columnWidths;
+
+      // สร้าง workbook และเพิ่ม worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "รายงาน");
+
+      // บันทึกไฟล์ Excel
+      XLSX.writeFile(workbook, fileName);
+    } catch (error) {
+      console.error("Failed to export Excel:", error);
+    }
+  };
+
   return (
     <Repair_Layout>
       <div className="equipment-info-content">
@@ -486,23 +599,61 @@ const Equipment_Repair: React.FC = () => {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "20px", // เพิ่มระยะห่างระหว่างปุ่ม PDF และปุ่ม + 
+              gap: "10px",
             }}
           >
-            {/* ปุ่มดาวน์โหลด PDF */}
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={exportToPDF}
+            {/* Button Group สำหรับปุ่มดาวน์โหลด PDF และ Excel */}
+            <div
+              className="btn-group"
+              role="group"
+              aria-label="Export Buttons"
+              style={{
+                borderRadius: "8px", // มุมโค้งมน
+                overflow: "hidden", // ป้องกันปุ่มล้น
+                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)", // เพิ่มเงาเล็กน้อย
+              }}
             >
-              <FontAwesomeIcon icon={faFilePdf} />
-            </button>
+              {/* ปุ่มดาวน์โหลด PDF */}
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={exportToPDF}
+                title="ดาวน์โหลดรายงาน PDF"
+                style={{
+                  fontSize: "20px", // ขนาดตัวอักษร
+                }}
+              >
+                <FontAwesomeIcon icon={faFilePdf} />
+              </button>
+
+              {/* ปุ่มส่งออกเป็น Excel */}
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={exportToExcel}
+                title="ดาวน์โหลดรายงาน Excel"
+                style={{
+                  fontSize: "20px",
+                }}
+              >
+                <FontAwesomeIcon icon={faFileExcel} />
+              </button>
+            </div>
 
             {/* ปุ่มเพิ่มข้อมูล (ปุ่ม Plus) */}
             <button
               type="button"
-              className="btn btn-success"
+              className="btn btn-secondary"
               onClick={() => setShowAddModal(true)}
+              title="เพิ่มข้อมูลอุปกรณ์ส่งซ่อม"
+              style={{
+                color: "white",
+                marginLeft: "10px",
+                padding: "10px 15px",
+                fontSize: "14px",
+                borderRadius: "8px", // มุมโค้งมน
+                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)", // เพิ่มเงาเล็กน้อย
+              }}
             >
               <FontAwesomeIcon icon={faPlus} />
             </button>

@@ -150,7 +150,7 @@
                     {item.distribution_amount}
                     </td>
                     <td className="align-middle text-center">{item.g_name}</td>
-                    <td className="align-middle text-center">{item.receiver}</td>
+                    <td className="align-middle text-center">{item.r_name}</td>
                     <td className="align-middle text-center">{item.date}</td>
                     <td className="align-middle text-center">
                     <Button

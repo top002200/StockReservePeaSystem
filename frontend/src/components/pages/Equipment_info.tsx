@@ -519,17 +519,6 @@ function Equipment_info() {
                 placeholder="กรุณากรอก Equipment ID"
               />
             </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>ชื่อผู้จัดสรร</Form.Label>
-              <Form.Control
-                type="text"
-                name="name" // ใช้ชื่อฟิลด์ให้ตรงกับฐานข้อมูล
-                value={distributionData.name} // อัปเดตการใช้งานชื่อฟิลด์
-                onChange={handleInputChangePaid}
-                placeholder="กรุณากรอกชื่อผู้จัดสรร"
-              />
-            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
