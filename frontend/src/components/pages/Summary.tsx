@@ -16,7 +16,9 @@ const Summary: React.FC = () => {
   const [data, setData] = useState<RepairData[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(""); // State สำหรับเดือนที่เลือก
   const [selectedYears, setSelectedYears] = useState<number[]>([]); // รองรับการเลือกหลายปี
-
+  const [contractCounts, setContractCounts] = useState<{
+    [key: string]: number;
+  }>({});
 
 
   // Fetch repairs data
@@ -28,6 +30,7 @@ const Summary: React.FC = () => {
 
       if (Array.isArray(data)) {
         setData(data); // Set the extracted data
+        calculateContractCounts(response.data || []);
       } else {
         console.error(
           "Invalid data format. Expected an array, received:",
@@ -39,6 +42,16 @@ const Summary: React.FC = () => {
       console.error("Failed to fetch repairs:", response.message);
       setData([]); // Fallback to an empty array
     }
+  };
+
+  // ฟังก์ชันคำนวณจำนวน `contract`
+  const calculateContractCounts = (repairs: RepairData[]) => {
+    const counts: { [key: string]: number } = {};
+    repairs.forEach((repair) => {
+      const contract = repair.contract || "ไม่ระบุ";
+      counts[contract] = (counts[contract] || 0) + 1;
+    });
+    setContractCounts(counts);
   };
 
   useEffect(() => {
@@ -171,6 +184,40 @@ const Summary: React.FC = () => {
       ],
     };
   };
+  const ContractData = {
+    labels: Object.keys(contractCounts), // ชื่อ `contract`
+    datasets: [
+      {
+        label: "จำนวน",
+        data: Object.values(contractCounts), // จำนวน `contract`
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.2)",
+          "rgba(54, 162, 235, 0.2)",
+          "rgba(255, 206, 86, 0.2)",
+          "rgba(75, 192, 192, 0.2)",
+          "rgba(153, 102, 255, 0.2)",
+        ],
+        borderColor: [
+          "rgba(255, 99, 132, 1)",
+          "rgba(54, 162, 235, 1)",
+          "rgba(255, 206, 86, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(153, 102, 255, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const ContractOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+    },
+  };
+
 
   return (
     <Repair_Layout>
@@ -182,8 +229,9 @@ const Summary: React.FC = () => {
           <b>สรุปข้อมูลอุปกรณ์ส่งซ่อม</b>
         </h4>
 
+        {/*type chart*/}
         <Row className="mb-4 justify-content-center">
-          <Col md={4} lg={4} sm={12} className="mb-4">
+          <Col md={4} className="mb-4">
             <Card className="shadow-sm card-dash h-100">
               <Card.Header
                 className="text-center"
@@ -191,74 +239,97 @@ const Summary: React.FC = () => {
               >
                 ประเภทอุปกรณ์ที่ส่งซ่อม
               </Card.Header>
-              <Card.Body className="d-flex justify-content-between align-items-center">
+              <Card.Body
+                className="d-flex justify-content-center align-items-center"
+                style={{
+                  display: "flex",
+                  flexDirection: "row", // จัดเรียงแนวนอน
+                  alignItems: "center", // จัดให้อยู่ตรงกลางแนวตั้ง
+                }}
+              >
+                {/* Container สำหรับ label */}
                 <div
                   style={{
-                    width: "100%",
-                    maxWidth: "300px",
-                    height: "auto",
+                    flex: 1, // ใช้พื้นที่ฝั่งซ้าย
+                    display: "flex",
+                    justifyContent: "flex-start", // ชิดซ้าย
+                    alignItems: "center",
+                    paddingRight: "20px", // เว้นระยะห่างระหว่าง label กับ chart
                   }}
                 >
-                  <Doughnut
-                    data={chartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        tooltip: { enabled: true },
-                        legend: {
-                          display: true,
-                          position: "left",
-                          labels: {
-                            font: {
-                              size: 10,
-                            },
+                  <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+                    {chartData.labels.map((label, index) => (
+                      <li key={index} style={{ marginBottom: "10px", fontSize: "12px" }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: "10px",
+                            height: "10px",
+                            backgroundColor: chartData.datasets[0].backgroundColor[index],
+                            marginRight: "10px",
+                            borderRadius: "50%",
+                          }}
+                        ></span>
+                        {label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Container สำหรับ Chart */}
+                <div
+                  style={{
+                    flex: 3, // ใช้พื้นที่ฝั่งขวาสำหรับ Chart
+                    display: "flex",
+                    justifyContent: "center", // จัดให้อยู่ตรงกลาง
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "100%",
+                      maxWidth: "200px",
+                      height: "auto",
+                    }}
+                  >
+                    <Doughnut
+                      data={chartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          tooltip: { enabled: true },
+                          legend: {
+                            display: false, // ซ่อน legend ใน chart
                           },
                         },
-                      },
-                    }}
-                  />
+                      }}
+                    />
+                  </div>
                 </div>
               </Card.Body>
             </Card>
           </Col>
+        </Row>
 
-          <Col md={4} lg={4} sm={12} className="mb-4">
+
+        <Row className="mb-4 justify-content-center">
+          <Col md={8} className="mb-4">
             <Card className="shadow-sm card-dash h-100">
               <Card.Header
                 className="text-center"
                 style={{ backgroundColor: "#54504c", color: "#fff" }}
               >
-                แผนกที่ส่งซ่อม
+                จำนวนอุปกรณ์ส่งซ่อมตามเลขที่ศัญญา
               </Card.Header>
               <Card.Body className="d-flex justify-content-center align-items-center">
                 <div
                   style={{
                     width: "100%",
-                    maxWidth: "300px",
+                    maxWidth: "500px",
                     height: "auto",
                   }}
                 >
-                  <Pie
-                    data={chartDept}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        tooltip: { enabled: true },
-                        legend: {
-                          display: true,
-                          position: "left",
-                          labels: {
-                            font: {
-                              size: 10,
-                            },
-                            color: "#333",
-                          },
-                        },
-                      },
-                    }}
-                  />
+                  <Bar data={ContractData} options={ContractOptions} />
                 </div>
               </Card.Body>
             </Card>

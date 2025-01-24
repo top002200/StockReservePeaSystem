@@ -9,11 +9,11 @@
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         equipment_type: "",
-        equipment_name: "",
+        g_name: "",
         equipment_brand: "",
         equipment_model: "",
         equip_contract: "",
-        receiver: "",
+        r_name: "",
         date: "",
     });
     const [data, setData] = useState<any[]>([]); // สำหรับเก็บข้อมูลที่ดึงมาจาก API
@@ -61,23 +61,51 @@
       };
       
 
-    const handleOpenModal = (edit = false, item = null) => {
+      interface Equipment {
+        equipment_type: string;
+        equipment_name: string;
+        equipment_brand: string;
+        equipment_model: string;
+    }
+    
+    interface DistributionItem {
+        equipment: Equipment;
+        equip_contract: string;
+        r_name: string;
+        date: string;
+        distribution_id: string;
+        distribution_amount: number;
+        g_name: string;
+    }
+    
+    const handleOpenModal = (edit = false, item: DistributionItem | null = null) => {
         setIsEdit(edit);
         setShowModal(true);
+    
         if (edit && item) {
-        setFormData(item);
+            setFormData({
+                equipment_type: item.equipment?.equipment_type || "",
+                g_name: item.g_name || "",
+                equipment_brand: item.equipment?.equipment_brand || "",
+                equipment_model: item.equipment?.equipment_model || "",
+                equip_contract: item.equip_contract || "",
+                r_name: item.r_name || "",
+                date: item.date || "",
+            });
         } else {
-        setFormData({
-            equipment_type: "",
-            equipment_name: "",
-            equipment_brand: "",
-            equipment_model: "",
-            equip_contract: "",
-            receiver: "",
-            date: "",
-        });
+            setFormData({
+                equipment_type: "",
+                g_name: "",
+                equipment_brand: "",
+                equipment_model: "",
+                equip_contract: "",
+                r_name: "",
+                date: "",
+            });
         }
     };
+    
+    
 
     const handleCloseModal = () => {
         setShowModal(false);
@@ -190,11 +218,11 @@
                     />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                    <Form.Label>ชื่ออุปกรณ์</Form.Label>
+                    <Form.Label>ผู้จัดสรร</Form.Label>
                     <Form.Control
                     type="text"
                     name="equipment_name"
-                    value={formData.equipment_name}
+                    value={formData.g_name}
                     onChange={handleInputChange}
                     />
                 </Form.Group>
@@ -221,7 +249,7 @@
                     <Form.Control
                     type="text"
                     name="receiver"
-                    value={formData.receiver}
+                    value={formData.r_name}
                     onChange={handleInputChange}
                     />
                 </Form.Group>
