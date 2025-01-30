@@ -564,7 +564,9 @@ async function getAllBorrowedEquipments() {
 
     if (response.ok) {
       const data = await response.json();
-      return { status: true, data };
+
+      // เพิ่มการดึงข้อมูลจาก data.data โดยตรง
+      return { status: true, data: data.data };  // ใช้ data.data แทนการใช้ data
     } else {
       const error = await response.json();
       return {
@@ -924,7 +926,7 @@ async function updateDistribution(data: DistributionData) {
 }
 
 // Delete Distribution
-async function deleteDistribution(distributionId: string) {
+async function deleteDistribution(distributionId: number) {
   try {
     const response = await fetch(`${apiURL}/distribution/${distributionId}`, {
       method: "DELETE",
@@ -948,6 +950,7 @@ async function deleteDistribution(distributionId: string) {
     };
   }
 }
+
 
 // Get All Distributions
 async function getAllDistributions() {

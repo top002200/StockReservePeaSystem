@@ -30,6 +30,7 @@ func InitDatabase() {
 	}
 
 	// Run AutoMigrate for all models
+	// AutoMigrate will add missing columns and indexes, but won't remove any existing data
 	err = DB.AutoMigrate(
 		&models.Admin{},
 		&models.Equipment{},
@@ -40,11 +41,14 @@ func InitDatabase() {
 		&models.Picture{},
 		&models.BorrowedEquipment{},
 		&models.Repair{},
-		&models.Distribution{}, // Added Distribution model for migration
+		&models.Distribution{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database schema:", err)
+	} else {
+		log.Println("Database schema successfully migrated")
 	}
+
 }
 
 // GetDB returns the database instance

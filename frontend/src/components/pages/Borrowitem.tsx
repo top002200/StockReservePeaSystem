@@ -75,13 +75,10 @@ const Borrowitem: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await getAllBorrowedEquipments();
-        console.log("API Response:", response);
-        if (
-          response.status &&
-          response.data &&
-          Array.isArray(response.data.data)
-        ) {
-          setBorrowedEquipmentData(response.data.data);
+        console.log("API Response:", response); // ดูค่าที่ได้จาก API
+
+        if (response.status && Array.isArray(response.data)) {
+          setBorrowedEquipmentData(response.data); // ถ้าเป็น array ให้ใช้ response.data
         } else {
           console.error("Invalid API data:", response);
         }
@@ -91,6 +88,7 @@ const Borrowitem: React.FC = () => {
         setIsLoading(false);
       }
     };
+
     fetchData();
     fetchDropdownData();
   }, []);
@@ -183,7 +181,6 @@ const Borrowitem: React.FC = () => {
         });
       }
 
-
       // Reset form and close modal
       setShowModal(false);
       setFormData({
@@ -212,7 +209,6 @@ const Borrowitem: React.FC = () => {
       setIsLoading(false);
     }
   };
-
 
   const handleEditRow = (item: BorrowedEquipmentData) => {
     setEditingId(item.borrowed_equipment_id || null);
@@ -254,7 +250,6 @@ const Borrowitem: React.FC = () => {
       }
     });
   };
-
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -365,25 +360,29 @@ const Borrowitem: React.FC = () => {
         </Pagination>
       </div>
 
-      <Modal show={showModal} onHide={() => {
-        setShowModal(false);
-        setFormData({
-          equipment_name: "",
-          equipment_type: "",
-          equipment_brand: "",
-          equipment_model: "",
-          equip_contract: "",
-          equip_assetcode: "",
-          equip_img: "",
-        });
-        setIsEdit(false); // รีเซ็ตสถานะแก้ไขเมื่อปิด
-      }} centered>
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          setFormData({
+            equipment_name: "",
+            equipment_type: "",
+            equipment_brand: "",
+            equipment_model: "",
+            equip_contract: "",
+            equip_assetcode: "",
+            equip_img: "",
+          });
+          setIsEdit(false); // รีเซ็ตสถานะแก้ไขเมื่อปิด
+        }}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-          <Form.Group className="mb-3">
+            <Form.Group className="mb-3">
               <Form.Label>ประเภท</Form.Label>
               <Form.Select
                 name="equipment_type"

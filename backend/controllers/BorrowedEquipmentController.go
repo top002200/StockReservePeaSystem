@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -47,14 +48,18 @@ func GetBorrowedEquipmentByID(c *gin.Context) {
 
 // GetAllBorrowedEquipments - ดึงข้อมูล BorrowedEquipment ทั้งหมด
 func GetAllBorrowedEquipments(c *gin.Context) {
-	var borrowedEquipments []models.BorrowedEquipment
-	if err := config.DB.Preload("Submissions").Find(&borrowedEquipments).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error retrieving borrowed equipments", "error": err.Error()})
-		return
-	}
+    var borrowedEquipments []models.BorrowedEquipment
+    if err := config.DB.Preload("Submissions").Find(&borrowedEquipments).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error retrieving borrowed equipments", "error": err.Error()})
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": borrowedEquipments})
+    // Log ข้อมูลที่ส่งออกไป
+    fmt.Println("Fetched Data:", borrowedEquipments)
+
+    c.JSON(http.StatusOK, gin.H{"status": "success", "data": borrowedEquipments})
 }
+
 
 // UpdateBorrowedEquipment - อัปเดตข้อมูล BorrowedEquipment
 func UpdateBorrowedEquipment(c *gin.Context) {

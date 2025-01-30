@@ -289,48 +289,101 @@ function Equipment_info() {
   };
 
   const handleSubmitPaid = async () => {
-    // แปลง equipment_id ให้เป็น number ก่อนส่ง
-    distributionData.equipment_id = Number(distributionData.equipment_id);
-
-    console.log("Distribution data before submitting:", distributionData);
-
-    const response = await createDistribution(distributionData);
-
-    if (response.status) {
-      const resData = response.data;
-
-      // ตรวจสอบข้อมูลใน response ว่าครบถ้วนหรือไม่
-      if (resData && resData.distribution_id && resData.equipment) {
-        console.log("Successfully created distribution:", resData);
-
-        // แสดง SweetAlert2 แจ้งเตือนว่า บันทึกข้อมูลสำเร็จ
-        Swal.fire({
-          title: "Success!",
-          text: "บันทึกข้อมูลสำเร็จ",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-
-        handleCloseModal();
+    try {
+      // แปลง equipment_id ให้เป็น number ก่อนส่ง
+      distributionData.equipment_id = Number(distributionData.equipment_id);
+  
+      console.log("Distribution data before submitting:", distributionData);
+  
+      // เรียก API เพื่อบันทึกข้อมูลการจัดสรร
+      const response = await createDistribution(distributionData);
+  
+      if (response.status) {
+        const resData = response.data;
+  
+        if (resData && resData.distribution_id && resData.equipment) {
+          console.log("Successfully created distribution:", resData);
+  
+          // ลดจำนวน `equip_amount` ในฐานข้อมูล
+          const updatedEquipment = {
+            equipment_id: resData.equipment.equipment_id,
+            equipment_type: resData.equipment.equipment_type,
+            equipment_brand: resData.equipment.equipment_brand,
+            equipment_model: resData.equipment.equipment_model,
+            equip_assetcode: resData.equipment.equip_assetcode,
+            equip_img: resData.equipment.equip_img,
+            equip_amount: resData.equipment.equip_amount - resData.distribution_amount,
+            equipment_name: resData.equipment.equipment_name,
+          };
+  
+          const equipmentId = resData.equipment.equipment_id;
+  
+          // เรียก API updateEquipment เพื่อลดจำนวนในฐานข้อมูล
+          const updateResponse = await updateEquipment(
+            equipmentId.toString(),
+            updatedEquipment
+          );
+  
+          if (updateResponse.status) {
+            console.log("Equipment updated successfully:", updateResponse.data);
+  
+            // อัปเดตข้อมูลใน State (UI)
+            setEquipmentData((prevData) =>
+              prevData.map((item) =>
+                item.equipment_id === distributionData.equipment_id
+                  ? { ...item, equip_amount: updatedEquipment.equip_amount }
+                  : item
+              )
+            );
+  
+            // แสดง SweetAlert2 แจ้งเตือนว่า บันทึกข้อมูลสำเร็จ
+            Swal.fire({
+              title: "Success!",
+              text: "บันทึกข้อมูลสำเร็จ",
+              icon: "success",
+              confirmButtonText: "OK",
+            });
+  
+            handleCloseModal();
+          } else {
+            // แสดงข้อความแจ้งเตือนหากการอัปเดตจำนวนในฐานข้อมูลล้มเหลว
+            Swal.fire({
+              title: "Error!",
+              text: "ไม่สามารถอัปเดตจำนวนอุปกรณ์ในฐานข้อมูลได้",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        } else {
+          Swal.fire({
+            title: "Error!",
+            text: "ข้อมูลไม่ครบถ้วน",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
       } else {
-        // แสดง SweetAlert2 แจ้งเตือนว่า ข้อมูลไม่ครบถ้วน
         Swal.fire({
           title: "Error!",
-          text: "ข้อมูลไม่ครบถ้วน",
+          text: response.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
           icon: "error",
           confirmButtonText: "OK",
         });
       }
-    } else {
-      // แสดง SweetAlert2 แจ้งเตือนในกรณีที่เกิดข้อผิดพลาด
+    } catch (error) {
+      console.error("Error submitting distribution:", error);
       Swal.fire({
         title: "Error!",
-        text: response.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+        text: "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
         icon: "error",
         confirmButtonText: "OK",
       });
     }
   };
+  
+  
+  
+  
 
   const handleSetEquipmentId = (equipmentId: number) => {
     setDistributionData((prevState) => ({

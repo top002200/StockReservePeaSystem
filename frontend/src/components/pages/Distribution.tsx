@@ -44,21 +44,18 @@
         fetchData();
     }, []);
 
-    const handleDelete = async (distributionId: string) => {
-        console.log("Attempting to delete distribution with ID:", distributionId);
+    const handleDelete = (index: number) => {
+        const distributionId = data[index]?.distribution_id; // ตรวจสอบว่าได้ ID ที่ถูกต้อง
         if (!distributionId) {
-          console.error("distribution_id is undefined");
-          return;
+            console.error("Invalid distribution ID");
+            return;  // หรือ return ข้อความแจ้งเตือน
         }
+    
+        // เรียก deleteDistribution หรือฟังก์ชันลบที่ต้องการ
+        deleteDistribution(distributionId);
+    };
+    
       
-        const response = await deleteDistribution(distributionId);
-        if (response.status) {
-          console.log("Deleted successfully:", distributionId);
-          fetchDistributions();
-        } else {
-          console.error("Error deleting:", response.message);
-        }
-      };
       
 
       interface Equipment {
@@ -165,7 +162,7 @@
                         {item.equipment?.equipment_type || "-"}
                         <br />    
                         </div>
-                        <div style={{ flex: 1, paddingLeft: "10px" }}>
+                        <div style={{ flex: 1, paddingLeft: "10px" }}                       >
                         <strong>ยี่ห้อ:</strong>{" "}
                         {item.equipment?.equipment_brand || "-"}
                         <br />
@@ -191,7 +188,7 @@
                     </Button>
                     <Button
                         variant="outline-danger"
-                        onClick={() => handleDelete(item.distribution_id)}
+                        onClick={() => handleDelete(index)}
                     >
                         <FontAwesomeIcon icon={faTrashCan} />
                     </Button>

@@ -116,17 +116,25 @@ func UpdateDistribution(c *gin.Context) {
 }
 
 // DeleteDistribution deletes a distribution by ID
+// ฟังก์ชันที่ใช้ลบข้อมูล
 func DeleteDistribution(c *gin.Context) {
-	id := c.Param("id") // Extract the ID from the URL parameters
-	// Delete the distribution with the given ID
-	if err := config.DB.Delete(&models.Distribution{}, "distribution_id = ?", id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete distribution"})
-		return
-	}
+    var distribution models.Distribution
+    if err := c.ShouldBindJSON(&distribution); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid data"})
+        return
+    }
 
-	// Return a success message
-	c.JSON(http.StatusOK, gin.H{"message": "Distribution deleted successfully"})
+    // ลบข้อมูลที่ตรงกับข้อมูลทั้งหมด
+    if err := config.DB.Where("distribution_id = ? AND distribution_amount = ? AND equipment_id = ? AND name = ? AND date = ? AND g_name = ? AND r_name = ?",
+        distribution.DistributionID, distribution.DistributionAmount, distribution.EquipmentID, distribution.Name, distribution.Date, distribution.GName, distribution.RName).
+        Delete(&distribution).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to delete distribution"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Distribution deleted"})
 }
+
 
 // GetDistributionsByEquipmentID retrieves all distributions for a specific equipment ID
 func GetDistributionsByEquipmentID(c *gin.Context) {
