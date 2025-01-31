@@ -43,7 +43,8 @@ function Equipment_info() {
     distribution_amount: 0, // จำนวนที่จัดสรร
     equipment_id: 0, // รหัสอุปกรณ์
     date: "", // วันที่
-    name: "", // ชื่อผู้จัดสรร
+    equip_contract: "", // เลขที่สัญญา
+    equip_assetcode: "",
   });
 
   const [showModal, setShowModal] = useState(false);
@@ -231,7 +232,7 @@ function Equipment_info() {
       !formData.equipment_brand ||
       !formData.equipment_model ||
       !formData.equip_amount ||
-      !formData.equip_img
+      !formData.equip_img 
     ) {
       Swal.fire({
         icon: "error",
@@ -292,18 +293,18 @@ function Equipment_info() {
     try {
       // แปลง equipment_id ให้เป็น number ก่อนส่ง
       distributionData.equipment_id = Number(distributionData.equipment_id);
-  
+
       console.log("Distribution data before submitting:", distributionData);
-  
+
       // เรียก API เพื่อบันทึกข้อมูลการจัดสรร
       const response = await createDistribution(distributionData);
-  
+
       if (response.status) {
         const resData = response.data;
-  
+
         if (resData && resData.distribution_id && resData.equipment) {
           console.log("Successfully created distribution:", resData);
-  
+
           // ลดจำนวน `equip_amount` ในฐานข้อมูล
           const updatedEquipment = {
             equipment_id: resData.equipment.equipment_id,
@@ -313,20 +314,21 @@ function Equipment_info() {
             equip_assetcode: resData.equipment.equip_assetcode,
             equip_img: resData.equipment.equip_img,
             equip_amount: resData.equipment.equip_amount - resData.distribution_amount,
-            equipment_name: resData.equipment.equipment_name,
+            equip_contract: resData.equipment.equip_contract,
+
           };
-  
+
           const equipmentId = resData.equipment.equipment_id;
-  
+
           // เรียก API updateEquipment เพื่อลดจำนวนในฐานข้อมูล
           const updateResponse = await updateEquipment(
             equipmentId.toString(),
             updatedEquipment
           );
-  
+
           if (updateResponse.status) {
             console.log("Equipment updated successfully:", updateResponse.data);
-  
+
             // อัปเดตข้อมูลใน State (UI)
             setEquipmentData((prevData) =>
               prevData.map((item) =>
@@ -335,7 +337,7 @@ function Equipment_info() {
                   : item
               )
             );
-  
+
             // แสดง SweetAlert2 แจ้งเตือนว่า บันทึกข้อมูลสำเร็จ
             Swal.fire({
               title: "Success!",
@@ -343,7 +345,7 @@ function Equipment_info() {
               icon: "success",
               confirmButtonText: "OK",
             });
-  
+
             handleCloseModal();
           } else {
             // แสดงข้อความแจ้งเตือนหากการอัปเดตจำนวนในฐานข้อมูลล้มเหลว
@@ -380,10 +382,6 @@ function Equipment_info() {
       });
     }
   };
-  
-  
-  
-  
 
   const handleSetEquipmentId = (equipmentId: number) => {
     setDistributionData((prevState) => ({
@@ -571,17 +569,24 @@ function Equipment_info() {
               />
             </Form.Group>
 
-            {/* เอาออกจากฟอร์มแล้ว */}
-            {/* <Form.Group className="mb-3">
-        <Form.Label>Equipment ID</Form.Label>
-        <Form.Control
-          type="number"
-          name="equipment_id"
-          value={distributionData.equipment_id}
-          onChange={handleInputChangePaid}
-          placeholder="กรุณากรอก Equipment ID"
-        />
-      </Form.Group> */}
+            <Form.Group className="mb-3">
+              <Form.Label>รหัสทรัพย์สิน</Form.Label>
+              <Form.Control
+                type="text"
+                name="equip_assetcode"
+                value={distributionData.equip_assetcode}
+                onChange={handleInputChangePaid}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>เลขที่สัญญา</Form.Label>
+              <Form.Control
+                type="text"
+                name="equip_contract"
+                value={distributionData.equip_contract}
+                onChange={handleInputChangePaid}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>

@@ -125,8 +125,8 @@ func DeleteDistribution(c *gin.Context) {
     }
 
     // ลบข้อมูลที่ตรงกับข้อมูลทั้งหมด
-    if err := config.DB.Where("distribution_id = ? AND distribution_amount = ? AND equipment_id = ? AND name = ? AND date = ? AND g_name = ? AND r_name = ?",
-        distribution.DistributionID, distribution.DistributionAmount, distribution.EquipmentID, distribution.Name, distribution.Date, distribution.GName, distribution.RName).
+    if err := config.DB.Where("distribution_id = ? AND distribution_amount = ? AND equipment_id = ? AND Contract = ? AND date = ? AND g_name = ? AND r_name = ? AND AssetCode = ?",
+        distribution.DistributionID, distribution.DistributionAmount, distribution.EquipmentID, distribution.Contract, distribution.Date, distribution.GName, distribution.RName,distribution.AssetCode).
         Delete(&distribution).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to delete distribution"})
         return
