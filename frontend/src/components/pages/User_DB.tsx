@@ -110,33 +110,83 @@ const User_DB: React.FC = () => {
         </Table>
 
         {/* Modal */}
-        <Modal show={showModal} onHide={handleCloseModal} size="xl" centered>
+        <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
           <Modal.Header closeButton>
-            <Modal.Title>ส่งคำขอยืมอุปกรณ์</Modal.Title>
+            <Modal.Title className="text-center w-100">ส่งคำขอยืมอุปกรณ์</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {selectedItem ? (
               <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label>ประเภทอุปกรณ์</Form.Label>
-                  <Form.Control
-                    type="text"
-                    readOnly
-                    value={selectedItem.equipment_type}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>จำนวน</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="1"
-                    max={selectedItem.quantity} 
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>วันที่และเวลา</Form.Label>
-                  <Form.Control type="datetime-local" />
-                </Form.Group>
+                <div className="mb-4">
+                  <h6 className="border-bottom pb-2 text-secondary fw-bold">ข้อมูลผู้ส่งคำขอยืม</h6>
+                  <div className="row">
+                    <Form.Group className="col-md-2">
+                      <Form.Label>คำนำหน้าชื่อ</Form.Label>
+                      <Form.Control type="text" name="title" />
+                    </Form.Group>
+
+                    <Form.Group className="col-md-4">
+                      <Form.Label>ชื่อ-สกุล</Form.Label>
+                      <Form.Control type="text" name="submission_username" />
+                    </Form.Group>
+
+                    <Form.Group className="col-md-3">
+                      <Form.Label>เลขประจำตัวพนักงาน</Form.Label>
+                      <Form.Control type="text" name="submission_userid" />
+                    </Form.Group>
+
+                    <Form.Group className="col-md-3">
+                      <Form.Label>ตำแหน่ง</Form.Label>
+                      <Form.Control type="text" name="submission_position" />
+                    </Form.Group>
+                  </div>
+                  <div className="row">
+                    <Form.Group className="col-md-3">
+                      <Form.Label>หมวด/แผนก:</Form.Label>
+                      <Form.Control type="text" name="submission_department" />
+                    </Form.Group>
+
+                    <Form.Group className="col-md-3">
+                      <Form.Label>กอง/เขต:</Form.Label>
+                      <Form.Control type="text" name="submission_division" />
+                    </Form.Group>
+
+                    <Form.Group className="col-md-3">
+                      <Form.Label>ฝ่าย/ภาค:</Form.Label>
+                      <Form.Control type="text" name="submission_section" />
+                    </Form.Group>
+
+                    <Form.Group className="col-md-3">
+                      <Form.Label>เบอร์ภายใน:</Form.Label>
+                      <Form.Control type="text" name="submission_internalnumber" />
+                    </Form.Group>
+                  </div>
+                  </div>
+                  <div className="mb-4">
+                  <h6 className="border-bottom pb-2 text-secondary fw-bold">ข้อมูลอุปกรณ์</h6>
+                  <div className="row">
+                    <Form.Group className="col-md-6">
+                      <Form.Label>ประเภทอุปกรณ์</Form.Label>
+                      <Form.Control
+                        type="text"
+                        readOnly
+                        value={selectedItem.equipment_type}
+                      />
+                    </Form.Group>
+                    <Form.Group className="col-md-2">
+                      <Form.Label>จำนวน</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="1"
+                        max={selectedItem.quantity}
+                      />
+                    </Form.Group>
+                    <Form.Group className="col-md-3">
+                      <Form.Label>วันที่และเวลา</Form.Label>
+                      <Form.Control type="datetime-local" />
+                    </Form.Group>
+                  </div>
+                  </div>
               </Form>
             ) : (
               <p>ไม่พบข้อมูล</p>
