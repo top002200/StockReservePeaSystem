@@ -280,7 +280,7 @@ async function getAllSubmissions() {
 
     if (response.ok) {
       const data = await response.json();
-      return { status: true, data };
+      return { status: true, data: Array.isArray(data.data) ? data.data : [] }; // Ensure data is an array
     } else {
       const error = await response.json();
       return {
@@ -290,9 +290,10 @@ async function getAllSubmissions() {
     }
   } catch (error) {
     console.error("Error fetching submissions:", error);
-    return { status: false, message: "An unexpected error occurred" };
+    return { status: false, message: "An unexpected error occurred", data: [] }; // Return an empty array if error occurs
   }
 }
+
 
 // Brand API Functions
 

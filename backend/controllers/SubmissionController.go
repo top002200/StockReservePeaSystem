@@ -13,16 +13,19 @@ import (
 // CreateSubmission - Controller สำหรับสร้างการส่งงานใหม่
 func CreateSubmission(c *gin.Context) {
 	var submission models.Submission
+
+	// ผูกข้อมูล JSON กับ struct
 	if err := c.ShouldBindJSON(&submission); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid input"})
 		return
 	}
 
-	// ตั้งค่า `submitted_at` เป็นเวลาปัจจุบันถ้าสถานะเป็น "ส่งแล้ว"
+	// ถ้าไม่มี `submitted_at` ให้ตั้งเป็นเวลาปัจจุบัน
 	if submission.SubmittedAt.IsZero() {
 		submission.SubmittedAt = time.Now()
 	}
 
+	// บันทึกลงฐานข้อมูล
 	if err := config.DB.Create(&submission).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to create submission"})
 		return

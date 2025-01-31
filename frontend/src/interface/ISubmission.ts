@@ -1,17 +1,19 @@
 export interface SubmissionData {
-    submission_id: number;          // รหัสประจำตัวของการส่ง
-    equipment_id?: number;           // รหัสประจำตัวของอุปกรณ์ที่เกี่ยวข้อง
-    username: string;               // ชื่อผู้ใช้ที่ส่ง
-    user_id: string;                // รหัสประจำตัวของผู้ใช้ที่ส่ง
-    position: string;               // ตำแหน่งของผู้ส่ง
-    department: string;             // แผนกของผู้ส่ง
-    division: string;               // แผนกย่อยของผู้ส่ง
-    section: string;                // ส่วนของผู้ส่ง
-    internal_number: string;        // เบอร์ภายใน
-    our_agency: string;             // หน่วยงานของเรา
-    time_start: Date;               // เวลาเริ่มต้น
-    time_end: Date;                 // เวลาสิ้นสุด
-    note: string;                   // หมายเหตุ
-    submitted_at: Date;             // วันที่และเวลาที่ส่ง
-  }
-      
+  submission_id?: number;
+  borrowed_equipment_id?: number;
+  title?: string;
+  submission_username?: string;
+  submission_userid?: string;
+  submission_position?: string;
+  submission_department?: string;
+  submission_division?: string;
+  submission_section?: string;
+  submission_internalnumber?: string;
+  submission_ouragency?: string;
+  time_start?: string; // ใช้ string แทน Date เพื่อให้ตรงกับ JSON
+  time_end?: string;
+  amount?: number;
+  submission_note?: string;
+  submitted_at: string; // ต้องมีค่าเสมอ
+  is_urgent?: number;
+}

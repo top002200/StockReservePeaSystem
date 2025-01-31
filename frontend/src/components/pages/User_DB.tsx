@@ -4,14 +4,18 @@ import { Table, Button, Modal, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExport } from "@fortawesome/free-solid-svg-icons";
 import { BorrowedEquipmentData } from "../../interface/IBorrowedEquipment";
-import { getAllBorrowedEquipments } from "../../services/api";
+import { getAllBorrowedEquipments, createSubmission } from "../../services/api";
 
 const User_DB: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<BorrowedEquipmentData & { quantity: number } | null>(null);
+  const [selectedItem, setSelectedItem] = useState<
+    (BorrowedEquipmentData & { quantity: number }) | null
+  >(null);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
-  const [borrowedequipmentData, setBorrowedEquipmentData] = useState<BorrowedEquipmentData[]>([]);
+  const [borrowedequipmentData, setBorrowedEquipmentData] = useState<
+    BorrowedEquipmentData[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState<string>("");
 
@@ -37,20 +41,51 @@ const User_DB: React.FC = () => {
     fetchData();
   }, []);
 
-  // Group data by equipment type and calculate quantity
-  const groupedData = borrowedequipmentData.reduce((acc: any[], currentItem) => {
-    const existingItem = acc.find(
-      (item) => item.equipment_type === currentItem.equipment_type
-    );
-    if (existingItem) {
-      existingItem.quantity += 1;
+  const [submissionData, setSubmissionData] = useState({
+    title: "",
+    submission_username: "",
+    submission_userid: "",
+    submission_position: "",
+    submission_department: "",
+    submission_division: "",
+    submission_section: "",
+    submission_internalnumber: "",
+    equipment_type: selectedItem?.equipment_type || "",
+    quantity: 1,
+    submitted_at: new Date().toISOString(),
+  });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSubmissionData({ ...submissionData, [e.target.name]: e.target.value });
+  };
+  const handleSubmit = async () => {
+    const response = await createSubmission(submissionData);
+    if (response.status) {
+      alert("บันทึกสำเร็จ!");
+      setShowModal(false);
     } else {
-      acc.push({ ...currentItem, quantity: 1 });
+      alert("เกิดข้อผิดพลาด: " + response.message);
     }
-    return acc;
-  }, []);
+  };
 
-  const handleShowModal = (item: BorrowedEquipmentData & { quantity: number }) => {
+  // Group data by equipment type and calculate quantity
+  const groupedData = borrowedequipmentData.reduce(
+    (acc: any[], currentItem) => {
+      const existingItem = acc.find(
+        (item) => item.equipment_type === currentItem.equipment_type
+      );
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        acc.push({ ...currentItem, quantity: 1 });
+      }
+      return acc;
+    },
+    []
+  );
+
+  const handleShowModal = (
+    item: BorrowedEquipmentData & { quantity: number }
+  ) => {
     setSelectedItem(item);
     setShowModal(true);
   };
@@ -112,88 +147,145 @@ const User_DB: React.FC = () => {
         {/* Modal */}
         <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
           <Modal.Header closeButton>
-            <Modal.Title className="text-center w-100">ส่งคำขอยืมอุปกรณ์</Modal.Title>
+            <Modal.Title className="text-center w-100">
+              ส่งคำขอยืมอุปกรณ์
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedItem ? (
-              <Form>
-                <div className="mb-4">
-                  <h6 className="border-bottom pb-2 text-secondary fw-bold">ข้อมูลผู้ส่งคำขอยืม</h6>
-                  <div className="row">
-                    <Form.Group className="col-md-2">
-                      <Form.Label>คำนำหน้าชื่อ</Form.Label>
-                      <Form.Control type="text" name="title" />
-                    </Form.Group>
+            <Form>
+              {/* ข้อมูลผู้ขอยืม */}
+              <h6 className="border-bottom pb-2 text-secondary fw-bold">
+                ข้อมูลผู้ส่งคำขอยืม
+              </h6>
+              <div className="row">
+                <Form.Group className="col-md-2">
+                  <Form.Label>คำนำหน้าชื่อ</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="title"
+                    value={submissionData.title}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
 
-                    <Form.Group className="col-md-4">
-                      <Form.Label>ชื่อ-สกุล</Form.Label>
-                      <Form.Control type="text" name="submission_username" />
-                    </Form.Group>
+                <Form.Group className="col-md-4">
+                  <Form.Label>ชื่อ-สกุล</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_username"
+                    value={submissionData.submission_username}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
 
-                    <Form.Group className="col-md-3">
-                      <Form.Label>เลขประจำตัวพนักงาน</Form.Label>
-                      <Form.Control type="text" name="submission_userid" />
-                    </Form.Group>
+                <Form.Group className="col-md-3">
+                  <Form.Label>เลขประจำตัวพนักงาน</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_userid"
+                    value={submissionData.submission_userid}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
 
-                    <Form.Group className="col-md-3">
-                      <Form.Label>ตำแหน่ง</Form.Label>
-                      <Form.Control type="text" name="submission_position" />
-                    </Form.Group>
-                  </div>
-                  <div className="row">
-                    <Form.Group className="col-md-3">
-                      <Form.Label>หมวด/แผนก:</Form.Label>
-                      <Form.Control type="text" name="submission_department" />
-                    </Form.Group>
+                <Form.Group className="col-md-3">
+                  <Form.Label>ตำแหน่ง</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_position"
+                    value={submissionData.submission_position}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </div>
 
-                    <Form.Group className="col-md-3">
-                      <Form.Label>กอง/เขต:</Form.Label>
-                      <Form.Control type="text" name="submission_division" />
-                    </Form.Group>
+              <div className="row">
+                <Form.Group className="col-md-3">
+                  <Form.Label>หมวด/แผนก:</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_department"
+                    value={submissionData.submission_department}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
 
-                    <Form.Group className="col-md-3">
-                      <Form.Label>ฝ่าย/ภาค:</Form.Label>
-                      <Form.Control type="text" name="submission_section" />
-                    </Form.Group>
+                <Form.Group className="col-md-3">
+                  <Form.Label>กอง/เขต:</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_division"
+                    value={submissionData.submission_division}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
 
-                    <Form.Group className="col-md-3">
-                      <Form.Label>เบอร์ภายใน:</Form.Label>
-                      <Form.Control type="text" name="submission_internalnumber" />
-                    </Form.Group>
-                  </div>
-                  </div>
-                  <div className="mb-4">
-                  <h6 className="border-bottom pb-2 text-secondary fw-bold">ข้อมูลอุปกรณ์</h6>
-                  <div className="row">
-                    <Form.Group className="col-md-6">
-                      <Form.Label>ประเภทอุปกรณ์</Form.Label>
-                      <Form.Control
-                        type="text"
-                        readOnly
-                        value={selectedItem.equipment_type}
-                      />
-                    </Form.Group>
-                    <Form.Group className="col-md-2">
-                      <Form.Label>จำนวน</Form.Label>
-                      <Form.Control
-                        type="number"
-                        min="1"
-                        max={selectedItem.quantity}
-                      />
-                    </Form.Group>
-                    <Form.Group className="col-md-3">
-                      <Form.Label>วันที่และเวลา</Form.Label>
-                      <Form.Control type="datetime-local" />
-                    </Form.Group>
-                  </div>
-                  </div>
-              </Form>
-            ) : (
-              <p>ไม่พบข้อมูล</p>
-            )}
+                <Form.Group className="col-md-3">
+                  <Form.Label>ฝ่าย/ภาค:</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_section"
+                    value={submissionData.submission_section}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+
+                <Form.Group className="col-md-3">
+                  <Form.Label>เบอร์ภายใน:</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_internalnumber"
+                    value={submissionData.submission_internalnumber}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </div>
+
+              {/* ข้อมูลอุปกรณ์ */}
+              <h6 className="border-bottom pb-2 text-secondary fw-bold mt-3">
+                ข้อมูลอุปกรณ์
+              </h6>
+              <div className="row">
+                <Form.Group className="col-md-6">
+                  <Form.Label>ประเภทอุปกรณ์</Form.Label>
+                  <Form.Control
+                    type="text"
+                    readOnly
+                    value={submissionData.equipment_type}
+                  />
+                </Form.Group>
+
+                <Form.Group className="col-md-2">
+                  <Form.Label>จำนวน</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="quantity"
+                    min="1"
+                    max={selectedItem?.quantity || 1}
+                    value={submissionData.quantity}
+                    onChange={(e) =>
+                      setSubmissionData({
+                        ...submissionData,
+                        quantity: Number(e.target.value),
+                      })
+                    }
+                  />
+                </Form.Group>
+
+                <Form.Group className="col-md-3">
+                  <Form.Label>วันที่และเวลา</Form.Label>
+                  <Form.Control
+                    type="datetime-local"
+                    name="submitted_at"
+                    value={submissionData.submitted_at.slice(0, 16)}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+              </div>
+            </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button type="submit" variant="success">
+            <Button variant="success" onClick={handleSubmit}>
               ยืนยัน
             </Button>
           </Modal.Footer>
