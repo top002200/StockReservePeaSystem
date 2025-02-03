@@ -337,8 +337,6 @@ async function updateSubmission(data: Partial<SubmissionData>) {
   }
 }
 
-
-
 // Brand API Functions
 
 // Create Brand

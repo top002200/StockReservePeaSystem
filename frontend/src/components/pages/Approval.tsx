@@ -40,12 +40,23 @@ const Approval: React.FC = () => {
     return new Date(dateStr).toISOString(); // ✅ แปลงเป็น ISO 8601
   };
 
-  const startDate = formatDateToISO(
+  /*const startDate = formatDateToISO(
     document.querySelector<HTMLInputElement>("[name='time_start']")?.value
   );
   const endDate = formatDateToISO(
     document.querySelector<HTMLInputElement>("[name='time_end']")?.value
-  );
+  ); */
+
+  const [timeStart, setTimeStart] = useState<string | undefined>(undefined);
+  const [timeEnd, setTimeEnd] = useState<string | undefined>(undefined);
+
+  const handleTimeStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTimeStart(formatDateToISO(e.target.value));
+  };
+
+  const handleTimeEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTimeEnd(formatDateToISO(e.target.value));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,35 +104,35 @@ const Approval: React.FC = () => {
       alert("ไม่พบ submission_id");
       return;
     }
-  
+
     // ✅ กรองค่าที่เป็น undefined หรือ ""
     const updatedData: Partial<SubmissionData> = Object.fromEntries(
       Object.entries({
         submission_id: selectedSubmission.submission_id,
-        is_urgent: Number(is_urgent), 
+        is_urgent: Number(is_urgent),
         type: selectedType || undefined,
         brand: selectedBrand || undefined,
         model: selectedModel || undefined,
         asset_code: selectedAsset || undefined,
         contract_number: selectedContract || undefined,
-        time_start: startDate, 
-        time_end: endDate, 
+        time_start: timeStart,
+        time_end: timeEnd,
         submitted_at: selectedSubmission.submitted_at || "", // ✅ ป้องกัน undefined
       }).filter(([_, v]) => v !== undefined && v !== "")
     );
-  
+
     console.log("🔹 Sending updated data:", JSON.stringify(updatedData, null, 2));
-  
+
     try {
       const response = await updateSubmission(updatedData);
-  
+
       if (response.status) {
         alert("✅ อัปเดตข้อมูลสำเร็จ");
-  
+
         // ✅ รีโหลดข้อมูลหลังจากอัปเดต
         const updatedSubmissions = await getAllSubmissions();
         setSubmissions(updatedSubmissions.data);
-  
+
         closeModal();
       } else {
         alert("❌ เกิดข้อผิดพลาดในการอัปเดตข้อมูล: " + response.message);
@@ -131,8 +142,8 @@ const Approval: React.FC = () => {
       alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
     }
   };
-  
-  
+
+
 
   const openModal = (submission: SubmissionData) => {
     setSelectedSubmission(submission);
@@ -170,13 +181,30 @@ const Approval: React.FC = () => {
       doc.text(`${submission.submission_section || "-"}`, 150, 42.5);
       doc.text(`${submission.submission_internalnumber || "-"}`, 185, 42.5);
       doc.text(`ผคข.`, 75, 47.5);
-      doc.text(`${submission.time_start || "-"}`, 54, 112);
-      doc.text(`${submission.time_end || "-"}`, 102, 112);
+      doc.text(`${(submission.time_start || "-").split("T")[0]}`, 54, 112);
+      doc.text(`${(submission.time_end || "-").split("T")[0]}`, 102, 112);
+
+
+      const startTime = submission.time_start ? new Date(submission.time_start) : null;
+      const endTime = submission.time_end ? new Date(submission.time_end) : null;
+
+      if (startTime && endTime) {
+        // รีเซ็ตเวลาเป็น 00:00:00 เพื่อให้คำนวณจากวันที่เท่านั้น
+        startTime.setHours(0, 0, 0, 0);
+        endTime.setHours(0, 0, 0, 0);
+
+        const diffMs = endTime.getTime() - startTime.getTime(); // คำนวณส่วนต่าง
+        const diffDays = Math.abs(diffMs / (1000 * 60 * 60 * 24)); // แปลงเป็นวัน
+
+        doc.text(`${diffDays}`, 157, 112);
+      } else {
+        doc.text("-", 157, 112); // กรณีไม่มีค่าให้ใส่ "-" ใน PDF
+      }
 
       // ในตาราง
       doc.setFontSize(10);
-      doc.text(`ประเภท ยี่ห้อ รุ่น`, 30, 65);
-      doc.text(`รหัสทรัพย์สิน`, 102, 65);
+      doc.text(`${submission.type || "-"} ${submission.brand || "-"}  ${submission.model || "-"}`, 30, 65);
+      doc.text(`${submission.asset_code || "-"}`, 102, 65);
 
       // ดาวน์โหลด PDF
       doc.save(`คำขอยืมอุปกรณ์_${submission.submission_userid}.pdf`);
@@ -188,29 +216,29 @@ const Approval: React.FC = () => {
   const getStatusColor = (is_urgent?: number) => {
     switch (is_urgent) {
       case 1:
-        return "text-success"; 
+        return "text-success";
       case 2:
-        return "text-danger"; 
+        return "text-danger";
       case 3:
-        return "text-muted"; 
+        return "text-muted";
       default:
-        return "text-warning"; 
+        return "text-warning";
     }
   };
-  
+
   const getApprovalText = (is_urgent?: number) => {
     switch (is_urgent) {
       case 1:
-        return "อนุมัติ"; 
+        return "อนุมัติ";
       case 2:
-        return "ไม่อนุมัติ"; 
+        return "ไม่อนุมัติ";
       case 3:
-        return "คืนแล้ว"; 
+        return "คืนแล้ว";
       default:
-        return "รออนุมัติ"; 
+        return "รออนุมัติ";
     }
   };
-  
+
 
   return (
     <Layout>
@@ -339,7 +367,8 @@ const Approval: React.FC = () => {
                 <div className="row g-3">
                   <div className="col-md-4">
                     <p>
-                      <b>ประเภท :</b> Notebook
+                      <b>ประเภท :</b>
+
                     </p>
                   </div>
                   <div className="col-md-4">
@@ -474,11 +503,17 @@ const Approval: React.FC = () => {
                 <div className="row g-5">
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>ระหว่างวันที่ :</Form.Label>
-                    <Form.Control type="date" name="time_start" />
+                    <Form.Control
+                      type="date"
+                      onChange={handleTimeStartChange}
+                    />
                   </Form.Group>
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>ถึงวันที่ :</Form.Label>
-                    <Form.Control type="date" name="time_end" />
+                    <Form.Control
+                      type="date"
+                      onChange={handleTimeEndChange}
+                    />
                   </Form.Group>
                 </div>
               </Form>

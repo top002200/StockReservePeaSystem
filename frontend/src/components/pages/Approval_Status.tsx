@@ -1,51 +1,61 @@
 // src/pages/User_DB.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import User_Layout from '../Layout/User_Layout';
 import { Button, Table } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import { getAllSubmissions } from '../../services/api';
+import { SubmissionData } from '../../interface/ISubmission';
+import Swal from "sweetalert2";
 
 
 const Approval_Status: React.FC = () => {
-    const data = [
-        {
-            id: 1,
-            type: 'Notebook',
-            quantity: '1',
-            status: 'อนุมัติ'
-        },
-        {
-            id: 2,
-            type: 'Wirless Mouse',
-            quantity: '1',
-            status: 'รอการอนุมัติ'
-        },
-        {
-            id: 3,
-            type: 'Monitor',
-            quantity: '1',
-            status: 'ไม่อนุมัติ'
-        },
-        {
-            id: 4,
-            type: 'Monitor',
-            quantity: '1',
-            status: 'คืนแล้ว'
-        }
-    ];
+    const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'อนุมัติ':
-                return 'text-success'; // Green
-            case 'ไม่อนุมัติ':
-                return 'text-danger'; // Red
-            case 'รอการอนุมัติ':
-                return 'text-warning'; // Yellow
-            case 'คืนแล้ว':
-                return 'text-muted'; // gray
+    useEffect(() => {
+        const fetchSubmissions = async () => {
+            try {
+                const response = await getAllSubmissions();
+                console.log("📦 Submissions Response:", response); // Debug ดูค่าที่ได้จาก API
+
+                if (response.status && Array.isArray(response.data)) {
+                    setSubmissions(response.data); // ใช้เฉพาะ `data` ที่เป็น array เท่านั้น
+                } else {
+                    setSubmissions([]); // ถ้าไม่ใช่ array ให้ตั้งเป็น `[]` เพื่อป้องกัน error
+                }
+
+            } catch (error) {
+                console.error("🚨 Error fetching submissions:", error);
+                setSubmissions([]); // ถ้ามี error ให้ใช้ `[]` เพื่อป้องกันปัญหา
+            }
+        };
+
+        fetchSubmissions();
+    }, []);
+    
+    const getStatusColor = (is_urgent?: number) => {
+        switch (is_urgent) {
+            case 1:
+                return "text-success";
+            case 2:
+                return "text-danger";
+            case 3:
+                return "text-muted";
             default:
-                return '';
+                return "text-warning";
+        }
+    };
+
+    const getApprovalText = (is_urgent?: number) => {
+        switch (is_urgent) {
+            case 1:
+                return "อนุมัติ";
+            case 2:
+                return "ไม่อนุมัติ";
+            case 3:
+                return "คืนแล้ว";
+            default:
+                return "รออนุมัติ";
         }
     };
 
@@ -56,22 +66,28 @@ const Approval_Status: React.FC = () => {
                 <Table bordered hover responsive>
                     <thead>
                         <tr className='align-middle text-center'>
-                            <th style={{width: "150px"}}>ลำดับที่</th>
+                            <th style={{ width: "150px" }}>ลำดับที่</th>
                             <th>อุปกรณ์</th>
-                            <th style={{width: "150px"}}>จำนวน</th>
-                            <th style={{width: "150px"}}>วันที่ส่งคำขอ</th>
-                            <th style={{width: "150px"}}>สถานะ</th>
-                            <th style={{width: "150px"}}>ยกเลิกคำขอ</th>
+                            <th style={{ width: "150px" }}>จำนวน</th>
+                            <th style={{ width: "150px" }}>วันที่ส่งคำขอ</th>
+                            <th style={{ width: "150px" }}>สถานะ</th>
+                            <th style={{ width: "150px" }}>ยกเลิกคำขอ</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map((item, index) => (
-                            <tr key={item.id} className="align-middle text-center">
+                        {submissions.map((item, index) => (
+                            <tr key={item.submission_id} className="align-middle text-center">
                                 <td>{index + 1}</td>
                                 <td>{item.type}</td>
-                                <td>{item.quantity}</td>
-                                <td></td>
-                                <td className={getStatusColor(item.status)}>{item.status}</td>
+                                <td>{item.amount}</td>
+                                <td>{new Date(item.submitted_at).toLocaleDateString()}</td>
+                                <td
+                                    className={`align-middle text-center ${getStatusColor(
+                                        item.is_urgent
+                                    )}`}
+                                >
+                                    {getApprovalText(item.is_urgent)}
+                                </td>
                                 <td>
                                     <Button variant='outline-secondary'>
                                         <FontAwesomeIcon icon={faXmark} />

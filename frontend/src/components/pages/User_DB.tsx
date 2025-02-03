@@ -24,7 +24,10 @@ const User_DB: React.FC = () => {
         console.log("📡 Fetching data...");
         const borrowedequipRes = await getAllBorrowedEquipments();
         const submissionsRes = await getAllSubmissions();
-        
+  
+        console.log("📦 Borrowed Equipment Response:", borrowedequipRes);
+        console.log("📦 Submissions Response:", submissionsRes);
+  
         if (borrowedequipRes.status && Array.isArray(borrowedequipRes.data)) {
           setBorrowedEquipmentData(borrowedequipRes.data);
         }
@@ -39,8 +42,7 @@ const User_DB: React.FC = () => {
     };
     fetchData();
   }, []);
-
-
+  
 
   const [submissionData, setSubmissionData] = useState({
     title: "",
@@ -52,7 +54,7 @@ const User_DB: React.FC = () => {
     submission_section: "",
     submission_internalnumber: "",
     equipment_type: selectedItem?.equipment_type || "",
-    quantity: 1,
+    amount: 1,
     submitted_at: new Date().toISOString(),
     submission_note: "",
   });
@@ -81,9 +83,7 @@ const User_DB: React.FC = () => {
   }, [selectedItem]);
   
 
-  const handleShowModal = (
-    item: BorrowedEquipmentData & { quantity: number }
-  ) => {
+  const handleShowModal = (item: BorrowedEquipmentData & { quantity: number }) => {
     setSelectedItem(item);
     setShowModal(true);
   };
@@ -154,7 +154,7 @@ const User_DB: React.FC = () => {
                   <Button
                     variant="outline-secondary"
                     style={{ color: "#c7911b", borderColor: "#c7911b" }}
-                    onClick={() => setShowModal(true)}
+                    onClick={() => handleShowModal(item)}
                   >
                     <FontAwesomeIcon icon={faFileExport} />
                   </Button>
@@ -293,11 +293,11 @@ const User_DB: React.FC = () => {
                     name="quantity"
                     min="1"
                     max={selectedItem?.quantity || 1}
-                    value={submissionData.quantity}
+                    value={submissionData.amount}
                     onChange={(e) =>
                       setSubmissionData({
                         ...submissionData,
-                        quantity: Number(e.target.value),
+                        amount: Number(e.target.value),
                       })
                     }
                   />
