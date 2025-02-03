@@ -83,8 +83,7 @@ const Approval_Status: React.FC = () => {
                                 <td>{new Date(item.submitted_at).toLocaleDateString()}</td>
                                 <td
                                     className={`align-middle text-center ${getStatusColor(
-                                        item.is_urgent
-                                    )}`}
+                                        item.is_urgent )}`}
                                 >
                                     {getApprovalText(item.is_urgent)}
                                 </td>
