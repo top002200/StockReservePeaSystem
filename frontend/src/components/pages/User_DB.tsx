@@ -4,7 +4,7 @@ import { Table, Button, Modal, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExport } from "@fortawesome/free-solid-svg-icons";
 import { BorrowedEquipmentData } from "../../interface/IBorrowedEquipment";
-import { getAllBorrowedEquipments, createSubmission } from "../../services/api";
+import { getAllBorrowedEquipments, getAllSubmissions, createSubmission } from "../../services/api";
 
 const User_DB: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
@@ -13,24 +13,23 @@ const User_DB: React.FC = () => {
   >(null);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
-  const [borrowedequipmentData, setBorrowedEquipmentData] = useState<
-    BorrowedEquipmentData[]
-  >([]);
+  const [borrowedequipmentData, setBorrowedEquipmentData] = useState<BorrowedEquipmentData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState<string>("");
+  const [submissions, setSubmissions] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log("📡 Fetching data...");
         const borrowedequipRes = await getAllBorrowedEquipments();
-        console.log("🔄 API Response:", borrowedequipRes);
-
+        const submissionsRes = await getAllSubmissions();
+        
         if (borrowedequipRes.status && Array.isArray(borrowedequipRes.data)) {
-          console.log("✅ Data received:", borrowedequipRes.data);
           setBorrowedEquipmentData(borrowedequipRes.data);
-        } else {
-          console.error("❌ Error fetching equipment: ", borrowedequipRes);
+        }
+        if (submissionsRes.status) {
+          setSubmissions(submissionsRes.data);
         }
       } catch (error) {
         console.error("🚨 Error fetching data:", error);
@@ -40,6 +39,8 @@ const User_DB: React.FC = () => {
     };
     fetchData();
   }, []);
+
+
 
   const [submissionData, setSubmissionData] = useState({
     title: "",
@@ -68,21 +69,7 @@ const User_DB: React.FC = () => {
     }
   };
 
-  // Group data by equipment type and calculate quantity
-  const groupedData = borrowedequipmentData.reduce(
-    (acc: any[], currentItem) => {
-      const existingItem = acc.find(
-        (item) => item.equipment_type === currentItem.equipment_type
-      );
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        acc.push({ ...currentItem, quantity: 1 });
-      }
-      return acc;
-    },
-    []
-  );
+ 
 
   useEffect(() => {
     if (selectedItem) {
@@ -106,13 +93,38 @@ const User_DB: React.FC = () => {
     setSelectedItem(null);
   };
 
-  // Pagination
+  const disabledAssets = new Map();
+  submissions.forEach((sub) => {
+    if (sub.is_urgent === 1) {
+      const code = String(sub.asset_code || "");
+      disabledAssets.set(code, (disabledAssets.get(code) || 0) + 1);
+    }
+  });
+  const groupedData = borrowedequipmentData.reduce((acc: any[], currentItem) => {
+    const existingItem = acc.find((item) => item.equipment_type === currentItem.equipment_type);
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      acc.push({ ...currentItem, quantity: 1 });
+    }
+    return acc;
+  }, []);
+  const adjustedGroupedData = groupedData
+  .map((item) => {
+    const reduceCount = disabledAssets.get(String(item.equip_assetcode || "")) || 0;
+    return {
+      ...item,
+      quantity: Math.max(0, item.quantity - reduceCount),
+    };
+  })
+  .filter((item) => item.quantity > 0); // ซ่อนแถวที่จำนวนเหลือ 0
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const filteredData = typeFilter
-    ? groupedData.filter((item) => item.equipment_type === typeFilter)
-    : groupedData;
+    ? adjustedGroupedData.filter((item) => item.equipment_type === typeFilter)
+    : adjustedGroupedData;
   const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+
 
   return (
     <User_Layout>
@@ -134,18 +146,15 @@ const User_DB: React.FC = () => {
           </thead>
           <tbody>
             {currentRows.map((item, index) => (
-              <tr
-                key={item.borrowed_equipment_id}
-                className="align-middle text-center"
-              >
+              <tr key={item.borrowed_equipment_id} className="align-middle text-center">
                 <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                 <td>{item.equipment_type}</td>
-                <td>{item.quantity}</td> {/* Display quantity */}
+                <td>{item.quantity}</td> 
                 <td>
                   <Button
                     variant="outline-secondary"
                     style={{ color: "#c7911b", borderColor: "#c7911b" }}
-                    onClick={() => handleShowModal(item)}
+                    onClick={() => setShowModal(true)}
                   >
                     <FontAwesomeIcon icon={faFileExport} />
                   </Button>

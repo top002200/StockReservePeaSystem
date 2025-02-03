@@ -17,11 +17,13 @@ import {
   deleteBorrowedEquipment,
   getAllPictures,
   getAllTypes,
+  getAllSubmissions,
 } from "../../services/api";
 import { BorrowedEquipmentData } from "../../interface/IBorrowedEquipment";
 import Swal from "sweetalert2";
 import { PictureData } from "../../interface/IPicture";
 import { TypeData } from "../../interface/IType";
+import { SubmissionData } from "../../interface/ISubmission";
 
 const Borrowitem: React.FC = () => {
   const [borrowedEquipmentData, setBorrowedEquipmentData] = useState<
@@ -34,6 +36,37 @@ const Borrowitem: React.FC = () => {
   const [editingId, setEditingId] = useState<number | string | null>(null);
   const [typeOptions, setTypeOptions] = useState<TypeData[]>([]);
   const [pictureOptions, setPictureOptions] = useState<PictureData[]>([]);
+  const [borrowedEquipments, setBorrowedEquipments] = useState<
+    BorrowedEquipmentData[]
+  >([]);
+  const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const borrowedResponse = await getAllBorrowedEquipments();
+        const submissionsResponse = await getAllSubmissions();
+
+        setBorrowedEquipments(borrowedResponse.data);
+        setSubmissions(submissionsResponse.data);
+      } catch (error) {
+        console.error("❌ Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const disabledAssets = new Set(
+    submissions
+      .filter(sub => sub.is_urgent === 1) // ✅ คัดเฉพาะที่ `is_urgent = 1`
+      .map(sub => sub.asset_code || "") // ✅ ป้องกัน `undefined`
+  );
+  
+  console.log("🔹 Disabled Asset Codes (urgent=1):", Array.from(disabledAssets));
+
   const [formData, setFormData] = useState<BorrowedEquipmentData>({
     equipment_name: "",
     equipment_type: "",
@@ -92,7 +125,21 @@ const Borrowitem: React.FC = () => {
     fetchData();
     fetchDropdownData();
   }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const borrowedResponse = await getAllBorrowedEquipments();
+        const submissionsResponse = await getAllSubmissions();
 
+        setBorrowedEquipments(borrowedResponse.data);
+        setSubmissions(submissionsResponse.data);
+      } catch (error) {
+        console.error("❌ Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
   type FormControlElement =
     | HTMLInputElement
     | HTMLSelectElement
@@ -296,60 +343,71 @@ const Borrowitem: React.FC = () => {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="text-center">
+                <td colSpan={9} className="text-center">
                   กำลังโหลดข้อมูล...
                 </td>
               </tr>
             ) : currentRows.length > 0 ? (
-              currentRows.map((item, index) => (
-                <tr
-                  key={item.borrowed_equipment_id}
-                  className="align-middle text-center"
-                >
-                  <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                  <td>{item.equipment_type}</td>
-                  <td>{item.equipment_name}</td>
-                  <td>{item.equipment_brand}</td>
-                  <td>{item.equipment_model}</td>
-                  <td>{item.equip_assetcode}</td>
-                  <td>{item.equip_contract}</td>
-                  <td>
-                    {item.equip_img && (
-                      <img
-                        src={item.equip_img}
-                        alt="Equipment Image"
-                        style={{ maxWidth: "100px", maxHeight: "100px" }}
-                      />
-                    )}
-                  </td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      className="me-2"
-                      onClick={() => handleEditRow(item)}
-                    >
-                      <FontAwesomeIcon icon={faEdit} />
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      onClick={() =>
-                        handleDeleteRow(item.borrowed_equipment_id || 0)
-                      }
-                    >
-                      <FontAwesomeIcon icon={faTrashCan} />
-                    </Button>
-                  </td>
-                </tr>
-              ))
+              currentRows
+                .filter(
+                  (item) => !disabledAssets.has(item.equip_assetcode || "")
+                ) // ✅ ซ่อนแถวที่ตรงกัน
+                .map((item, index) => (
+                  <tr
+                    key={item.borrowed_equipment_id}
+                    className="align-middle text-center"
+                  >
+                    <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+                    <td>{item.equipment_type}</td>
+                    <td>{item.equipment_name}</td>
+                    <td>{item.equipment_brand}</td>
+                    <td>{item.equipment_model}</td>
+                    <td>{item.equip_assetcode}</td>
+                    <td>{item.equip_contract}</td>
+                    <td>
+                      {item.equip_img && (
+                        <img
+                          src={item.equip_img}
+                          alt="Equipment Image"
+                          style={{ maxWidth: "100px", maxHeight: "100px" }}
+                        />
+                      )}
+                    </td>
+                    <td>
+                      <Button
+                        variant="outline-primary"
+                        className="me-2"
+                        onClick={() => handleEditRow(item)}
+                        disabled={disabledAssets.has(
+                          item.equip_assetcode || ""
+                        )} // ✅ Disable ปุ่ม Edit
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        onClick={() =>
+                          handleDeleteRow(item.borrowed_equipment_id || 0)
+                        }
+                        disabled={disabledAssets.has(
+                          item.equip_assetcode || ""
+                        )} // ✅ Disable ปุ่ม Delete
+                      >
+                        <FontAwesomeIcon icon={faTrashCan} />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
             ) : (
               <tr>
-                <td colSpan={8} className="text-center">
+                <td colSpan={9} className="text-center">
                   ไม่มีข้อมูล
                 </td>
               </tr>
             )}
           </tbody>
         </Table>
+
         <Pagination className="justify-content-center">
           {[...Array(totalPages)].map((_, pageIndex) => (
             <Pagination.Item

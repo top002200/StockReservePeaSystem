@@ -294,10 +294,17 @@ async function getAllSubmissions() {
   }
 }
 
-// Update Distribution
-async function updateSubmission(data: SubmissionData) {
+async function updateSubmission(data: Partial<SubmissionData>) {
+
   try {
-    const response = await fetch(`${apiURL}/approval/`, {
+    // 🔥 Log ข้อมูลที่กำลังส่งไปยัง API
+    console.log("🔹 Submitting data to API:", data);
+
+    if (!data.submission_id) {
+      throw new Error("❌ Missing submission_id");
+    }
+
+    const response = await fetch(`${apiURL}/submission/${data.submission_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -305,24 +312,32 @@ async function updateSubmission(data: SubmissionData) {
       body: JSON.stringify(data),
     });
 
+    // 🔥 Log response ก่อนแปลงเป็น JSON
+    console.log("🔹 Raw API Response:", response);
+
     const res = await response.json();
+
+    // 🔥 Log response หลังจากแปลง JSON
+    console.log("🔹 API Response JSON:", res);
 
     if (response.ok) {
       return { status: true, message: res.message, data: res.data };
     } else {
       return {
         status: false,
-        message: res.error || "Failed to update approval",
+        message: res.error || "Failed to update submission",
       };
     }
   } catch (error: any) {
-    console.error("Error updating distribution:", error);
+    console.error("❌ Error updating submission:", error);
     return {
       status: false,
       message: error.message || "An unexpected error occurred",
     };
   }
 }
+
+
 
 // Brand API Functions
 

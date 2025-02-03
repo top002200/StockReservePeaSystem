@@ -14,8 +14,12 @@ export interface SubmissionData {
   time_end?: string;
   amount?: number;
   submission_note?: string;
-  submitted_at?: string; // ต้องมีค่าเสมอ
+  submitted_at: string; // ต้องมีค่าเสมอ
   is_urgent?: number;
   approval_status?: number;
-  
+  type?: string;            // ประเภท
+  brand?: string;           // ยี่ห้อ
+  model?: string;           // รุ่น
+  asset_code?: string;      // รหัสทรัพย์สิน
+  contract_number?: string; // เลขที่สัญญา
 }

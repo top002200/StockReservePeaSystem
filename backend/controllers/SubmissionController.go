@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -62,35 +63,71 @@ func GetAllSubmissions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": submissions})
 }
 
-// UpdateSubmission - อัปเดตข้อมูล submission
+
+
 func UpdateSubmission(c *gin.Context) {
 	submissionID := c.Param("id")
 
+	// ค้นหาข้อมูล submission จากฐานข้อมูล
 	var submission models.Submission
 	if err := config.DB.First(&submission, "submission_id = ?", submissionID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "Submission not found"})
 		return
 	}
 
-	// เก็บค่าข้อมูลเดิมของ SubmittedAt สำหรับการอัปเดตหากยังไม่มีค่า
-	originalSubmittedAt := submission.SubmittedAt
+	// ✅ Log ข้อมูลก่อนอัปเดต
+	fmt.Println("🔹 Existing submission:", submission)
 
-	if err := c.ShouldBindJSON(&submission); err != nil {
+	// รับค่าข้อมูลใหม่จาก JSON
+	var updatedData models.Submission
+	if err := c.ShouldBindJSON(&updatedData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
 
-	// อัปเดต `submitted_at` เป็นเวลาปัจจุบันถ้า `submitted_at` ยังไม่มีค่า
-	if originalSubmittedAt.IsZero() && submission.SubmittedAt.IsZero() {
-		submission.SubmittedAt = time.Now()
+	// ✅ อัปเดตเฉพาะฟิลด์ที่ถูกส่งมา
+	if updatedData.IsUrgent != 0 { // 🔹 ใช้ `is_urgent` แทน `approval_status`
+		submission.IsUrgent = updatedData.IsUrgent
+	}
+	if updatedData.Type != nil {
+		submission.Type = updatedData.Type
+	}
+	if updatedData.Brand != nil {
+		submission.Brand = updatedData.Brand
+	}
+	if updatedData.Model != nil {
+		submission.Model = updatedData.Model
+	}
+	if updatedData.AssetCode != nil {
+		submission.AssetCode = updatedData.AssetCode
+	}
+	if updatedData.ContractNumber != nil {
+		submission.ContractNumber = updatedData.ContractNumber
+	}
+	if updatedData.TimeStart != nil {
+		submission.TimeStart = updatedData.TimeStart
+	}
+	if updatedData.TimeEnd != nil {
+		submission.TimeEnd = updatedData.TimeEnd
 	}
 
-	// อัปเดตข้อมูล submission ในฐานข้อมูล
-	if err := config.DB.Save(&submission).Error; err != nil {
+	// ✅ Log ข้อมูลที่อัปเดตก่อนบันทึกลงฐานข้อมูล
+	fmt.Println("🔹 Updated submission before saving:", submission)
+
+	// ✅ บันทึกข้อมูลที่อัปเดตลงในฐานข้อมูล
+	result := config.DB.Save(&submission)
+	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to update submission details"})
 		return
 	}
 
+	// ✅ ตรวจสอบว่ามีข้อมูลถูกอัปเดตหรือไม่
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "No records updated"})
+		return
+	}
+
+	// ✅ ส่งข้อมูลที่อัปเดตกลับไปยัง Frontend
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Submission updated successfully", "data": submission})
 }
 

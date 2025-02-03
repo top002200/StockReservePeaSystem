@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -55,7 +55,7 @@ func GetAllBorrowedEquipments(c *gin.Context) {
     }
 
     // Log ข้อมูลที่ส่งออกไป
-    fmt.Println("Fetched Data:", borrowedEquipments)
+   
 
     c.JSON(http.StatusOK, gin.H{"status": "success", "data": borrowedEquipments})
 }

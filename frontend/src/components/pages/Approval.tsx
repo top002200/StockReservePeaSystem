@@ -7,27 +7,51 @@ import jsPDF from "jspdf";
 import backgroundImg from "../../assets/pdf/background.jpg"; // ใช้รูปที่แปลงจาก PDF
 import "jspdf-autotable";
 import { THSarabunFont } from "../../fonts/THSarabun"; // Import THSarabunFont
-import { getAllSubmissions, getAllBorrowedEquipments } from "../../services/api";
-import { SubmissionData } from "../../interface/ISubmission"; // 
+import {
+  getAllSubmissions,
+  getAllBorrowedEquipments,
+} from "../../services/api";
+import { SubmissionData } from "../../interface/ISubmission"; //
 import { BorrowedEquipmentData } from "../../interface/IBorrowedEquipment";
 import { updateSubmission } from "../../services/api"; // นำเข้า API สำหรับอัปเดตข้อมูล
 
 const Approval: React.FC = () => {
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
-  const [borrowedEquipments, setBorrowedEquipments] = useState<BorrowedEquipmentData[]>([]);
+  const [borrowedEquipments, setBorrowedEquipments] = useState<
+    BorrowedEquipmentData[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<SubmissionData | null>(null);
-  const [approvalStatus, setApprovalStatus] = useState<string>("0");
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<SubmissionData | null>(null);
+  const [is_urgent, setIsUrgent] = useState<string>("0");
 
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState<string>("");
+  const [selectedAsset, setSelectedAsset] = useState<string | undefined>(
+    undefined
+  );
+  const [selectedContract, setSelectedContract] = useState<string | undefined>(
+    undefined
+  );
+  const formatDateToISO = (dateStr: string | undefined) => {
+    if (!dateStr) return undefined;
+    return new Date(dateStr).toISOString(); // ✅ แปลงเป็น ISO 8601
+  };
+
+  const startDate = formatDateToISO(
+    document.querySelector<HTMLInputElement>("[name='time_start']")?.value
+  );
+  const endDate = formatDateToISO(
+    document.querySelector<HTMLInputElement>("[name='time_end']")?.value
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getAllSubmissions();
+        console.log("🔹 Loaded submission data:", response.data); // ✅ Debugging Log
         setSubmissions(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("Error fetching submission data:", error);
@@ -50,41 +74,65 @@ const Approval: React.FC = () => {
     fetchEquipments();
   }, []);
 
-  const filteredBrands = borrowedEquipments.filter(e => e.equipment_type === selectedType);
-  const filteredModels = borrowedEquipments.filter(e => e.equipment_brand === selectedBrand && e.equipment_type === selectedType);
-  const filteredAssets = borrowedEquipments.filter(e => e.equipment_model === selectedModel && e.equipment_brand === selectedBrand && e.equipment_type === selectedType);
+  const filteredBrands = borrowedEquipments.filter(
+    (e) => e.equipment_type === selectedType
+  );
+  const filteredModels = borrowedEquipments.filter(
+    (e) =>
+      e.equipment_brand === selectedBrand && e.equipment_type === selectedType
+  );
+  const filteredAssets = borrowedEquipments.filter(
+    (e) =>
+      e.equipment_model === selectedModel &&
+      e.equipment_brand === selectedBrand &&
+      e.equipment_type === selectedType
+  );
 
   const handleConfirm = async () => {
-    if (!selectedSubmission) return;
-
-    try {
-      const updatedData = {
+    if (!selectedSubmission?.submission_id) {
+      alert("ไม่พบ submission_id");
+      return;
+    }
+  
+    // ✅ กรองค่าที่เป็น undefined หรือ ""
+    const updatedData: Partial<SubmissionData> = Object.fromEntries(
+      Object.entries({
         submission_id: selectedSubmission.submission_id,
-        approval_status: parseInt(approvalStatus, 10), // แปลงเป็นตัวเลข
-        equipment_type: selectedType,
-        equipment_brand: selectedBrand,
-        equipment_model: selectedModel,
-      };
-
-      await updateSubmission(updatedData); // ส่งข้อมูลไปอัปเดต API
-
-      // อัปเดตรายการ submissions ให้ UI แสดงสถานะที่เปลี่ยนไป
-      setSubmissions((prev) =>
-        prev.map((sub) =>
-          sub.submission_id === selectedSubmission.submission_id
-            ? { ...sub, approval_status: updatedData.approval_status }
-            : sub
-        )
-      );
-
-      alert("อัปเดตสถานะเรียบร้อยแล้ว!");
-      closeModal();
+        is_urgent: Number(is_urgent), 
+        type: selectedType || undefined,
+        brand: selectedBrand || undefined,
+        model: selectedModel || undefined,
+        asset_code: selectedAsset || undefined,
+        contract_number: selectedContract || undefined,
+        time_start: startDate, 
+        time_end: endDate, 
+        submitted_at: selectedSubmission.submitted_at || "", // ✅ ป้องกัน undefined
+      }).filter(([_, v]) => v !== undefined && v !== "")
+    );
+  
+    console.log("🔹 Sending updated data:", JSON.stringify(updatedData, null, 2));
+  
+    try {
+      const response = await updateSubmission(updatedData);
+  
+      if (response.status) {
+        alert("✅ อัปเดตข้อมูลสำเร็จ");
+  
+        // ✅ รีโหลดข้อมูลหลังจากอัปเดต
+        const updatedSubmissions = await getAllSubmissions();
+        setSubmissions(updatedSubmissions.data);
+  
+        closeModal();
+      } else {
+        alert("❌ เกิดข้อผิดพลาดในการอัปเดตข้อมูล: " + response.message);
+      }
     } catch (error) {
-      console.error("Error updating submission:", error);
-      alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+      console.error("❌ Error updating submission:", error);
+      alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
     }
   };
-
+  
+  
 
   const openModal = (submission: SubmissionData) => {
     setSelectedSubmission(submission);
@@ -112,7 +160,6 @@ const Approval: React.FC = () => {
       // เพิ่มรูปพื้นหลัง (ถ้ามี)
       doc.addImage(backgroundImg, "JPEG", 0, 0, 210, 297);
 
-
       // ข้อมูลผู้ขอยืม
       doc.setFontSize(12);
       doc.text(`${submission.submission_username || "-"}`, 70, 37);
@@ -138,37 +185,32 @@ const Approval: React.FC = () => {
     }
   };
 
-
-  const getStatusColor = (status?: number) => {
-    // กำหนดสีตามค่าของ status
-    switch (status) {
-      case 0:
-        return "text-warning";  // สีเหลือง สำหรับ "รออนุมัติ"
+  const getStatusColor = (is_urgent?: number) => {
+    switch (is_urgent) {
       case 1:
-        return "text-success";  // สีเขียว สำหรับ "อนุมัติ"
+        return "text-success"; 
       case 2:
-        return "text-danger";   // สีแดง สำหรับ "ไม่อนุมัติ"
+        return "text-danger"; 
       case 3:
-        return "text-muted";    // สีเทา สำหรับ "คืนแล้ว"
+        return "text-muted"; 
       default:
-        return "text-warning"; // ถ้าไม่ตรงกับค่าที่กำหนด ใช้สีเริ่มต้น
+        return "text-warning"; 
     }
   };
-
-  const getApprovalText = (status?: number) => {
-    switch (status) {
-      case 0:
-        return "รออนุมัติ";  // กำลังรออนุมัติ
+  
+  const getApprovalText = (is_urgent?: number) => {
+    switch (is_urgent) {
       case 1:
-        return "อนุมัติ";   // ผ่านการอนุมัติแล้ว
+        return "อนุมัติ"; 
       case 2:
-        return "ไม่อนุมัติ"; // ไม่ผ่านการอนุมัติ
+        return "ไม่อนุมัติ"; 
       case 3:
-        return "คืนแล้ว";   // อุปกรณ์ถูกคืนแล้ว
+        return "คืนแล้ว"; 
       default:
-        return "รออนุมัติ"; // กรณีอื่น ๆ
+        return "รออนุมัติ"; 
     }
   };
+  
 
   return (
     <Layout>
@@ -213,9 +255,11 @@ const Approval: React.FC = () => {
                     {item.submission_internalnumber}
                   </td>
                   <td
-                    className={`align-middle text-center ${getStatusColor(item.approval_status)}`}
+                    className={`align-middle text-center ${getStatusColor(
+                      item.is_urgent
+                    )}`}
                   >
-                    {getApprovalText(item.approval_status)}
+                    {getApprovalText(item.is_urgent)}
                   </td>
 
                   <td className="align-middle text-center">
@@ -250,37 +294,81 @@ const Approval: React.FC = () => {
             <div className="container">
               {/* ข้อมูลผู้ส่งคำขอยืม */}
               <div className="mb-3 p-3 rounded bg-light">
-                <h6 className="border-bottom pb-2 text-secondary fw-bold">ผู้ส่งคำขอยืม</h6>
+                <h6 className="border-bottom pb-2 text-secondary fw-bold">
+                  ผู้ส่งคำขอยืม
+                </h6>
                 <div className="row g-3">
-                  <div className="col-md-4"><p><b>ชื่อ-สกุล :</b> {selectedSubmission.submission_username}</p></div>
-                  <div className="col-md-4"><p><b>เลขพนักงาน :</b> {selectedSubmission.submission_userid}</p></div>
-                  <div className="col-md-4"><p><b>ตำแหน่ง :</b> {selectedSubmission.submission_position}</p></div>
+                  <div className="col-md-4">
+                    <p>
+                      <b>ชื่อ-สกุล :</b>{" "}
+                      {selectedSubmission.submission_username}
+                    </p>
+                  </div>
+                  <div className="col-md-4">
+                    <p>
+                      <b>เลขพนักงาน :</b> {selectedSubmission.submission_userid}
+                    </p>
+                  </div>
+                  <div className="col-md-4">
+                    <p>
+                      <b>ตำแหน่ง :</b> {selectedSubmission.submission_position}
+                    </p>
+                  </div>
                 </div>
                 <div className="row g-3">
-                  <div className="col-md-4"><p><b>หมวด/แผนก :</b> {selectedSubmission.submission_department}</p></div>
-                  <div className="col-md-4"><p><b>เบอร์ภายใน :</b> {selectedSubmission.submission_internalnumber}</p></div>
+                  <div className="col-md-4">
+                    <p>
+                      <b>หมวด/แผนก :</b>{" "}
+                      {selectedSubmission.submission_department}
+                    </p>
+                  </div>
+                  <div className="col-md-4">
+                    <p>
+                      <b>เบอร์ภายใน :</b>{" "}
+                      {selectedSubmission.submission_internalnumber}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* ข้อมูลอุปกรณ์ */}
               <div className="mb-3 p-3 rounded bg-light">
-                <h6 className="border-bottom pb-2 text-secondary fw-bold">รายละเอียดอุปกรณ์</h6>
+                <h6 className="border-bottom pb-2 text-secondary fw-bold">
+                  รายละเอียดอุปกรณ์
+                </h6>
                 <div className="row g-3">
-                  <div className="col-md-4"><p><b>ประเภท :</b> Notebook</p></div>
-                  <div className="col-md-4"><p><b>จำนวน :</b> </p></div>
+                  <div className="col-md-4">
+                    <p>
+                      <b>ประเภท :</b> Notebook
+                    </p>
+                  </div>
+                  <div className="col-md-4">
+                    <p>
+                      <b>จำนวน :</b>{" "}
+                    </p>
+                  </div>
                 </div>
                 <div className="row g-3">
-                  <div className="col-md-6"><p><b>การใช้งาน :</b> {selectedSubmission.submission_note}</p></div>
+                  <div className="col-md-6">
+                    <p>
+                      <b>การใช้งาน :</b> {selectedSubmission.submission_note}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* ฟอร์มการอนุมัติ */}
               <Form className="p-3 rounded bg-light">
-                <h6 className="border-bottom pb-2 text-secondary fw-bold">การอนุมัติ</h6>
+                <h6 className="border-bottom pb-2 text-secondary fw-bold">
+                  การอนุมัติ
+                </h6>
                 <div className="row g-5">
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>สถานะ :</Form.Label>
-                    <Form.Select value={approvalStatus} onChange={(e) => setApprovalStatus(e.target.value)}>
+                    <Form.Select
+                      value={is_urgent}
+                      onChange={(e) => setIsUrgent(e.target.value)}
+                    >
                       <option value="0">รออนุมัติ</option>
                       <option value="1">อนุมัติ</option>
                       <option value="2">ไม่อนุมัติ</option>
@@ -289,10 +377,19 @@ const Approval: React.FC = () => {
                   </Form.Group>
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>ประเภท :</Form.Label>
-                    <Form.Select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
+                    <Form.Select
+                      value={selectedType}
+                      onChange={(e) => setSelectedType(e.target.value)}
+                    >
                       <option value="">เลือกประเภท</option>
-                      {[...new Set(borrowedEquipments.map(e => e.equipment_type))].map((type, index) => (
-                        <option key={index} value={type}>{type}</option>
+                      {[
+                        ...new Set(
+                          borrowedEquipments.map((e) => e.equipment_type)
+                        ),
+                      ].map((type, index) => (
+                        <option key={index} value={type}>
+                          {type}
+                        </option>
                       ))}
                     </Form.Select>
                   </Form.Group>
@@ -301,20 +398,40 @@ const Approval: React.FC = () => {
                 <div className="row g-5">
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>ยี่ห้อ :</Form.Label>
-                    <Form.Select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} disabled={!selectedType}>
+                    <Form.Select
+                      value={selectedBrand}
+                      onChange={(e) => setSelectedBrand(e.target.value)}
+                      disabled={!selectedType}
+                    >
                       <option value="">เลือกยี่ห้อ</option>
-                      {[...new Set(filteredBrands.map(e => e.equipment_brand))].map((brand, index) => (
-                        <option key={index} value={brand}>{brand}</option>
+                      {[
+                        ...new Set(
+                          filteredBrands.map((e) => e.equipment_brand)
+                        ),
+                      ].map((brand, index) => (
+                        <option key={index} value={brand}>
+                          {brand}
+                        </option>
                       ))}
                     </Form.Select>
                   </Form.Group>
 
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>รุ่น :</Form.Label>
-                    <Form.Select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} disabled={!selectedBrand}>
+                    <Form.Select
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                      disabled={!selectedBrand}
+                    >
                       <option value="">เลือกรุ่น</option>
-                      {[...new Set(filteredModels.map(e => e.equipment_model))].map((model, index) => (
-                        <option key={index} value={model}>{model}</option>
+                      {[
+                        ...new Set(
+                          filteredModels.map((e) => e.equipment_model)
+                        ),
+                      ].map((model, index) => (
+                        <option key={index} value={model}>
+                          {model}
+                        </option>
                       ))}
                     </Form.Select>
                   </Form.Group>
@@ -323,20 +440,32 @@ const Approval: React.FC = () => {
                 <div className="row g-5">
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>รหัสทรัพย์สิน :</Form.Label>
-                    <Form.Select disabled={!selectedModel}>
+                    <Form.Select
+                      value={selectedAsset}
+                      onChange={(e) => setSelectedAsset(e.target.value)}
+                      disabled={!selectedModel}
+                    >
                       <option value="">เลือกรหัสทรัพย์สิน</option>
                       {filteredAssets.map((asset, index) => (
-                        <option key={index} value={asset.equip_assetcode}>{asset.equip_assetcode}</option>
+                        <option key={index} value={asset.equip_assetcode}>
+                          {asset.equip_assetcode}
+                        </option>
                       ))}
                     </Form.Select>
                   </Form.Group>
 
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>เลขที่สัญญา :</Form.Label>
-                    <Form.Select disabled={!selectedModel}>
+                    <Form.Select
+                      value={selectedContract}
+                      onChange={(e) => setSelectedContract(e.target.value)}
+                      disabled={!selectedModel}
+                    >
                       <option value="">เลือกเลขที่สัญญา</option>
                       {filteredAssets.map((asset, index) => (
-                        <option key={index} value={asset.equip_contract}>{asset.equip_contract}</option>
+                        <option key={index} value={asset.equip_contract}>
+                          {asset.equip_contract}
+                        </option>
                       ))}
                     </Form.Select>
                   </Form.Group>
@@ -357,8 +486,20 @@ const Approval: React.FC = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" className="rounded px-4" onClick={closeModal}>ปิด</Button>
-          <Button variant="success" className="rounded px-4" onClick={handleConfirm}>ยืนยัน</Button>
+          <Button
+            variant="secondary"
+            className="rounded px-4"
+            onClick={closeModal}
+          >
+            ปิด
+          </Button>
+          <Button
+            variant="success"
+            className="rounded px-4"
+            onClick={handleConfirm}
+          >
+            ยืนยัน
+          </Button>
         </Modal.Footer>
       </Modal>
     </Layout>

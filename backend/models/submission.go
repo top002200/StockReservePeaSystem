@@ -6,8 +6,8 @@ import (
 
 type Submission struct {
 	SubmissionID        uint       `gorm:"primaryKey;autoIncrement" json:"submission_id"`
-	BorrowedEquipmentID *uint      `json:"borrowed_equipment_id,omitempty"` // Foreign key, อาจเป็น `nil` ได้
-	Title              *string    `json:"title,omitempty"`                  // ใช้ pointer เพื่อให้ `omitempty` ทำงาน
+	BorrowedEquipmentID *uint      `json:"borrowed_equipment_id,omitempty"` // Foreign key, อาจเป็น nil ได้
+	Title              *string    `json:"title,omitempty"`                  // ใช้ pointer เพื่อให้ omitempty ทำงาน
 	UsernName          *string    `json:"submission_username,omitempty"`
 	Usernid            *string    `json:"submission_userid,omitempty"`
 	Position           *string    `json:"submission_position,omitempty"`
@@ -20,7 +20,11 @@ type Submission struct {
 	TimeEnd            *time.Time `json:"time_end,omitempty"`
 	Amount             *int       `json:"amount,omitempty"`
 	Note               *string    `json:"submission_note,omitempty"`
-	SubmittedAt        time.Time  `json:"submitted_at"` // ไม่ใช้ `omitempty` เพราะต้องมีค่าเสมอ
-	IsUrgent 			int       `gorm:"default:0" json:"is_urgent"`
-
+	SubmittedAt        time.Time  `json:"submitted_at"` // ไม่ใช้ omitempty เพราะต้องมีค่าเสมอ
+	IsUrgent           int        `gorm:"default:0" json:"is_urgent"`
+	Type              *string `json:"type,omitempty"`              // ประเภท
+	Brand             *string `json:"brand,omitempty"`             // ยี่ห้อ
+	Model            *string `json:"model,omitempty"`            // รุ่น
+	AssetCode        *string `json:"asset_code,omitempty"`        // รหัสทรัพย์สิน
+	ContractNumber   *string `json:"contract_number,omitempty"`   // เลขที่สัญญา
 }
