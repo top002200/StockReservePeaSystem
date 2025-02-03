@@ -216,8 +216,9 @@ const Equipment_Repair: React.FC = () => {
   };
 
   /// กรองข้อมูลตามปีและเดือน
-  const filteredData = data.filter((item) => {
-    if (!item.date) return false;
+  const filteredData = data
+  .filter((item) => {
+    if (!item.date || typeof item.date !== "string") return false; // ตรวจสอบค่า undefined หรือชนิดข้อมูล
     const date = new Date(item.date);
     const itemMonth = date.getMonth() + 1;
     const itemYear = date.getFullYear();
@@ -226,6 +227,11 @@ const Equipment_Repair: React.FC = () => {
     const isYearMatched =
       selectedYear === "" || itemYear === parseInt(selectedYear);
     return isMonthMatched && isYearMatched;
+  })
+  .sort((a, b) => {
+    const dateA = new Date(a.date || ""); // แก้ไขสำหรับ undefined
+    const dateB = new Date(b.date || "");
+    return dateB.getTime() - dateA.getTime(); // เรียงจากใหม่ไปเก่า
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -888,6 +894,7 @@ const Equipment_Repair: React.FC = () => {
           </Modal.Footer>
         </Modal>
 
+        {/* Edit Modal */}
         <Modal
           show={showEditModal}
           onHide={handleCloseEditModal}

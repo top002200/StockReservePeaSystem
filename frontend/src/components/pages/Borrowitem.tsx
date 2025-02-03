@@ -288,6 +288,8 @@ const Borrowitem: React.FC = () => {
               <th>ยี่ห้อ</th>
               <th>รุ่น</th>
               <th>รหัสทรัพย์สิน</th>
+              <th>เลขที่สัญญา</th>
+              <th>รูปภาพ</th>
               <th>จัดการ</th>
             </tr>
           </thead>
@@ -310,6 +312,7 @@ const Borrowitem: React.FC = () => {
                   <td>{item.equipment_brand}</td>
                   <td>{item.equipment_model}</td>
                   <td>{item.equip_assetcode}</td>
+                  <td>{item.equip_contract}</td>
                   <td>
                     {item.equip_img && (
                       <img

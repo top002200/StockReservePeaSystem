@@ -53,6 +53,7 @@ const User_DB: React.FC = () => {
     equipment_type: selectedItem?.equipment_type || "",
     quantity: 1,
     submitted_at: new Date().toISOString(),
+    submission_note: "",
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSubmissionData({ ...submissionData, [e.target.name]: e.target.value });
@@ -82,6 +83,16 @@ const User_DB: React.FC = () => {
     },
     []
   );
+
+  useEffect(() => {
+    if (selectedItem) {
+      setSubmissionData((prev) => ({
+        ...prev,
+        equipment_type: selectedItem.equipment_type,
+      }));
+    }
+  }, [selectedItem]);
+  
 
   const handleShowModal = (
     item: BorrowedEquipmentData & { quantity: number }
@@ -115,10 +126,10 @@ const User_DB: React.FC = () => {
         <Table bordered hover responsive>
           <thead>
             <tr className="align-middle text-center">
-              <th>ลำดับที่</th>
-              <th>อุปกรณ์</th>
-              <th>จำนวน</th>
-              <th style={{ width: 200 }}>ส่งคำขอยืม</th>
+              <th style={{width: "100px"}}>ลำดับที่</th>
+              <th style={{width: "200px"}}>อุปกรณ์</th>
+              <th style={{width: "100px"}}>จำนวน</th>
+              <th style={{width: "100px"}}>ส่งคำขอยืม</th>
             </tr>
           </thead>
           <tbody>
@@ -246,7 +257,7 @@ const User_DB: React.FC = () => {
                 ข้อมูลอุปกรณ์
               </h6>
               <div className="row">
-                <Form.Group className="col-md-6">
+                <Form.Group className="col-md-4">
                   <Form.Label>ประเภทอุปกรณ์</Form.Label>
                   <Form.Control
                     type="text"
@@ -255,6 +266,17 @@ const User_DB: React.FC = () => {
                   />
                 </Form.Group>
 
+                <Form.Group className="col-md-6">
+                  <Form.Label>การใช้งาน</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="submission_note"
+                    value={submissionData.submission_note}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
+                </div>
+                <div className="row">
                 <Form.Group className="col-md-2">
                   <Form.Label>จำนวน</Form.Label>
                   <Form.Control
@@ -272,7 +294,7 @@ const User_DB: React.FC = () => {
                   />
                 </Form.Group>
 
-                <Form.Group className="col-md-3">
+                <Form.Group className="col-md-4">
                   <Form.Label>วันที่และเวลา</Form.Label>
                   <Form.Control
                     type="datetime-local"

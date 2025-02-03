@@ -1,7 +1,9 @@
 // src/pages/User_DB.tsx
 import React from 'react';
 import User_Layout from '../Layout/User_Layout';
-import { Table } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 
 
 const Approval_Status: React.FC = () => {
@@ -54,10 +56,12 @@ const Approval_Status: React.FC = () => {
                 <Table bordered hover responsive>
                     <thead>
                         <tr className='align-middle text-center'>
-                            <th>ลำดับที่</th>
+                            <th style={{width: "150px"}}>ลำดับที่</th>
                             <th>อุปกรณ์</th>
-                            <th>จำนวน</th>
-                            <th>สถานะ</th>
+                            <th style={{width: "150px"}}>จำนวน</th>
+                            <th style={{width: "150px"}}>วันที่ส่งคำขอ</th>
+                            <th style={{width: "150px"}}>สถานะ</th>
+                            <th style={{width: "150px"}}>ยกเลิกคำขอ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,7 +70,13 @@ const Approval_Status: React.FC = () => {
                                 <td>{index + 1}</td>
                                 <td>{item.type}</td>
                                 <td>{item.quantity}</td>
+                                <td></td>
                                 <td className={getStatusColor(item.status)}>{item.status}</td>
+                                <td>
+                                    <Button variant='outline-secondary'>
+                                        <FontAwesomeIcon icon={faXmark} />
+                                    </Button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>

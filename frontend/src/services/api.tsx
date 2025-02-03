@@ -294,6 +294,35 @@ async function getAllSubmissions() {
   }
 }
 
+// Update Distribution
+async function updateSubmission(data: SubmissionData) {
+  try {
+    const response = await fetch(`${apiURL}/approval/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message, data: res.data };
+    } else {
+      return {
+        status: false,
+        message: res.error || "Failed to update approval",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error updating distribution:", error);
+    return {
+      status: false,
+      message: error.message || "An unexpected error occurred",
+    };
+  }
+}
 
 // Brand API Functions
 
@@ -1011,6 +1040,7 @@ export {
   deleteEquipment,
   createSubmission,
   getAllSubmissions,
+  updateSubmission,
   createBrand,
   getAllBrands,
   createModel,

@@ -51,6 +51,8 @@ function Equipment_info() {
   const [isEdit, setIsEdit] = useState(false); // <-- Add this line
   const [editingId, setEditingId] = useState<number | string | null>(null);
   const [showModalPaid, setShowModalPaid] = useState(false); // To control visibility of ModalPaid
+  const [customType, setCustomType] = useState(""); // เก็บค่าประเภทอุปกรณ์ที่กำหนดเอง
+  const [isCustomType, setIsCustomType] = useState(false); // ตรวจสอบว่าผู้ใช้เลือก "อื่นๆ" หรือไม่
 
   // ฟังก์ชันการจัดการกรอกข้อมูล
 
@@ -232,7 +234,7 @@ function Equipment_info() {
       !formData.equipment_brand ||
       !formData.equipment_model ||
       !formData.equip_amount ||
-      !formData.equip_img 
+      !formData.equip_img
     ) {
       Swal.fire({
         icon: "error",
@@ -390,6 +392,7 @@ function Equipment_info() {
     }));
   };
 
+
   return (
     <Info_Layout>
       <div className="equipment-info-content">
@@ -406,7 +409,7 @@ function Equipment_info() {
             onChange={(e) => setTypeFilter(e.target.value)}
             style={{ maxWidth: "300px" }}
           >
-            <option value="">-- แสดงทั้งหมด --</option>
+            <option value="">แสดงทั้งหมด</option>
             {typeOptions.map((type) => (
               <option key={type.type_id} value={type.type_id}>
                 {type.type_name}
@@ -606,26 +609,59 @@ function Equipment_info() {
         </Modal.Header>
         <Modal.Body>
           <Form>
+
             <Form.Group className="mb-3">
               <Form.Label>ประเภทอุปกรณ์</Form.Label>
+
+              {/* Dropdown เลือกประเภทอุปกรณ์ */}
               <Form.Select
                 name="equipment_type"
                 value={formData.equipment_type}
                 onChange={(e) => {
-                  const selectedTypeName = e.target.value;
                   setFormData((prev) => ({
                     ...prev,
-                    equipment_type: selectedTypeName, // เก็บเป็นชื่อประเภท
+                    equipment_type: e.target.value,
                   }));
                 }}
               >
-                <option value="">-- เลือกประเภท --</option>
+                <option value="">เลือกประเภท</option>
                 {typeOptions.map((type) => (
                   <option key={type.type_id} value={type.type_name}>
                     {type.type_name}
                   </option>
                 ))}
               </Form.Select>
+
+              {/* "อื่นๆ" */}
+              <span
+                className="text-primary mt-2 d-block text-end"
+                style={{ cursor: "pointer", textDecoration: "underline" }}
+                onClick={() => setIsCustomType(true)}
+              >
+                อื่นๆ
+              </span>
+
+              {/* ช่องกรอกประเภทใหม่ (แสดงเมื่อกดลิงก์) */}
+              {isCustomType && (
+                <Form.Control
+                  type="text"
+                  placeholder="กรอกประเภทอุปกรณ์"
+                  value={customType}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setCustomType(newType);
+
+                    // บันทึกไปที่ formData.equipment_type และ type_name
+                    setFormData((prev) => ({
+                      ...prev,
+                      equipment_type: newType, // ใช้เป็นค่าประเภทที่เลือก
+                      type_name: newType, // บันทึกเป็นชื่อประเภท
+                    }));
+                  }}
+                  className="mt-2"
+                />
+              )}
+
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -658,17 +694,6 @@ function Equipment_info() {
               />
             </Form.Group>
 
-            {/* เพิ่มฟิลด์ Asset code ที่นี่ 
-              <Form.Group className="mb-3">
-                <Form.Label>Asset Code</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="equip_assetcode"
-                  value={formData.equip_assetcode}
-                  onChange={handleInputChange}
-                />
-              </Form.Group> */}
-
             <Form.Group className="mb-3">
               <Form.Label>เลือกรูปภาพ</Form.Label>
               <Form.Select
@@ -676,7 +701,7 @@ function Equipment_info() {
                 value={formData.equip_img}
                 onChange={handleInputChange}
               >
-                <option value="">-- เลือกรูปภาพ --</option>
+                <option value="">เลือกรูปภาพ</option>
                 {pictureOptions.map((picture) => (
                   <option key={picture.picture_id} value={picture.picture_data}>
                     รูปภาพ {picture.picture_id}

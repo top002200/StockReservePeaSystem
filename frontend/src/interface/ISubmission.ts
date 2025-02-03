@@ -14,6 +14,8 @@ export interface SubmissionData {
   time_end?: string;
   amount?: number;
   submission_note?: string;
-  submitted_at: string; // ต้องมีค่าเสมอ
+  submitted_at?: string; // ต้องมีค่าเสมอ
   is_urgent?: number;
+  approval_status?: number;
+  
 }
