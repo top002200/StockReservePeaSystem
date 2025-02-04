@@ -336,6 +336,29 @@ async function updateSubmission(data: Partial<SubmissionData>) {
     };
   }
 }
+async function deleteSubmission(submissionId: string) {
+  try {
+    const response = await fetch(`${apiURL}/submission/${submissionId}`, {
+      method: "DELETE",
+    });
+
+    const res = await response.json();
+
+    if (response.ok) {
+      return { status: true, message: res.message };
+    } else {
+      return {
+        status: false,
+        message: res.message || "Failed to delete submission",
+      };
+    }
+  } catch (error: any) {
+    console.error("Error deleting submission:", error);
+    return { status: false, message: error.message || "An error occurred" };
+  }
+}
+
+
 
 // Brand API Functions
 
@@ -1054,6 +1077,7 @@ export {
   createSubmission,
   getAllSubmissions,
   updateSubmission,
+  deleteSubmission,
   createBrand,
   getAllBrands,
   createModel,
