@@ -88,7 +88,6 @@ func main() {
 		protectedRoutes.PUT("/distribution/:id", controllers.UpdateDistribution)
 		protectedRoutes.DELETE("/distribution/:id", controllers.DeleteDistribution)
 
-
 	
 	}
 
