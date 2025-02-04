@@ -157,8 +157,19 @@ const Approval: React.FC = () => {
 
   const openModal = (submission: SubmissionData) => {
     setSelectedSubmission(submission);
+  
+    setIsUrgent(submission.is_urgent?.toString() || "0");
+    setSelectedType(submission.type || "");
+    setSelectedBrand(submission.brand || "");
+    setSelectedModel(submission.model || "");
+    setSelectedAsset(submission.asset_code || "");
+    setSelectedContract(submission.contract_number || "");
+    setTimeStart(submission.time_start || undefined);
+    setTimeEnd(submission.time_end || undefined);
+  
     setShowModal(true);
   };
+  
 
   const closeModal = () => {
     setShowModal(false);
@@ -273,7 +284,7 @@ const Approval: React.FC = () => {
                 <th>ผู้ขอยืม</th>
                 <th style={{ width: 200 }}>เลขประจำตัวพนักงาน</th>
                 <th>อุปกรณ์</th>
-                <th style={{ width: 150 }}>เบอร์ภายใน</th>
+                <th style={{ width: 150 }}>จำนวน</th>
                 <th>สถานะ</th>
                 <th style={{ width: 200 }}></th>
               </tr>
@@ -282,16 +293,20 @@ const Approval: React.FC = () => {
               {currentSubmissions.map((item, index) => (
                 <tr key={item.submission_id}>
                   <td className="align-middle text-center">{(currentPage - 1) * rowsPerPage + index + 1}</td>
-                  <td className="align-middle text-center">
-                    {item.submission_username}
-                  </td>
-                  <td className="align-middle text-center">
-                    {item.submission_userid}
-                  </td>
-                  <td></td>
-                  <td className="align-middle text-left">
-                    {item.submission_internalnumber}
-                  </td>
+                  <td className="align-middle text-center">{item.submission_username}</td>
+                  <td className="align-middle text-center">{item.submission_userid}</td>
+                  <td className="align-middle text-left"><div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div style={{ flex: 1, paddingRight: "5px", borderRight: "1px solid #ccc" }}>
+                      <strong>ประเภท:</strong> {item.type || "-"}<br />
+                      <strong>ยี่ห้อ:</strong> {item.brand || "-"}<br />
+                      <strong>รุ่น:</strong> {item.model || "-"}<br />
+                    </div>
+                    <div style={{ flex: 1, paddingLeft: "10px" }}>
+                      <strong>รหัสทรัพย์สิน:</strong> {item.asset_code || "-"}<br />
+                      <strong>เลขที่สัญญา:</strong> {item.contract_number || "-"}
+                    </div>
+                  </div></td>
+                  <td className="align-middle text-center">{item.amount}</td>
                   <td
                     className={`align-middle text-center ${getStatusColor(
                       item.is_urgent
@@ -299,7 +314,6 @@ const Approval: React.FC = () => {
                   >
                     {getApprovalText(item.is_urgent)}
                   </td>
-
                   <td className="align-middle text-center">
                     <Button
                       variant="outline-primary"
@@ -400,13 +414,13 @@ const Approval: React.FC = () => {
                 <div className="row g-3">
                   <div className="col-md-4">
                     <p>
-                      <b>ประเภท :</b>
+                      <b>ประเภท :</b> {selectedSubmission.type}
 
                     </p>
                   </div>
                   <div className="col-md-4">
                     <p>
-                      <b>จำนวน :</b>{" "}
+                      <b>จำนวน :</b> {selectedSubmission.amount}
                     </p>
                   </div>
                 </div>
@@ -424,51 +438,33 @@ const Approval: React.FC = () => {
                 <h6 className="border-bottom pb-2 text-secondary fw-bold">
                   การอนุมัติ
                 </h6>
+
                 <div className="row g-5">
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>สถานะ :</Form.Label>
-                    <Form.Select
-                      value={is_urgent}
-                      onChange={(e) => setIsUrgent(e.target.value)}
-                    >
+                    <Form.Select value={is_urgent} onChange={(e) => setIsUrgent(e.target.value)}>
                       <option value="0">รออนุมัติ</option>
                       <option value="1">อนุมัติ</option>
                       <option value="2">ไม่อนุมัติ</option>
                       <option value="3">คืนแล้ว</option>
                     </Form.Select>
                   </Form.Group>
-                  <Form.Group className="col-md-4 mb-2">
-                    <Form.Label>ประเภท :</Form.Label>
-                    <Form.Select
-                      value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value)}
-                    >
-                      <option value="">เลือกประเภท</option>
-                      {[
-                        ...new Set(
-                          borrowedEquipments.map((e) => e.equipment_type)
-                        ),
-                      ].map((type, index) => (
-                        <option key={index} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
                 </div>
 
                 <div className="row g-5">
+                  {/* ✅ ใช้ selectedSubmission.type แทน selectedType */}
                   <Form.Group className="col-md-4 mb-2">
                     <Form.Label>ยี่ห้อ :</Form.Label>
                     <Form.Select
                       value={selectedBrand}
                       onChange={(e) => setSelectedBrand(e.target.value)}
-                      disabled={!selectedType}
                     >
                       <option value="">เลือกยี่ห้อ</option>
                       {[
                         ...new Set(
-                          filteredBrands.map((e) => e.equipment_brand)
+                          borrowedEquipments
+                            .filter((e) => e.equipment_type === selectedSubmission.type)
+                            .map((e) => e.equipment_brand)
                         ),
                       ].map((brand, index) => (
                         <option key={index} value={brand}>
@@ -488,7 +484,9 @@ const Approval: React.FC = () => {
                       <option value="">เลือกรุ่น</option>
                       {[
                         ...new Set(
-                          filteredModels.map((e) => e.equipment_model)
+                          borrowedEquipments
+                            .filter((e) => e.equipment_brand === selectedBrand && e.equipment_type === selectedSubmission.type)
+                            .map((e) => e.equipment_model)
                         ),
                       ].map((model, index) => (
                         <option key={index} value={model}>
@@ -508,11 +506,17 @@ const Approval: React.FC = () => {
                       disabled={!selectedModel}
                     >
                       <option value="">เลือกรหัสทรัพย์สิน</option>
-                      {filteredAssets.map((asset, index) => (
-                        <option key={index} value={asset.equip_assetcode}>
-                          {asset.equip_assetcode}
-                        </option>
-                      ))}
+                      {borrowedEquipments
+                        .filter((e) =>
+                          e.equipment_model === selectedModel &&
+                          e.equipment_brand === selectedBrand &&
+                          e.equipment_type === selectedSubmission.type
+                        )
+                        .map((asset, index) => (
+                          <option key={index} value={asset.equip_assetcode}>
+                            {asset.equip_assetcode}
+                          </option>
+                        ))}
                     </Form.Select>
                   </Form.Group>
 
@@ -524,11 +528,17 @@ const Approval: React.FC = () => {
                       disabled={!selectedModel}
                     >
                       <option value="">เลือกเลขที่สัญญา</option>
-                      {filteredAssets.map((asset, index) => (
-                        <option key={index} value={asset.equip_contract}>
-                          {asset.equip_contract}
-                        </option>
-                      ))}
+                      {borrowedEquipments
+                        .filter((e) =>
+                          e.equipment_model === selectedModel &&
+                          e.equipment_brand === selectedBrand &&
+                          e.equipment_type === selectedSubmission.type
+                        )
+                        .map((asset, index) => (
+                          <option key={index} value={asset.equip_contract}>
+                            {asset.equip_contract}
+                          </option>
+                        ))}
                     </Form.Select>
                   </Form.Group>
                 </div>

@@ -53,7 +53,7 @@ const User_DB: React.FC = () => {
     submission_division: "",
     submission_section: "",
     submission_internalnumber: "",
-    equipment_type: selectedItem?.equipment_type || "",
+    type: selectedItem?.equipment_type || "",
     amount: 1,
     submitted_at: new Date().toISOString(),
     submission_note: "",
@@ -77,7 +77,7 @@ const User_DB: React.FC = () => {
     if (selectedItem) {
       setSubmissionData((prev) => ({
         ...prev,
-        equipment_type: selectedItem.equipment_type,
+        type: selectedItem.equipment_type, // ✅ อัปเดตค่า type แทน equipment_type
       }));
     }
   }, [selectedItem]);
@@ -271,7 +271,7 @@ const User_DB: React.FC = () => {
                   <Form.Control
                     type="text"
                     readOnly
-                    value={submissionData.equipment_type}
+                    value={submissionData.type}
                   />
                 </Form.Group>
 
