@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../Layout/Layout";
-import { Table, Button, Spinner, Modal, Form } from "react-bootstrap";
+import { Table, Button, Spinner, Modal, Form, Pagination } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faFileDownload } from "@fortawesome/free-solid-svg-icons";
 import jsPDF from "jspdf";
@@ -35,6 +35,16 @@ const Approval: React.FC = () => {
   const [selectedContract, setSelectedContract] = useState<string | undefined>(
     undefined
   );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
+
+  const totalPages = Math.ceil(submissions.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentSubmissions = submissions.slice(startIndex, endIndex);
+
+
   const formatDateToISO = (dateStr: string | undefined) => {
     if (!dateStr) return undefined;
     return new Date(dateStr).toISOString(); // ✅ แปลงเป็น ISO 8601
@@ -269,9 +279,9 @@ const Approval: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {submissions.map((item, index) => (
+              {currentSubmissions.map((item, index) => (
                 <tr key={item.submission_id}>
-                  <td className="align-middle text-center">{index + 1}</td>
+                  <td className="align-middle text-center">{(currentPage - 1) * rowsPerPage + index + 1}</td>
                   <td className="align-middle text-center">
                     {item.submission_username}
                   </td>
@@ -311,6 +321,29 @@ const Approval: React.FC = () => {
             </tbody>
           </Table>
         )}
+
+        {/* Pagination */}
+        <div className="d-flex justify-content-center mt-3">
+          <Pagination>
+            <Pagination.Prev
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            />
+            {[...Array(totalPages)].map((_, i) => (
+              <Pagination.Item
+                key={i + 1}
+                active={i + 1 === currentPage}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </Pagination.Item>
+            ))}
+            <Pagination.Next
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            />
+          </Pagination>
+        </div>
       </div>
 
       <Modal show={showModal} onHide={closeModal} size="lg" centered>

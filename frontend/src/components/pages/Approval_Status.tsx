@@ -1,7 +1,7 @@
 // src/pages/User_DB.tsx
 import React, { useState, useEffect } from 'react';
 import User_Layout from '../Layout/User_Layout';
-import { Button, Table } from 'react-bootstrap';
+import { Button, Table, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { getAllSubmissions } from '../../services/api';
@@ -11,6 +11,8 @@ import Swal from "sweetalert2";
 
 const Approval_Status: React.FC = () => {
     const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10;
 
     useEffect(() => {
         const fetchSubmissions = async () => {
@@ -32,7 +34,12 @@ const Approval_Status: React.FC = () => {
 
         fetchSubmissions();
     }, []);
-    
+
+    const totalPages = Math.ceil(submissions.length / rowsPerPage);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const currentSubmissions = submissions.slice(startIndex, endIndex);
+
     const getStatusColor = (is_urgent?: number) => {
         switch (is_urgent) {
             case 1:
@@ -75,15 +82,15 @@ const Approval_Status: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {submissions.map((item, index) => (
+                        {currentSubmissions.map((item, index) => (
                             <tr key={item.submission_id} className="align-middle text-center">
-                                <td>{index + 1}</td>
+                                <td>{(currentPage - 1) * rowsPerPage + index + 1}</td>
                                 <td>{item.type}</td>
                                 <td>{item.amount}</td>
                                 <td>{new Date(item.submitted_at).toLocaleDateString()}</td>
                                 <td
                                     className={`align-middle text-center ${getStatusColor(
-                                        item.is_urgent )}`}
+                                        item.is_urgent)}`}
                                 >
                                     {getApprovalText(item.is_urgent)}
                                 </td>
@@ -96,6 +103,29 @@ const Approval_Status: React.FC = () => {
                         ))}
                     </tbody>
                 </Table>
+
+                {/* Pagination */}
+                <div className="d-flex justify-content-center mt-3">
+                    <Pagination>
+                        <Pagination.Prev
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        />
+                        {[...Array(totalPages)].map((_, i) => (
+                            <Pagination.Item
+                                key={i + 1}
+                                active={i + 1 === currentPage}
+                                onClick={() => setCurrentPage(i + 1)}
+                            >
+                                {i + 1}
+                            </Pagination.Item>
+                        ))}
+                        <Pagination.Next
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        />
+                    </Pagination>
+                </div>
             </div>
         </User_Layout>
     );

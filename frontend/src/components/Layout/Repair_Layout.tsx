@@ -80,7 +80,7 @@ const Repair_Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Navbar */}
         <nav className="navbar navbar-m-expand-lg navbar-light bg-light">
           <div className="container-fluid">
-            <span className="navbar-brand mb-0 h1 " style={{color: "#fefcff" , fontSize: "20px"}}>
+            <span className="navbar-brand mb-0 h1 " style={{color: "#fefcff" , fontSize: "20px", marginLeft: "20px"}}>
               <b>ระบบข้อมูลอุปกรณ์ส่งซ่อม</b>
             </span>
           </div>
