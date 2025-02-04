@@ -14,6 +14,7 @@ import {
 import { SubmissionData } from "../../interface/ISubmission"; //
 import { BorrowedEquipmentData } from "../../interface/IBorrowedEquipment";
 import { updateSubmission } from "../../services/api"; // นำเข้า API สำหรับอัปเดตข้อมูล
+import Swal from "sweetalert2";
 
 const Approval: React.FC = () => {
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
@@ -95,7 +96,7 @@ const Approval: React.FC = () => {
     fetchEquipments();
   }, []);
 
-  const filteredBrands = borrowedEquipments.filter(
+  /*const filteredBrands = borrowedEquipments.filter(
     (e) => e.equipment_type === selectedType
   );
   const filteredModels = borrowedEquipments.filter(
@@ -107,15 +108,19 @@ const Approval: React.FC = () => {
       e.equipment_model === selectedModel &&
       e.equipment_brand === selectedBrand &&
       e.equipment_type === selectedType
-  );
+  );*/
 
   const handleConfirm = async () => {
     if (!selectedSubmission?.submission_id) {
-      alert("ไม่พบ submission_id");
+      Swal.fire({
+        icon: "error",
+        title: "ไม่พบ Submission ID",
+        text: "กรุณาตรวจสอบข้อมูลอีกครั้ง",
+      });
       return;
     }
 
-    // ✅ กรองค่าที่เป็น undefined หรือ ""
+    // กรองค่าที่เป็น undefined หรือ ""
     const updatedData: Partial<SubmissionData> = Object.fromEntries(
       Object.entries({
         submission_id: selectedSubmission.submission_id,
@@ -137,27 +142,38 @@ const Approval: React.FC = () => {
       const response = await updateSubmission(updatedData);
 
       if (response.status) {
-        alert("✅ อัปเดตข้อมูลสำเร็จ");
+        Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "✅ อัปเดตข้อมูลสำเร็จ",
+        });
 
-        // ✅ รีโหลดข้อมูลหลังจากอัปเดต
+        //รีโหลดข้อมูลหลังจากอัปเดต
         const updatedSubmissions = await getAllSubmissions();
         setSubmissions(updatedSubmissions.data);
 
         closeModal();
       } else {
-        alert("❌ เกิดข้อผิดพลาดในการอัปเดตข้อมูล: " + response.message);
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: `❌ เกิดข้อผิดพลาดในการอัปเดตข้อมูล: ${response.message}`,
+        });
       }
     } catch (error) {
       console.error("❌ Error updating submission:", error);
-      alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
+      Swal.fire({
+        icon: "error",
+        title: "การเชื่อมต่อล้มเหลว",
+        text: "❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์",
+      });
     }
   };
 
 
-
   const openModal = (submission: SubmissionData) => {
     setSelectedSubmission(submission);
-  
+
     setIsUrgent(submission.is_urgent?.toString() || "0");
     setSelectedType(submission.type || "");
     setSelectedBrand(submission.brand || "");
@@ -166,10 +182,10 @@ const Approval: React.FC = () => {
     setSelectedContract(submission.contract_number || "");
     setTimeStart(submission.time_start || undefined);
     setTimeEnd(submission.time_end || undefined);
-  
+
     setShowModal(true);
   };
-  
+
 
   const closeModal = () => {
     setShowModal(false);
@@ -197,11 +213,13 @@ const Approval: React.FC = () => {
       doc.text(`${submission.submission_username || "-"}`, 70, 37);
       doc.text(`${submission.submission_userid || "-"}`, 148, 37);
       doc.text(`${submission.submission_position || "-"}`, 180, 37);
-      doc.text(`${submission.submission_department || "-"}`, 65, 42.5);
+      doc.text(`${submission.submission_department || "-"}`, 70, 42.5);
       doc.text(`${submission.submission_division || "-"}`, 105, 42.5);
       doc.text(`${submission.submission_section || "-"}`, 150, 42.5);
       doc.text(`${submission.submission_internalnumber || "-"}`, 185, 42.5);
       doc.text(`ผคข.`, 75, 47.5);
+      doc.text(`${submission.amount || "-"}`, 29,53)
+
       doc.text(`${(submission.time_start || "-").split("T")[0]}`, 54, 112);
       doc.text(`${(submission.time_end || "-").split("T")[0]}`, 102, 112);
 
@@ -297,13 +315,13 @@ const Approval: React.FC = () => {
                   <td className="align-middle text-center">{item.submission_userid}</td>
                   <td className="align-middle text-left"><div style={{ display: "flex", justifyContent: "space-between" }}>
                     <div style={{ flex: 1, paddingRight: "5px", borderRight: "1px solid #ccc" }}>
-                      <strong>ประเภท:</strong> {item.type || "-"}<br />
-                      <strong>ยี่ห้อ:</strong> {item.brand || "-"}<br />
-                      <strong>รุ่น:</strong> {item.model || "-"}<br />
+                      <strong>ประเภท :</strong> {item.type || "-"}<br />
+                      <strong>ยี่ห้อ :</strong> {item.brand || "-"}<br />
+                      <strong>รุ่น :</strong> {item.model || "-"}<br />
                     </div>
                     <div style={{ flex: 1, paddingLeft: "10px" }}>
-                      <strong>รหัสทรัพย์สิน:</strong> {item.asset_code || "-"}<br />
-                      <strong>เลขที่สัญญา:</strong> {item.contract_number || "-"}
+                      <strong>รหัสทรัพย์สิน :</strong> {item.asset_code || "-"}<br />
+                      <strong>เลขที่สัญญา :</strong> {item.contract_number || "-"}
                     </div>
                   </div></td>
                   <td className="align-middle text-center">{item.amount}</td>

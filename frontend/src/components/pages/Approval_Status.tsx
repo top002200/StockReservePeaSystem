@@ -4,10 +4,9 @@ import User_Layout from '../Layout/User_Layout';
 import { Button, Table, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import { getAllSubmissions } from '../../services/api';
+import { getAllSubmissions, deleteSubmission } from '../../services/api';
 import { SubmissionData } from '../../interface/ISubmission';
-import Swal from "sweetalert2";
-
+import Swal from 'sweetalert2';
 
 const Approval_Status: React.FC = () => {
     const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
@@ -34,6 +33,48 @@ const Approval_Status: React.FC = () => {
 
         fetchSubmissions();
     }, []);
+
+    const handleDeleteSubmission = async (submissionId: string, isUrgent?: number) => {
+        if (isUrgent !== undefined && isUrgent !== 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถลบคำขอ',
+                text: '❌ ไม่สามารถยกเลิกคำขอที่ได้รับการอนุมัติแล้วได้',
+            });
+            return;
+        }
+    
+        const result = await Swal.fire({
+            title: 'คุณต้องการลบใช่หรือไม่?',
+            text: 'คุณต้องการยกเลิกคำขอนี้หรือไม่?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก',
+        });
+    
+        if (!result.isConfirmed) return;
+    
+        const response = await deleteSubmission(submissionId);
+    
+        if (response.status) {
+            Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ',
+                text: '✅ ลบคำขอสำเร็จ',
+            });
+            setSubmissions((prev) =>
+                prev.filter((item) => item.submission_id !== Number(submissionId))
+            );
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: `❌ ${response.message}`,
+            });
+        }
+    };
+    
 
     const totalPages = Math.ceil(submissions.length / rowsPerPage);
     const startIndex = (currentPage - 1) * rowsPerPage;
@@ -95,7 +136,10 @@ const Approval_Status: React.FC = () => {
                                     {getApprovalText(item.is_urgent)}
                                 </td>
                                 <td>
-                                    <Button variant='outline-secondary'>
+                                    <Button variant='outline-secondary'
+                                        onClick={() => handleDeleteSubmission(String(item.submission_id), item.is_urgent)}
+                                        disabled={item.is_urgent !== undefined && item.is_urgent !== 0} // ปิดปุ่มหากไม่ใช่ "รออนุมัติ"
+                                    >
                                         <FontAwesomeIcon icon={faXmark} />
                                     </Button>
                                 </td>
