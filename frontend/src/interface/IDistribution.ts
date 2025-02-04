@@ -6,5 +6,4 @@ export interface DistributionData {
   date: string; // วันที่ในรูปแบบ YYYY-MM-DD
   equip_contract: string; // เลขที่สัญญา
   equip_assetcode: string;
-  idfordelete: string; // ID สำหรับลบ (อาจใช้เป็น Primary Key หรือ Auto Increment)
 }

@@ -4,7 +4,6 @@ import { Button, Modal, Table, Form, Pagination } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { getAllDistributions, deleteDistribution } from "../../services/api";
-import Swal from "sweetalert2";
 const Distribution: React.FC = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -45,63 +44,15 @@ const Distribution: React.FC = () => {
     fetchData();
   }, []);
 
- 
-
   const handleDelete = async (index: number) => {
-    const idForDelete = data[index]?.idfordelete;
-    if (!idForDelete) {
-      console.error("Invalid idfordelete");
+    const distributionId = data[index]?.distribution_id;
+    if (!distributionId) {
+      console.error("Invalid distribution ID");
       return;
     }
-  
-    // แสดง SweetAlert2 ให้ผู้ใช้ยืนยันก่อนลบ
-    const result = await Swal.fire({
-      title: "คุณแน่ใจหรือไม่?",
-      text: "การลบนี้ไม่สามารถกู้คืนได้!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "ใช่, ลบเลย!",
-      cancelButtonText: "ยกเลิก",
-    });
-  
-    if (result.isConfirmed) {
-      try {
-        const response = await deleteDistribution(idForDelete);
-        
-        if (response.status) {
-          setData(data.filter((_, i) => i !== index));
-  
-          // แสดงแจ้งเตือนเมื่อสำเร็จ
-          Swal.fire({
-            title: "ลบสำเร็จ!",
-            text: response.message,
-            icon: "success",
-            timer: 2000,
-            showConfirmButton: false,
-          });
-        } else {
-          // แสดงแจ้งเตือนเมื่อเกิดข้อผิดพลาด
-          Swal.fire({
-            title: "ลบไม่สำเร็จ!",
-            text: response.message,
-            icon: "error",
-          });
-        }
-      } catch (error) {
-        console.error("Error deleting distribution:", error);
-  
-        // แจ้งเตือนเมื่อเกิดข้อผิดพลาด
-        Swal.fire({
-          title: "เกิดข้อผิดพลาด!",
-          text: "ไม่สามารถลบข้อมูลได้",
-          icon: "error",
-        });
-      }
-    }
+    await deleteDistribution(distributionId);
+    setData(data.filter((_, i) => i !== index));
   };
-  
 
   interface Equipment {
     equipment_type: string;

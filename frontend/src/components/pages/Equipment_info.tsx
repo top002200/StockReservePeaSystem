@@ -45,6 +45,7 @@ function Equipment_info() {
     date: "", // วันที่
     equip_contract: "", // เลขที่สัญญา
     equip_assetcode: "",
+    idfordelete: "",
   });
 
   const [showModal, setShowModal] = useState(false);
