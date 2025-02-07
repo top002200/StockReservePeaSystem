@@ -61,11 +61,14 @@ const Borrowitem: React.FC = () => {
 
   const disabledAssets = new Set(
     submissions
-      .filter(sub => sub.is_urgent === 1) // ✅ คัดเฉพาะที่ `is_urgent = 1`
-      .map(sub => sub.asset_code || "") // ✅ ป้องกัน `undefined`
+      .filter((sub) => sub.is_urgent === 1) // ✅ คัดเฉพาะที่ `is_urgent = 1`
+      .map((sub) => sub.asset_code || "") // ✅ ป้องกัน `undefined`
   );
-  
-  console.log("🔹 Disabled Asset Codes (urgent=1):", Array.from(disabledAssets));
+
+  console.log(
+    "🔹 Disabled Asset Codes (urgent=1):",
+    Array.from(disabledAssets)
+  );
 
   const [formData, setFormData] = useState<BorrowedEquipmentData>({
     equipment_name: "",
@@ -451,13 +454,20 @@ const Borrowitem: React.FC = () => {
                 onChange={handleInputChange}
               >
                 <option value="">-- เลือกประเภท --</option>
-                {typeOptions.map((type) => (
-                  <option key={type.type_id} value={type.type_name}>
-                    {type.type_name}
-                  </option>
-                ))}
+                {typeOptions
+                  .filter(
+                    (type) =>
+                      type.type_name === "Printer" ||
+                      type.type_name === "NoteBook"
+                  )
+                  .map((type) => (
+                    <option key={type.type_id} value={type.type_name}>
+                      {type.type_name}
+                    </option>
+                  ))}
               </Form.Select>
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>ชื่ออุปกรณ์</Form.Label>
               <Form.Control
@@ -513,11 +523,20 @@ const Borrowitem: React.FC = () => {
                 onChange={handleInputChange}
               >
                 <option value="">-- เลือกรูปภาพ --</option>
-                {pictureOptions.map((picture) => (
-                  <option key={picture.picture_id} value={picture.picture_data}>
-                    รูปภาพ {picture.picture_id}
-                  </option>
-                ))}
+                {pictureOptions
+                  .filter(
+                    (picture) =>
+                      picture.picture_id.toString().includes("NoteBook") ||
+                      picture.picture_id.toString().includes("Printer")
+                  )
+                  .map((picture) => (
+                    <option
+                      key={picture.picture_id}
+                      value={picture.picture_data}
+                    >
+                      รูปภาพ {picture.picture_id}
+                    </option>
+                  ))}
               </Form.Select>
             </Form.Group>
           </Form>
