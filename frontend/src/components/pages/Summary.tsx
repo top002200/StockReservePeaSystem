@@ -5,11 +5,11 @@ import {
   getAllRepairs,
 } from "../../services/api";
 import { RepairData } from "../../interface/IRepair";
+import { Pie, Bar } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, Plugin } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
-import { Doughnut, Pie, Bar } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from "chart.js";
-
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, ChartDataLabels);
 
 const Summary: React.FC = () => {
 
@@ -177,8 +177,18 @@ const Summary: React.FC = () => {
         {
           label: "จำนวนอุปกรณ์ส่งซ่อม",
           data: monthlyCounts,
-          backgroundColor: "#ff096c",
-          borderColor: "#2a3843",
+          backgroundColor: [
+            "#00becd",
+            "#0093ba",
+            "#ffd700",
+            "#d0df00",
+            "#ff9e52",],
+          borderColor: [
+            "#00becd",
+            "#0093ba",
+            "#ffd700",
+            "#d0df00",
+            "#ff9e52",],
           borderWidth: 1,
         },
       ],
@@ -191,37 +201,116 @@ const Summary: React.FC = () => {
         label: "จำนวน",
         data: Object.values(contractCounts), // จำนวน `contract`
         backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-          "rgba(75, 192, 192, 0.2)",
-          "rgba(153, 102, 255, 0.2)",
-        ],
+          "#00becd",
+          "#0093ba",
+          "#ffd700",
+          "#d0df00",
+          "#ff9e52",],
         borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-        ],
+          "#00becd",
+          "#0093ba",
+          "#ffd700",
+          "#d0df00",
+          "#ff9e52",],
         borderWidth: 1,
       },
     ],
   };
 
-  const ContractOptions = {
+  // กรองข้อมูลที่มี type เป็น "PC"
+  const PCModelData = data.filter((item) => item.type === "PC");
+
+  // สร้างข้อมูลสำหรับ Pie Chart
+  const ModelData = PCModelData.reduce(
+    (acc: { [key: string]: number }, item) => {
+      if (item.model) {
+        acc[item.model] = (acc[item.model] || 0) + 1;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  const PCModelChart = {
+    labels: Object.keys(ModelData),
+    datasets: [
+      {
+        data: Object.values(ModelData),
+        backgroundColor: ["#82ca9d", "#8884d8", "#ffc658", "#ff7300", "#ff8c00"],
+      },
+    ],
+  };
+
+  // กรองข้อมูลที่มี type เป็น "Notebook"
+  const NBModelData = data.filter((item) => item.type === "Notebook");
+  const NBData = NBModelData.reduce(
+    (acc: { [key: string]: number }, item) => {
+      if (item.model) {
+        acc[item.model] = (acc[item.model] || 0) + 1;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  const NBModelChart = {
+    labels: Object.keys(NBData),
+    datasets: [
+      {
+        data: Object.values(NBData),
+        backgroundColor: ["#82ca9d", "#8884d8", "#ffc658", "#ff7300", "#ff8c00"],
+      },
+    ],
+  };
+
+  const chartOptions = {
     responsive: true,
     plugins: {
-      legend: {
-        position: "top" as const,
-      },
+      legend: { display: true, position: "right" },
+      tooltip: { enabled: true },
     },
   };
 
+// กรองข้อมูลที่มี type เป็น "Printer"
+const PModelData = data.filter((item) => item.type === "Printer");
+const PrinterData = PModelData.reduce(
+  (acc: { [key: string]: number }, item) => {
+    if (item.model) {
+      acc[item.model] = (acc[item.model] || 0) + 1;
+    }
+    return acc;
+  },
+  {}
+);
 
+const PModelChart = {
+  labels: Object.keys(PrinterData),
+  datasets: [
+    {
+      data: Object.values(PrinterData),
+      backgroundColor: ["#82ca9d", "#8884d8", "#ffc658", "#ff7300", "#ff8c00"],
+    },
+  ],
+};
+
+const [selectedChart, setSelectedChart] = useState("PCModelChart");
+
+const getSelectedChartData = () => {
+  switch (selectedChart) {
+    case "PCModelChart":
+      return PCModelChart;
+    case "NBModelChart":
+      return NBModelChart;
+    case "PModelChart":
+      return PModelChart;
+    default:
+      return PCModelChart;
+  }
+};
+  
   return (
     <Repair_Layout>
-      <div className="equipment-info-content">
+      <div className="container py-4">
         <h4
           className="text-center"
           style={{ color: "#74045f", textDecoration: "underline", marginBottom: "20px" }}
@@ -229,190 +318,138 @@ const Summary: React.FC = () => {
           <b>สรุปข้อมูลอุปกรณ์ส่งซ่อม</b>
         </h4>
 
-        {/*type chart*/}
-        <Row className="mb-4 justify-content-center">
-          <Col md={4} className="mb-4">
-            <Card className="shadow-sm card-dash h-100">
-              <Card.Header
-                className="text-center"
-                style={{ backgroundColor: "#54504c", color: "#fff" }}
-              >
+        {/* Row 1: Equipment Type and Department Charts */}
+        <Row className="gy-4">
+          <Col md={6}>
+            <Card className="shadow-sm">
+              <Card.Header className="bg-dark text-white text-center">
                 ประเภทอุปกรณ์ที่ส่งซ่อม
               </Card.Header>
-              <Card.Body
-                className="d-flex justify-content-center align-items-center"
-                style={{
-                  display: "flex",
-                  flexDirection: "row", // จัดเรียงแนวนอน
-                  alignItems: "center", // จัดให้อยู่ตรงกลางแนวตั้ง
-                }}
-              >
-                {/* Container สำหรับ label */}
-                <div
-                  style={{
-                    flex: 1, // ใช้พื้นที่ฝั่งซ้าย
-                    display: "flex",
-                    justifyContent: "flex-start", // ชิดซ้าย
-                    alignItems: "center",
-                    paddingRight: "20px", // เว้นระยะห่างระหว่าง label กับ chart
-                  }}
-                >
-                  <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
-                    {chartData.labels.map((label, index) => (
-                      <li key={index} style={{ marginBottom: "10px", fontSize: "12px" }}>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: "10px",
-                            height: "10px",
-                            backgroundColor: chartData.datasets[0].backgroundColor[index],
-                            marginRight: "10px",
-                            borderRadius: "50%",
-                          }}
-                        ></span>
-                        {label}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Container สำหรับ Chart */}
-                <div
-                  style={{
-                    flex: 3, // ใช้พื้นที่ฝั่งขวาสำหรับ Chart
-                    display: "flex",
-                    justifyContent: "center", // จัดให้อยู่ตรงกลาง
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "100%",
-                      maxWidth: "200px",
-                      height: "auto",
-                    }}
-                  >
-                    <Doughnut
-                      data={chartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          tooltip: { enabled: true },
-                          legend: {
-                            display: false, // ซ่อน legend ใน chart
+              <Card.Body className="d-flex justify-content-center align-items-center">
+                <div style={{ width: "400px", height: "400px" }}>
+                  <Pie
+                    data={chartData}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: {
+                          display: true, position: "right", labels: {
+                            boxWidth: 60, // ปรับขนาดกล่องสี
+                            padding: 10, // เพิ่มระยะห่างระหว่างแต่ละ item
                           },
                         },
-                      }}
-                    />
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-
-        <Row className="mb-4 justify-content-center">
-          <Col md={8} className="mb-4">
-            <Card className="shadow-sm card-dash h-100">
-              <Card.Header
-                className="text-center"
-                style={{ backgroundColor: "#54504c", color: "#fff" }}
-              >
-                จำนวนอุปกรณ์ส่งซ่อมตามเลขที่ศัญญา
-              </Card.Header>
-              <Card.Body className="d-flex justify-content-center align-items-center">
-                <div
-                  style={{
-                    width: "100%",
-                    maxWidth: "500px",
-                    height: "auto",
-                  }}
-                >
-                  <Bar data={ContractData} options={ContractOptions} />
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* BarChart Card */}
-        <Row className="mb-4  justify-content-center">
-          <Col md={8} className="mb-4">
-            <Card
-              className="shadow-sm card-dash h-100"
-              style={{ height: "200px", width: "100%" }} // เพิ่มขนาด Card
-            >
-              <Card.Header
-                className="text-center"
-                style={{ backgroundColor: "#54504c", color: "#fff" }}
-              >
-                จำนวนการส่งซ่อมอุปกรณ์
-              </Card.Header>
-              <Card.Body className="d-flex justify-content-center align-items-center">
-                <div
-                  className="chart-container"
-                  style={{
-                    width: "100%",
-                    maxWidth: "500px", // เพิ่มขนาด BarChart
-                    height: "auto",
-                    margin: "20px 0",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row", // เปลี่ยนเป็นเรียงแนวนอน
-                      gap: "10px", // ระยะห่างระหว่าง radio
-                      flexWrap: "wrap", // รองรับการแสดงผลเมื่อพื้นที่ไม่พอ
+                        tooltip: { enabled: true },
+                        datalabels: {
+                          color: "#000",
+                          font: { weight: "normal" },
+                          anchor: "end",
+                          align: "start",
+                        },
+                      },
                     }}
-                  >
-                    {Array.from(
-                      new Set(
-                        data
-                          .filter((item) => {
-                            if (selectedMonth) {
-                              const itemMonth = new Date(item.date as string).getMonth() + 1;
-                              return itemMonth === parseInt(selectedMonth);
-                            }
-                            return true;
-                          })
-                          .filter((item) => item.date)
-                          .map((item) => {
-                            const date = new Date(item.date as string);
-                            return date.getFullYear();
-                          })
-                      )
-                    )
-                      .sort()
-                      .map((year) => (
-                        <div key={year} style={{ display: "flex", alignItems: "center" }}>
-                          <input
-                            type="radio"
-                            id={`year-${year}`}
-                            name="selectedYear"
-                            value={year}
-                            checked={selectedYears.includes(year)}
-                            onChange={() => setSelectedYears([year])}
-                            style={{
-                              appearance: "none",
-                              width: "10px",
-                              height: "10px",
-                              border: "2px solid #555",
-                              borderRadius: "50%",
-                              outline: "none",
-                              cursor: "pointer",
-                              backgroundColor: selectedYears.includes(year) ? "#555" : "#fff", // สีที่เลือก
-                              transition: "background-color 0.3s",
-                            }}
-                          />
-                          <label htmlFor={`year-${year}`} style={{ marginLeft: "5px" }}>
-                            {year}
-                          </label>
-                        </div>
-                      ))}
-                  </div>
-                  <Bar data={getBarChartData()} />
+                  />
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={6}>
+            <Card className="shadow-sm">
+              <Card.Header className="bg-dark text-white text-center">
+                แผนกที่ส่งซ่อม
+              </Card.Header>
+              <Card.Body className="d-flex justify-content-center align-items-center">
+                <div style={{ width: "400px", height: "400px" }}>
+                  <Pie
+                    data={chartDept}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: {
+                          display: true, position: "right"
+                          , labels: {
+                            boxWidth: 10, // ปรับขนาดกล่องสี
+                            padding: 10, // เพิ่มระยะห่างระหว่างแต่ละ item
+                          },
+                        },
+                        tooltip: { enabled: true },
+                        datalabels: {
+                          color: "#000",
+                          font: { weight: "normal" },
+                          anchor: "end",
+                          align: "start",
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Row 2: Model Charts */}
+        <Row className="gy-4 mt-4 justify-content-center">
+          <Col md={8}>
+            <Card className="shadow-sm">
+              <Card.Header className="bg-dark text-white text-center">
+                รุ่นของอุปกรณ์ที่ส่งซ่อม
+              </Card.Header>
+              <Card.Body className="d-flex justify-content-center align-items-center position-relative">
+                <Form.Group controlId="chartSelect"  className="position-absolute top-0 start-0 m-2">
+                  <Form.Select value={selectedChart} onChange={(e) => setSelectedChart(e.target.value)}>
+                    <option value="PCModelChart">รุ่นของ PC</option>
+                    <option value="NBModelChart">รุ่นของ Notebook</option>
+                    <option value="PModelChart">รุ่นของ Printer</option>
+                  </Form.Select>
+                </Form.Group>
+                <div style={{ width: "400px", height: "400px" }}>
+                  <Pie data={getSelectedChartData()} 
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: {
+                        display: true, position: "right"
+                        , labels: {
+                          boxWidth: 10, // ปรับขนาดกล่องสี
+                          padding: 10, // เพิ่มระยะห่างระหว่างแต่ละ item
+                        },
+                      },
+                      tooltip: { enabled: true },
+                      datalabels: {
+                        color: "#000",
+                        font: { weight: "normal" },
+                        anchor: "end",
+                        align: "start",
+                      },
+                    },
+                  }}
+                  />
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Row 3: Contract Chart */}
+        <Row className="gy-4 mt-4">
+          <Col md={12}>
+            <Card className="shadow-sm">
+              <Card.Header className="bg-dark text-white text-center">
+                จำนวนอุปกรณ์ส่งซ่อมตามเลขที่สัญญา
+              </Card.Header>
+              <Card.Body>
+                <div style={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}>
+                  <Bar
+                    data={ContractData}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: { display: true },
+                        tooltip: { enabled: true },
+                      },
+                    }}
+                  />
                 </div>
               </Card.Body>
             </Card>

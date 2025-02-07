@@ -13,6 +13,7 @@ type Repair struct {
 	Brand      string    `json:"brand"`
 	Model      string    `json:"model"`
 	Contract   string    `json:"contract"`
+	AssetCode  string    `json:"asset_code"`
 	Problem    string    `json:"problem"`
 	Fixing     string    `json:"fixing"`
 	Note       string    `json:"note"`

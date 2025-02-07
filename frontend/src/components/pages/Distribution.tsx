@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Info_Layout from "../Layout/info_Layout";
 import { Button, Modal, Table, Form, Pagination } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faFileExcel, faFilePdf, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import {
   getAllDistributions,
   deleteDistribution,
@@ -10,6 +10,11 @@ import {
 } from "../../services/api";
 import Swal from "sweetalert2";
 import { DistributionData } from "../../interface/IDistribution";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { THSarabunFont } from "../../fonts/THSarabun";
+import * as XLSX from "xlsx";
+
 const Distribution: React.FC = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -150,7 +155,7 @@ const Distribution: React.FC = () => {
     }
   };
 
-  
+
 
   const handleEdit = async (index: number) => {
     const idForFix = data[index]?.id_for_fix;
@@ -214,15 +219,306 @@ const Distribution: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /* Pagination */
+  const [selectedMonth, setSelectedMonth] = useState(""); // State สำหรับเดือนที่เลือก
+  const [selectedYear, setSelectedYear] = useState("");
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMonth(e.target.value); // อัปเดตเดือนที่เลือก
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(e.target.value);
+  };
+
+
+  /// กรองข้อมูลตามปีและเดือน
+  const filteredData = data
+    .filter((item) => {
+      if (!item.date || typeof item.date !== "string") return false; // ตรวจสอบค่า undefined หรือชนิดข้อมูล
+      const date = new Date(item.date);
+      const itemMonth = date.getMonth() + 1;
+      const itemYear = date.getFullYear();
+      const isMonthMatched =
+        selectedMonth === "" || itemMonth === parseInt(selectedMonth);
+      const isYearMatched =
+        selectedYear === "" || itemYear === parseInt(selectedYear);
+      return isMonthMatched && isYearMatched;
+    });
+
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 4;
+  const rowsPerPage = 10;
 
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+  // การแบ่งหน้า
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const base64Data = THSarabunFont.normal.split(",")[1];
+  console.log("Base64 Data Only:", base64Data);
+
+  // Helper function to validate Base64
+  function isValidBase64(str: string): boolean {
+    try {
+      const decoded = atob(str.split(",")[1]); // แยกส่วนข้อมูล Base64 ออกจาก "data:font/ttf;base64,"
+      return !!decoded;
+    } catch (e) {
+      console.error("Base64 validation error:", e);
+      return false;
+    }
+  }
+
+  // เพิ่มฟังก์ชันสำหรับสร้าง PDF
+  const exportToPDF = () => {
+    // สร้าง PDF โดยกำหนดให้เป็นแนวนอน (Landscape)
+    const doc = new jsPDF({
+      orientation: "landscape", // กำหนด orientation เป็น "landscape"
+    });
+
+    try {
+      // ตรวจสอบฟอนต์
+      const base64Data = THSarabunFont.normal.split(",")[1];
+      if (!base64Data || !isValidBase64(THSarabunFont.normal)) {
+        throw new Error("Font data is not valid Base64.");
+      }
+
+      // เพิ่มฟอนต์
+      doc.addFileToVFS("THSarabunNew.ttf", base64Data);
+      doc.addFont("THSarabunNew.ttf", "THSarabun", "normal");
+      doc.setFont("THSarabun");
+      doc.setFontSize(16); // ขนาดฟอนต์เริ่มต้น
+
+      // สร้างชื่อเดือนและปีจากตัวเลือก
+      const monthNames = [
+        "มกราคม",
+        "กุมภาพันธ์",
+        "มีนาคม",
+        "เมษายน",
+        "พฤษภาคม",
+        "มิถุนายน",
+        "กรกฎาคม",
+        "สิงหาคม",
+        "กันยายน",
+        "ตุลาคม",
+        "พฤศจิกายน",
+        "ธันวาคม",
+      ];
+
+      const selectedMonthName =
+        selectedMonth !== "" ? monthNames[parseInt(selectedMonth) - 1] : "ทั้งหมด";
+      const selectedYearText = selectedYear !== "" ? selectedYear : "ทั้งหมด";
+
+      // ชื่อเอกสาร
+      const documentTitle = `รายงานข้อมูลการจัดสรรอุปกรณ์: เดือน ${selectedMonthName} ปี ${selectedYearText}`;
+      doc.text(documentTitle, 14, 10); // ตำแหน่งของชื่อเรื่อง
+
+      // กรองข้อมูลตามเดือนและปีที่เลือก
+      const filteredDataByMonthYear = filteredData.filter((item) => {
+        if (!item.date) return false;
+        const date = new Date(item.date);
+        const itemMonth = date.getMonth() + 1;
+        const itemYear = date.getFullYear();
+        const isMonthMatched =
+          selectedMonth === "" || itemMonth === parseInt(selectedMonth);
+        const isYearMatched =
+          selectedYear === "" || itemYear === parseInt(selectedYear);
+        return isMonthMatched && isYearMatched;
+      });
+
+      // ข้อมูลตาราง
+      const tableColumn = [
+        "ลำดับ",
+        "ผู้จัดสรร",
+        "ผู้รับจัดสรร",
+        "ประเภท",
+        "ยี่ห้อ",
+        "รุ่น",
+        "รหัสทรัพย์สิน",
+        "เลขที่สัญญา",
+        "จำนวน",
+        "วันที่จัดสรร",
+
+      ];
+      const tableRows: any[] = [];
+
+      // เตรียมข้อมูลจาก `filteredDataByMonthYear`
+      filteredDataByMonthYear.forEach((item, index) => {
+        const rowData = [
+          index + 1, // ลำดับที่
+          item.g_name, // ผู้จัดสรร
+          item.r_name, // ผู้รับจัดสรร
+          item.equipment?.equipment_type,
+          item.equipment?.equipment_brand,
+          item.equipment?.equipment_model,
+          item.equip_assetcode,
+          item.equip_contract,
+          item.distribution_amount,
+          item.date ? new Date(item.date).toLocaleDateString() : "-", // วันที่จัดสรร
+        ];
+        tableRows.push(rowData);
+      });
+
+      // ตรวจสอบว่ามีข้อมูลหรือไม่
+      if (tableRows.length === 0) {
+        Swal.fire("แจ้งเตือน", "ไม่มีข้อมูลสำหรับเดือนและปีที่เลือก", "info");
+        return;
+      }
+
+      // เพิ่มข้อมูลตารางลงใน PDF
+      (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 15,
+        styles: {
+          font: "THSarabun", // กำหนดฟอนต์
+          fontSize: 12, // ขนาดฟอนต์
+          lineColor: [200, 200, 200], // สีเส้นขอบ
+          lineWidth: 0.3, // ความหนาของเส้นขอบ
+          overflow: "linebreak",
+          minCellHeight: 10,
+        },
+        headStyles: {
+          fillColor: [0, 102, 204], // สีพื้นหลังหัวตาราง
+          textColor: [255, 255, 255], // สีข้อความหัวตาราง
+          fontStyle: "bold", // รูปแบบข้อความหัวตาราง
+          valign: "middle",
+          halign: "center",
+        },
+        bodyStyles: {
+          font: "THSarabun", // ฟอนต์ข้อความในตาราง
+          textColor: [0, 0, 0], // สีข้อความ
+          overflow: "linebreak",
+        },
+        columnStyles: {
+          0: { halign: "center", cellWidth: 10 }, // ลำดับ
+          1: { halign: "center" }, //g_name
+          2: { halign: "center" }, //r_name
+          3: { halign: "center" }, //type
+          4: { halign: "center" }, //brand
+          5: { halign: "center" }, //model
+          6: { halign: "center", cellWidth: 25 }, //assetcode
+          7: { halign: "center", cellWidth: 25 }, //contract
+          8: { halign: "center", cellWidth: 10 }, //amount
+          9: { halign: "center", cellWidth: 20 }, //date
+        },
+      });
+
+      // ชื่อไฟล์ PDF
+      const fileName = `รายงานข้อมูลการจัดสรรอุปกรณ์_${selectedMonthName}_${selectedYearText}.pdf`;
+
+      // ดาวน์โหลดไฟล์ PDF
+      doc.save(fileName);
+    } catch (error) {
+      console.error("Failed to export PDF:", error);
+    }
+  };
+
+  const exportToExcel = () => {
+    try {
+      const monthNames = [
+        "มกราคม",
+        "กุมภาพันธ์",
+        "มีนาคม",
+        "เมษายน",
+        "พฤษภาคม",
+        "มิถุนายน",
+        "กรกฎาคม",
+        "สิงหาคม",
+        "กันยายน",
+        "ตุลาคม",
+        "พฤศจิกายน",
+        "ธันวาคม",
+      ];
+
+      const selectedMonthName =
+        selectedMonth !== "" ? monthNames[parseInt(selectedMonth) - 1] : "ทั้งหมด";
+      const selectedYearText = selectedYear !== "" ? selectedYear : "ทั้งหมด";
+      const fileName = `รายงานข้อมูลการจัดสรรอุปกรณ์_${selectedMonthName}_${selectedYearText}.xlsx`;
+
+      const filteredDataByMonthYear = filteredData.filter((item) => {
+        if (!item.date) return false;
+        const date = new Date(item.date);
+        const itemMonth = date.getMonth() + 1;
+        const itemYear = date.getFullYear();
+        const isMonthMatched =
+          selectedMonth === "" || itemMonth === parseInt(selectedMonth);
+        const isYearMatched =
+          selectedYear === "" || itemYear === parseInt(selectedYear);
+        return isMonthMatched && isYearMatched;
+      });
+
+      if (filteredDataByMonthYear.length === 0) {
+        Swal.fire("แจ้งเตือน", "ไม่มีข้อมูลสำหรับเดือนและปีที่เลือก", "info");
+        return;
+      }
+
+      // เตรียมข้อมูลสำหรับ Excel
+      const excelData = filteredDataByMonthYear.map((item, index) => ({
+        "ลำดับ": index + 1,
+        "ผู้จัดสรร": item.g_name,
+        "ผู้รับจัดสรร": item.r_name,
+        "ประเภท": item.equipment?.equipment_type,
+        "ยี่ห้อ": item.equipment?.equipment_brand,
+        "รุ่น": item.equipment?.equipment_model,
+        "รหัสทรัพย์สิน": item.equip_assetcode,
+        "เลขที่สัญญา": item.equip_contract,
+        "จำนวน": item.distribution_amount,
+        "วันที่จัดสรร": item.date
+          ? new Date(item.date).toLocaleDateString()
+          : "-",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      // เพิ่มการจัดสไตล์
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+          if (!worksheet[cellAddress]) continue;
+          worksheet[cellAddress].s = {
+            font: { name: "Arial", sz: 12, bold: R === 0 }, // ฟอนต์และขนาด, หัวข้อหนา
+            alignment: {
+              horizontal: "center", // จัดข้อความแนวนอนกึ่งกลาง
+              vertical: "center", // จัดข้อความแนวตั้งกึ่งกลาง
+              wrapText: true, // รองรับข้อความยาว (break word)
+            },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          };
+        }
+      }
+
+      // กำหนดความกว้างของคอลัมน์
+      const columnWidths = [
+        { wch: 5 }, //ลำดับ
+        { wch: 30 }, //g_name
+        { wch: 30 }, //r_name
+        { wch: 20 }, // type
+        { wch: 20 }, //brand
+        { wch: 20 }, //model
+        { wch: 20 }, //assetcode
+        { wch: 20 }, //contract
+        { wch: 10 }, //amount
+        { wch: 20 }, //date
+      ];
+      worksheet["!cols"] = columnWidths;
+
+      // สร้าง workbook และเพิ่ม worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "รายงานข้อมูลการจัดสรรอุปกรณ์");
+
+      // บันทึกไฟล์ Excel
+      XLSX.writeFile(workbook, fileName);
+    } catch (error) {
+      console.error("Failed to export Excel:", error);
+    }
+  };
 
   return (
     <Info_Layout>
@@ -233,6 +529,121 @@ const Distribution: React.FC = () => {
         >
           <b>ข้อมูลการจัดสรรอุปกรณ์</b>
         </h4>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 15,
+            padding: "0 20px", // เพิ่ม padding ด้านข้างเพื่อความสมดุล
+          }}
+        >
+          {/* Dropdown สำหรับเลือกเดือน และปี */}
+          <div style={{ display: "flex", gap: "10px" }}>
+            {/* Dropdown สำหรับเลือกเดือน */}
+            <Form.Select
+              aria-label="เลือกเดือน"
+              onChange={handleMonthChange}
+              value={selectedMonth}
+              style={{ width: "200px" }}
+            >
+              <option value="">เลือกเดือน</option>
+              <option value="1">มกราคม</option>
+              <option value="2">กุมภาพันธ์</option>
+              <option value="3">มีนาคม</option>
+              <option value="4">เมษายน</option>
+              <option value="5">พฤษภาคม</option>
+              <option value="6">มิถุนายน</option>
+              <option value="7">กรกฎาคม</option>
+              <option value="8">สิงหาคม</option>
+              <option value="9">กันยายน</option>
+              <option value="10">ตุลาคม</option>
+              <option value="11">พฤศจิกายน</option>
+              <option value="12">ธันวาคม</option>
+            </Form.Select>
+
+            {/* Dropdown สำหรับเลือกปี */}
+            <Form.Select
+              aria-label="เลือกปี"
+              onChange={handleYearChange}
+              value={selectedYear}
+              style={{ width: "200px" }}
+            >
+              <option value="">เลือกปี</option>
+              {Array.from(
+                new Set(
+                  data
+                    .filter((item) => {
+                      // กรองข้อมูลตามเดือนก่อน
+                      if (selectedMonth) {
+                        const itemMonth = new Date(item.date as string).getMonth() + 1;
+                        return itemMonth === parseInt(selectedMonth);
+                      }
+                      return true;
+                    })
+                    .filter((item) => item.date) // กรองเฉพาะข้อมูลที่มีวันที่
+                    .map((item) => {
+                      const date = new Date(item.date as string); // กำหนด item.date เป็น string
+                      return date.getFullYear();
+                    })
+                )
+              )
+                .sort()
+                .map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+            </Form.Select>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            {/* Button Group สำหรับปุ่มดาวน์โหลด PDF และ Excel */}
+            <div
+              className="btn-group"
+              role="group"
+              aria-label="Export Buttons"
+              style={{
+                borderRadius: "8px", // มุมโค้งมน
+                overflow: "hidden", // ป้องกันปุ่มล้น
+                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)", // เพิ่มเงาเล็กน้อย
+              }}
+            >
+              {/* ปุ่มดาวน์โหลด PDF */}
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={exportToPDF}
+                title="ดาวน์โหลดรายงาน PDF"
+                style={{
+                  fontSize: "20px", // ขนาดตัวอักษร
+                }}
+              >
+                <FontAwesomeIcon icon={faFilePdf} />
+              </button>
+
+              {/* ปุ่มส่งออกเป็น Excel */}
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={exportToExcel}
+                title="ดาวน์โหลดรายงาน Excel"
+                style={{
+                  fontSize: "20px",
+                }}
+              >
+                <FontAwesomeIcon icon={faFileExcel} />
+              </button>
+            </div>
+          </div>
+        </div>
 
         <Table bordered hover responsive>
           <thead>
@@ -247,10 +658,10 @@ const Distribution: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {currentRows.map((item, index) => (
+            {paginatedData.map((item, index) => (
               <tr key={item.distribution_id}>
                 <td className="align-middle text-center">
-                  {indexOfFirstRow + index + 1}
+                  {(currentPage - 1) * rowsPerPage + index + 1}
                 </td>
                 <td className="align-middle text-left">
                   <div

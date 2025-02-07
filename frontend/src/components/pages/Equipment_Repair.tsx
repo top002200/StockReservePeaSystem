@@ -37,6 +37,7 @@ const Equipment_Repair: React.FC = () => {
     device_name: "",
     brand: "",
     model: "",
+    asset_code: "",
     contract: "",
     problem: "",
     fixing: "",
@@ -190,6 +191,7 @@ const Equipment_Repair: React.FC = () => {
           device_name: "",
           brand: "",
           model: "",
+          asset_code: "",
           contract: "",
           problem: "",
           fixing: "",
@@ -329,6 +331,7 @@ const Equipment_Repair: React.FC = () => {
         "ชื่ออุปกรณ์",
         "ยี่ห้อ",
         "รุ่น",
+        "รหัสทรัพย์สิน",
         "เลขที่สัญญา",
         "สาเหตุที่ส่งซ่อม",
         "การแก้ไข",
@@ -347,6 +350,7 @@ const Equipment_Repair: React.FC = () => {
           item.device_name, // ชื่ออุปกรณ์
           item.brand, //ยี่ห้อ
           item.model, //รุ่น
+          item.asset_code, // รหัสทรัพย์สิน
           item.contract, // เลขที่สัญญา
           item.problem, //สาเหตุ
           item.fixing,
@@ -395,10 +399,11 @@ const Equipment_Repair: React.FC = () => {
           5: { halign: "center", cellWidth: 20 }, //ประเภท
           6: { halign: "center", cellWidth: 20 }, //ยี่ห้อ
           7: { halign: "center", cellWidth: 25 }, //รุ่น
-          8: { halign: "center" }, //เลขที่สัญญา
-          9: { halign: "left" }, //สาเหตุ
-          10: { halign: "left" }, //การแก้ไข
-          11: { halign: "left" }, //หมายเหตุ
+          8: { halign: "center" }, //รหัสทรัพย์สิน
+          9: { halign: "center" }, //เลขที่สัญญา
+          10: { halign: "left" }, //สาเหตุ
+          11: { halign: "left" }, //การแก้ไข
+          12: { halign: "left" }, //หมายเหตุ
         },
       });
 
@@ -464,6 +469,7 @@ const Equipment_Repair: React.FC = () => {
         "ชื่ออุปกรณ์": item.device_name,
         "ยี่ห้อ": item.brand,
         "รุ่น": item.model,
+        "รหัสทรัพย์สิน" : item.asset_code,
         "เลขที่สัญญา": item.contract,
         "สาเหตุที่ส่งซ่อม": item.problem,
         "การแก้ไข": item.fixing,
@@ -504,6 +510,7 @@ const Equipment_Repair: React.FC = () => {
         { wch: 15 },
         { wch: 25 },
         { wch: 15 },
+        { wch: 20 },
         { wch: 20 },
         { wch: 20 },
         { wch: 40 },
@@ -825,7 +832,18 @@ const Equipment_Repair: React.FC = () => {
                       onChange={handleFormChange}
                     />
                   </Form.Group>
-                  <Form.Group className="col-md-4 mb-3">
+                </div>
+                <div className="row">
+                <Form.Group className="col-md-4 mb-3">
+                    <Form.Label>รหัสทรัพย์สิน:</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="asset_code"
+                      value={formData.asset_code}
+                      onChange={handleFormChange}
+                    />
+                  </Form.Group>
+                <Form.Group className="col-md-4 mb-3">
                     <Form.Label>เลขที่สัญญา:</Form.Label>
                     <Form.Control
                       type="text"
@@ -980,16 +998,27 @@ const Equipment_Repair: React.FC = () => {
                         onChange={handleEditFormChange}
                       />
                     </Form.Group>
-                    <Form.Group className="col-md-4 mb-3">
-                      <Form.Label>เลขที่สัญญา:</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="contract"
-                        value={editFormData.contract}
-                        onChange={handleEditFormChange}
-                      />
-                    </Form.Group>
                   </div>
+                  <div className="row">
+                  <Form.Group className="col-md-4 mb-3">
+                    <Form.Label>รหัสทรัพย์สิน:</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="asset_code"
+                      value={editFormData.asset_code}
+                      onChange={handleEditFormChange}
+                    />
+                  </Form.Group>
+                <Form.Group className="col-md-4 mb-3">
+                    <Form.Label>เลขที่สัญญา:</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="contract"
+                      value={editFormData.contract}
+                      onChange={handleEditFormChange}
+                    />
+                  </Form.Group>
+                </div>
                 </div>
 
                 {/* รายละเอียดการซ่อม */}
@@ -1099,13 +1128,14 @@ const Equipment_Repair: React.FC = () => {
                       <p>
                         <b>ยี่ห้อ :</b> {selectedDetail.brand}
                       </p>
-                    </div>
-                    <div className="col-md-4">
                       <p>
                         <b>รุ่น :</b> {selectedDetail.model}
                       </p>
                     </div>
                     <div className="col-md-4">
+                    <p>
+                        <b>รหัสทรัพย์สิน :</b> {selectedDetail.asset_code}
+                      </p>
                       <p>
                         <b>เลขที่สัญญา :</b> {selectedDetail.contract}
                       </p>

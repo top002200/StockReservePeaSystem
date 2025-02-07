@@ -7,6 +7,7 @@ export interface RepairData {
   brand: string;
   model: string;
   contract: string;
+  asset_code: string;
   problem: string;
   fixing: string;
   note: string;

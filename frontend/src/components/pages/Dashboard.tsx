@@ -90,13 +90,14 @@ const Dashboard: React.FC = () => {
             bgColor="#FFA780"
             iconSize="150px"
           />
+          {/*
           <DashboardItem
             path="/personal-info"
             icon="https://img2.pic.in.th/pic/setting58c7ca34f4b6809d.md.png"
             title="จัดการข้อมูลผู้ใช้"
             bgColor="#90C66E"
             iconSize="150px"
-          />
+          /> */}
         </div>
       </div>
     </div>
