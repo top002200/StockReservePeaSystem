@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/top002200/stockreversepea/config"
@@ -90,51 +91,61 @@ func GetDistributionByID(c *gin.Context) {
 
 // UpdateDistribution updates an existing distribution by its ID
 func UpdateDistribution(c *gin.Context) {
-	id := c.Param("id") // Extract the ID from the URL parameters
+	idForFix := c.Param("id") // Extract the ID from the URL parameters
 	var distribution models.Distribution
 
-	// Find the distribution by ID
-	if err := config.DB.First(&distribution, "distribution_id = ?", id).Error; err != nil {
+	// ค้นหา distribution ด้วย id_for_fix
+	if err := config.DB.First(&distribution, "id_for_fix = ?", idForFix).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Distribution not found"})
 		return
 	}
 
-	// Bind the new data to the distribution struct
+	// รับข้อมูลใหม่ที่ส่งมา
 	if err := c.ShouldBindJSON(&distribution); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Save the updated distribution data to the database
+	// อัปเดตข้อมูลในฐานข้อมูล
 	if err := config.DB.Save(&distribution).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update distribution"})
 		return
 	}
 
-	// Return the updated distribution
+	// ส่งข้อมูลที่อัปเดตกลับ
 	c.JSON(http.StatusOK, distribution)
 }
+
 
 // DeleteDistribution deletes a distribution by ID
 // ฟังก์ชันที่ใช้ลบข้อมูล
 func DeleteDistribution(c *gin.Context) {
+    // เปลี่ยนจาก c.Param("id") เป็น c.Param("idforfix")
+    idForFixStr := c.Param("idforfix")
+    fmt.Println("Received IDForFix:", idForFixStr) // Debug ค่าที่ได้รับจาก API
+
+    idForFix, err := strconv.ParseUint(idForFixStr, 10, 32)
+    if err != nil {
+        fmt.Println("Error parsing ID:", err) // Debug error ถ้าแปลงไม่ได้
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+        return
+    }
+
     var distribution models.Distribution
-    if err := c.ShouldBindJSON(&distribution); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid data"})
+    result := config.DB.Where("id_for_fix = ?", uint(idForFix)).Delete(&distribution)
+
+    if result.Error != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
         return
     }
 
-    // ลบข้อมูลที่ตรงกับข้อมูลทั้งหมด
-    if err := config.DB.Where("distribution_id = ? AND distribution_amount = ? AND equipment_id = ? AND Contract = ? AND date = ? AND g_name = ? AND r_name = ? AND AssetCode = ?",
-        distribution.DistributionID, distribution.DistributionAmount, distribution.EquipmentID, distribution.Contract, distribution.Date, distribution.GName, distribution.RName,distribution.AssetCode).
-        Delete(&distribution).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to delete distribution"})
+    if result.RowsAffected == 0 {
+        c.JSON(http.StatusNotFound, gin.H{"error": "No record found to delete"})
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Distribution deleted"})
+    c.JSON(http.StatusOK, gin.H{"message": "Distribution deleted successfully"})
 }
-
 
 // GetDistributionsByEquipmentID retrieves all distributions for a specific equipment ID
 func GetDistributionsByEquipmentID(c *gin.Context) {

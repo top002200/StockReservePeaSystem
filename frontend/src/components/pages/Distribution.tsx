@@ -3,7 +3,13 @@ import Info_Layout from "../Layout/info_Layout";
 import { Button, Modal, Table, Form, Pagination } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import { getAllDistributions, deleteDistribution } from "../../services/api";
+import {
+  getAllDistributions,
+  deleteDistribution,
+  updateDistribution,
+} from "../../services/api";
+import Swal from "sweetalert2";
+import { DistributionData } from "../../interface/IDistribution";
 const Distribution: React.FC = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -37,21 +43,61 @@ const Distribution: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await getAllDistributions();
+      console.log("API Response:", response);
+
       if (response.status) {
         setData(response.data);
       }
     };
     fetchData();
   }, []);
+  useEffect(() => {
+    console.log("Data changed:", data);
+  }, [data]);
 
   const handleDelete = async (index: number) => {
-    const distributionId = data[index]?.distribution_id;
-    if (!distributionId) {
-      console.error("Invalid distribution ID");
-      return;
+    const idForFix = data[index]?.id_for_fix;
+
+    // ตรวจสอบว่า idForFix มีค่าและไม่เป็นค่าว่าง
+    if (!idForFix || idForFix === "") {
+      console.error("IDForFix is empty or invalid:", idForFix); // เพิ่ม Debug
+      Swal.fire("เกิดข้อผิดพลาด", "IDForFix ไม่มีค่าหรือไม่ถูกต้อง", "error");
+      return; // ถ้าไม่มีค่า จะไม่ทำการส่งคำร้องขอ
     }
-    await deleteDistribution(distributionId);
-    setData(data.filter((_, i) => i !== index));
+
+    console.log("🟡 กำลังพยายามลบ ID:", idForFix); // เพิ่มการ Debug ค่าที่จะลบ
+
+    // ยืนยันการลบด้วย SweetAlert2
+    const confirmResult = await Swal.fire({
+      title: "คุณแน่ใจไหม?",
+      text: "คุณต้องการลบรายการนี้หรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return; // ถ้าผู้ใช้กด "ยกเลิก" จะไม่ทำการลบ
+    }
+
+    // ส่ง idForFix ที่แปลงเป็นหมายเลข
+    const response = await deleteDistribution(Number(idForFix));
+    console.log("ผลลัพธ์การลบ:", response);
+
+    if (response.status) {
+      const newData = data.filter((item) => item.id_for_fix !== idForFix);
+      setData([...newData]);
+      console.log("ข้อมูลที่อัปเดต:", newData);
+      Swal.fire("ลบเสร็จสิ้น", "รายการนี้ถูกลบออกแล้ว", "success");
+    } else {
+      console.error("ลบไม่สำเร็จ:", response.message);
+      Swal.fire(
+        "เกิดข้อผิดพลาด",
+        response.message || "ไม่สามารถลบรายการได้",
+        "error"
+      );
+    }
   };
 
   interface Equipment {
@@ -101,6 +147,59 @@ const Distribution: React.FC = () => {
         r_name: "",
         date: "",
       });
+    }
+  };
+
+  
+
+  const handleEdit = async (index: number) => {
+    const idForFix = data[index]?.id_for_fix;
+
+    if (!idForFix || idForFix === "") {
+      console.error("IDForFix is empty or invalid:", idForFix);
+      Swal.fire("เกิดข้อผิดพลาด", "IDForFix ไม่มีค่าหรือไม่ถูกต้อง", "error");
+      return;
+    }
+
+    console.log("🟡 กำลังแก้ไข ID:", idForFix);
+
+    // เรียกใช้ SweetAlert2 เพื่อให้ผู้ใช้ยืนยันการแก้ไข
+    const confirmResult = await Swal.fire({
+      title: "คุณแน่ใจไหม?",
+      text: "คุณต้องการแก้ไขข้อมูลนี้หรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, แก้ไขเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
+
+    // สร้างข้อมูลที่จะอัปเดต
+    const updateData: DistributionData = {
+      g_name: data[index]?.g_name || "",
+      r_name: data[index]?.r_name || "",
+      distribution_amount: data[index]?.distribution_amount || 0,
+      equipment_id: data[index]?.equipment_id || 0,
+      date: data[index]?.date || "",
+      equip_contract: data[index]?.equip_contract || "",
+      equip_assetcode: data[index]?.equip_assetcode || "",
+    };
+
+    // ส่งข้อมูลไปที่ API เพื่ออัปเดต
+    const response = await updateDistribution(updateData);
+
+    if (response.status) {
+      Swal.fire("แก้ไขเสร็จสิ้น", "ข้อมูลได้รับการอัปเดตเรียบร้อย", "success");
+      // อาจจะอัปเดตข้อมูลที่แสดงบนหน้า UI ตามการตอบกลับจาก API
+    } else {
+      Swal.fire(
+        "เกิดข้อผิดพลาด",
+        response.message || "ไม่สามารถอัปเดตข้อมูลได้",
+        "error"
+      );
     }
   };
 
@@ -189,13 +288,14 @@ const Distribution: React.FC = () => {
                 <td className="align-middle text-center">{item.r_name}</td>
                 <td className="align-middle text-center">{item.date}</td>
                 <td className="align-middle text-center">
-                  <Button
+                  {/* <Button
                     variant="outline-primary"
                     className="me-2"
                     style={{ width: "40px" }}
+                    onClick={() => handleEdit(index)} // เรียกฟังก์ชัน handleEdit เมื่อคลิก
                   >
                     <FontAwesomeIcon icon={faEdit} />
-                  </Button>
+                  </Button> */}
                   <Button
                     variant="outline-danger"
                     onClick={() => handleDelete(index)}

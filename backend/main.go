@@ -86,7 +86,10 @@ func main() {
 		protectedRoutes.GET("/distribution/:id", controllers.GetDistributionByID)
 		protectedRoutes.GET("/distributions", controllers.GetAllDistributions)
 		protectedRoutes.PUT("/distribution/:id", controllers.UpdateDistribution)
-		protectedRoutes.DELETE("/distribution/:id", controllers.DeleteDistribution)
+
+protectedRoutes.DELETE("/distribution/:idforfix", controllers.DeleteDistribution)
+
+
 
 	
 	}
